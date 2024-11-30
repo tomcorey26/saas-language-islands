@@ -124,6 +124,34 @@ export default function Home() {
           >
             {isLoading ? "Generating..." : "Generate Flash Cards"}
           </button>
+
+          {flashCards.length > 0 && (
+            <div>
+              <label
+                className={`flex items-center gap-2 ${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={showFavoritesOnly}
+                  onChange={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                />
+                Show favorites only
+              </label>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {displayedFlashCards.map((card) => (
+              <FlashCard
+                key={card.id}
+                card={card}
+                onToggleFavorite={handleToggleFavorite}
+                isDarkMode={isDarkMode}
+              />
+            ))}
+          </div>
           <h1 className="text-2xl">Create Flashcards</h1>
           <div className="flex gap-2">
             <input
@@ -155,30 +183,6 @@ export default function Home() {
           >
             Add Flash Card
           </button>
-        </div>
-        <div>
-          <label
-            className={`flex items-center gap-2 ${
-              isDarkMode ? "text-gray-300" : "text-gray-700"
-            }`}
-          >
-            <input
-              type="checkbox"
-              checked={showFavoritesOnly}
-              onChange={() => setShowFavoritesOnly(!showFavoritesOnly)}
-            />
-            Show favorites only
-          </label>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {displayedFlashCards.map((card) => (
-            <FlashCard
-              key={card.id}
-              card={card}
-              onToggleFavorite={handleToggleFavorite}
-              isDarkMode={isDarkMode}
-            />
-          ))}
         </div>
       </main>
       <footer
