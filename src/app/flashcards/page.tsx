@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { speak } from "@/lib/textToSpeech";
 import { generateFlashCards } from "@/server/ai/flashcards";
 import { useState } from "react";
 
@@ -218,15 +219,7 @@ function FlashCard({
   const [showTranslation, setShowTranslation] = useState(true);
 
   const handlePlayAudio = () => {
-    const utterance = new SpeechSynthesisUtterance(card.translation);
-    utterance.lang = "es-ES"; // Set Spanish language
-    const voice = window.speechSynthesis
-      .getVoices()
-      .find((voice) => voice.lang === "es-ES");
-    if (voice) {
-      utterance.voice = voice;
-      window.speechSynthesis.speak(utterance);
-    }
+    speak(card.translation, "es-ES");
   };
 
   return (
