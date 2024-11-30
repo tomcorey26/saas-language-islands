@@ -1,4 +1,6 @@
 "use client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { generateFlashCards } from "@/server/ai/flashcards";
 import { useState } from "react";
 
@@ -90,7 +92,7 @@ export default function Home() {
         <div className="flex flex-col gap-4">
           <h1 className="text-2xl">Generate Flashcards</h1>
           <div className="flex gap-2">
-            <input
+            <Input
               type="text"
               placeholder="Have AI generate flash cards"
               value={aiPrompt}
@@ -117,28 +119,36 @@ export default function Home() {
               <option value="german">🇩🇪 German</option>
             </select>
           </div>
-          <button
+          <Button
             onClick={handleGenerateFlashCards}
             className="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded transition duration-300"
             disabled={isLoading}
           >
             {isLoading ? "Generating..." : "Generate Flash Cards"}
-          </button>
+          </Button>
 
           {flashCards.length > 0 && (
-            <div>
-              <label
-                className={`flex items-center gap-2 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  checked={showFavoritesOnly}
-                  onChange={() => setShowFavoritesOnly(!showFavoritesOnly)}
-                />
-                Show favorites only
-              </label>
+            <div className="flex gap-2 items-center">
+              <div>
+                <label
+                  className={`flex items-center gap-2 ${
+                    isDarkMode ? "text-gray-300" : "text-gray-700"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={showFavoritesOnly}
+                    onChange={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                  />
+                  Show favorites only
+                </label>
+              </div>
+              <Button variant="secondary" size="sm">
+                Export Flashcards
+              </Button>
+              <Button variant="secondary" size="sm">
+                Edit
+              </Button>
             </div>
           )}
 
@@ -154,7 +164,7 @@ export default function Home() {
           </div>
           <h1 className="text-2xl">Create Flashcards</h1>
           <div className="flex gap-2">
-            <input
+            <Input
               type="text"
               placeholder="Enter sentence"
               value={newSentence}
@@ -165,7 +175,7 @@ export default function Home() {
                   : "bg-white text-gray-800 border-gray-300"
               }`}
             />
-            <input
+            <Input
               type="text"
               placeholder="Enter translation"
               value={newTranslation}
@@ -177,12 +187,12 @@ export default function Home() {
               }`}
             />
           </div>
-          <button
+          <Button
             onClick={handleAddFlashCard}
             className="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded transition duration-300"
           >
             Add Flash Card
-          </button>
+          </Button>
         </div>
       </main>
       <footer
@@ -205,7 +215,7 @@ function FlashCard({
   onToggleFavorite: (id: string) => void;
   isDarkMode: boolean;
 }) {
-  const [showTranslation, setShowTranslation] = useState(false);
+  const [showTranslation, setShowTranslation] = useState(true);
 
   const handlePlayAudio = () => {
     const utterance = new SpeechSynthesisUtterance(card.translation);
