@@ -1,18 +1,15 @@
 "use client";
+import { PracticeView } from "@/app/flashcards/_components/PracticeView";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { speak } from "@/lib/textToSpeech";
 import { generateFlashCards } from "@/server/ai/flashcards";
 import { useState } from "react";
+import type { FlashCard, FlashCardViews } from "@/app/flashcards/types";
 
-interface FlashCard {
-  id: string;
-  sentence: string;
-  translation: string;
-  isFavorite: boolean;
-}
+export default function FlashCards() {
+  const [view, setView] = useState<FlashCardViews>("edit");
 
-export default function Home() {
   const [flashCards, setFlashCards] = useState<FlashCard[]>([]);
   const [aiPrompt, setAiPrompt] = useState("");
   const [newSentence, setNewSentence] = useState("");
@@ -63,6 +60,10 @@ export default function Home() {
   const displayedFlashCards = showFavoritesOnly
     ? flashCards.filter((card) => card.isFavorite)
     : flashCards;
+
+  if (view === "practice") {
+    return <PracticeView flashCards={flashCards} setView={setView} />;
+  }
 
   return (
     <div
@@ -149,6 +150,13 @@ export default function Home() {
               </Button>
               <Button variant="secondary" size="sm">
                 Edit
+              </Button>
+              <Button
+                onClick={() => setView("practice")}
+                variant="secondary"
+                size="sm"
+              >
+                Practice
               </Button>
             </div>
           )}
