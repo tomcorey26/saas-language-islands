@@ -66,11 +66,7 @@ export default function FlashCards() {
   }
 
   return (
-    <div
-      className={`grid grid-rows-[auto_1fr_auto] min-h-screen p-8 gap-8 ${
-        isDarkMode ? "bg-gray-900 text-gray-200" : "bg-gray-100 text-gray-800"
-      }`}
-    >
+    <>
       <header className="flex justify-between items-center">
         <h1
           className={`text-2xl font-bold mb-4 ${
@@ -121,11 +117,7 @@ export default function FlashCards() {
               <option value="german">🇩🇪 German</option>
             </select>
           </div>
-          <Button
-            onClick={handleGenerateFlashCards}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded transition duration-300"
-            disabled={isLoading}
-          >
+          <Button onClick={handleGenerateFlashCards} disabled={isLoading}>
             {isLoading ? "Generating..." : "Generate Flash Cards"}
           </Button>
 
@@ -145,12 +137,8 @@ export default function FlashCards() {
                   Show favorites only
                 </label>
               </div>
-              <Button variant="secondary" size="sm">
-                Export Flashcards
-              </Button>
-              <Button variant="secondary" size="sm">
-                Edit
-              </Button>
+              <Button>Export Flashcards</Button>
+              <Button>Edit</Button>
               <Button
                 onClick={() => setView("practice")}
                 variant="secondary"
@@ -196,12 +184,7 @@ export default function FlashCards() {
               }`}
             />
           </div>
-          <Button
-            onClick={handleAddFlashCard}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded transition duration-300"
-          >
-            Add Flash Card
-          </Button>
+          <Button onClick={handleAddFlashCard}>Add Flash Card</Button>
         </div>
       </main>
       <footer
@@ -211,7 +194,7 @@ export default function FlashCards() {
       >
         © 2024 Language Study App
       </footer>
-    </div>
+    </>
   );
 }
 

@@ -7,6 +7,13 @@ import React, {
 } from "react";
 import { speak } from "@/lib/textToSpeech";
 import { FlashCard, FlashCardViews } from "@/app/flashcards/types";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface PronouncePracticeViewProps {
   flashCards: FlashCard[];
@@ -78,37 +85,34 @@ export const PracticeView: React.FC<PronouncePracticeViewProps> = ({
   ]);
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="bg-gray-200 rounded-lg p-8 w-3/4 h-2/4">
-        <div className="flex flex-col justify-between h-full">
-          <div className="flex justify-end">
-            <button className="text-xl font-bold" onClick={handleExit}>
-              X
+    <div className="flex flex-col items-center h-screen p-4 space-y-4">
+      <div className="flex justify-end w-1/2">
+        <Button className="text-xl font-bold" onClick={handleExit}>
+          Exit
+        </Button>
+      </div>
+      <Card className="bg-gray-800 border-gray-700 text-indigo-400 w-1/2">
+        <CardHeader className="flex items-end"></CardHeader>
+        <CardContent className="text-center mb-4 flex flex-col gap-6">
+          <h2 className="text-xl">{flashCards[currentCardIndex].sentence}</h2>
+          <h2 className="text-xl text-emerald-400 italic">
+            {flashCards[currentCardIndex].translation}
+          </h2>
+        </CardContent>
+        <CardFooter className="flex justify-between">
+          <div className="flex justify-between w-full">
+            <button className="text-3xl" onClick={handlePreviousCard}>
+              &larr;
+            </button>
+            <button className="text-3xl" onClick={handlePlayAudio}>
+              &#9658;
+            </button>
+            <button className="text-3xl" onClick={handleNextCard}>
+              &rarr;
             </button>
           </div>
-          <div className="text-center mb-4">
-            <h2 className="text-xl font-bold">
-              {flashCards[currentCardIndex].sentence}
-            </h2>
-            <h2 className="text-xl font-bold">
-              {flashCards[currentCardIndex].translation}
-            </h2>
-          </div>
-          <div className="flex justify-between">
-            <div className="flex justify-between w-full">
-              <button className="text-3xl" onClick={handlePreviousCard}>
-                &larr;
-              </button>
-              <button className="text-3xl" onClick={handlePlayAudio}>
-                &#9658;
-              </button>
-              <button className="text-3xl" onClick={handleNextCard}>
-                &rarr;
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+        </CardFooter>
+      </Card>
     </div>
   );
 };

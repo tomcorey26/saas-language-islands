@@ -14,7 +14,7 @@ export function NavBar() {
         <Link href="/" className="mr-auto">
           <BrandLogo />
         </Link>
-        <Link className="text-lg" href="#">
+        <Link className="text-lg" href="/flashcards">
           Create Islands
         </Link>
         <Link className="text-lg" href="#">
