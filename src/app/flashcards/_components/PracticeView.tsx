@@ -86,7 +86,11 @@ export const PracticeView: React.FC<PronouncePracticeViewProps> = ({
 
   return (
     <div className="flex flex-col items-center h-screen p-4 space-y-4">
-      <div className="flex justify-end w-1/2">
+      <div className="flex justify-between w-1/2">
+        <span className="text-xl font-bold">
+          Card {currentCardIndex + 1} of {flashCards.length}
+        </span>
+
         <Button className="text-xl font-bold" onClick={handleExit}>
           Exit
         </Button>
