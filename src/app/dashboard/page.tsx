@@ -1,11 +1,12 @@
 "use client";
-import { PracticeView } from "@/app/flashcards/_components/PracticeView";
+import { PracticeView } from "@/app/dashboard/_components/PracticeView";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { speak } from "@/lib/textToSpeech";
 import { generateFlashCards } from "@/server/ai/flashcards";
 import { useState } from "react";
-import type { FlashCard, FlashCardViews } from "@/app/flashcards/types";
+import type { FlashCard, FlashCardViews } from "@/app/dashboard/types";
+import Link from "next/link";
 
 export default function FlashCards() {
   const [view, setView] = useState<FlashCardViews>("edit");
@@ -68,13 +69,14 @@ export default function FlashCards() {
   return (
     <>
       <header className="flex justify-between items-center">
-        <h1
+        <Link
+          href="/"
           className={`text-2xl font-bold mb-4 ${
             isDarkMode ? "text-indigo-400" : "text-indigo-700"
           }`}
         >
           Language Study
-        </h1>
+        </Link>
         <button
           onClick={() => setIsDarkMode(!isDarkMode)}
           className={`px-4 py-2 rounded ${

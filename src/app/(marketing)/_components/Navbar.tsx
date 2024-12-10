@@ -4,6 +4,7 @@ import {
   SignedOut,
   SignInButton,
   SignOutButton,
+  UserButton,
 } from "@clerk/nextjs";
 import Link from "next/link";
 
@@ -14,7 +15,7 @@ export function NavBar() {
         <Link href="/" className="mr-auto">
           <BrandLogo />
         </Link>
-        <Link className="text-lg" href="/flashcards">
+        <Link className="text-lg" href="/dashboard">
           Create Islands
         </Link>
         <Link className="text-lg" href="#">
@@ -26,14 +27,15 @@ export function NavBar() {
         <Link className="text-lg" href="#">
           About
         </Link>
-        <div className="text-lg">
+        <span className="text-lg">
           <SignedIn>
-            <SignOutButton>Logout</SignOutButton>
+            <SignOutButton />
+            {/* <Link href="/dashboard">Dashboard</Link> */}
           </SignedIn>
           <SignedOut>
             <SignInButton>Login</SignInButton>
           </SignedOut>
-        </div>
+        </span>
       </nav>
     </header>
   );
