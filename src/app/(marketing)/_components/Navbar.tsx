@@ -1,11 +1,5 @@
 import { BrandLogo } from "@/components/BrandLogo";
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignOutButton,
-  UserButton,
-} from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 
 export function NavBar() {
@@ -29,8 +23,9 @@ export function NavBar() {
         </Link>
         <span className="text-lg">
           <SignedIn>
-            <SignOutButton />
-            {/* <Link href="/dashboard">Dashboard</Link> */}
+            <div className="flex items-center">
+              <UserButton />
+            </div>
           </SignedIn>
           <SignedOut>
             <SignInButton>Login</SignInButton>

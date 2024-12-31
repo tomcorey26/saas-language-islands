@@ -4,7 +4,8 @@ const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-in(.*)",
   "/sign-up(.*)",
-  "/api(.*)", // TODO: Uncomment this line to make all API routes public (Temp while forwarding port)
+  "/api/webhooks(.*)",
+  // "/api(.*)", // TODO: Uncomment this line to make all API routes public (Temp while forwarding port)
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
