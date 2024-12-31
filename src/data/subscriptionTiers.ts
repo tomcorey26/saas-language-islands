@@ -37,6 +37,8 @@ Goal: Provides an annual option with a slight discount and premium perks for lon
 
 // Buying tokens to unlock more island generations?
 
+export type TierNames = keyof typeof subscriptionTiers;
+
 export const subscriptionTiers = {
   Free: {
     name: "Free",
