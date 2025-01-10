@@ -33,6 +33,7 @@ import {
   Send,
   Languages,
   Hash,
+  Mail,
 } from 'lucide-react';
 
 // Mock flashcards data structure
@@ -83,6 +84,7 @@ export default function CreatePage() {
       directions: false,
       culture: false,
     },
+    email: '',
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -209,7 +211,7 @@ export default function CreatePage() {
               className="w-full"
               onValueChange={(value) => setCurrentStep(value)}
             >
-              <TabsList className="grid w-full grid-cols-6 h-min">
+              <TabsList className="grid w-full grid-cols-7 h-min">
                 <TabsTrigger
                   value="language"
                   className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
@@ -251,6 +253,13 @@ export default function CreatePage() {
                 >
                   <Hash className="h-4 w-4" />
                   <span>Count</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="email"
+                  className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
+                >
+                  <Mail className="h-4 w-4" />
+                  <span>Generate</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -378,7 +387,9 @@ export default function CreatePage() {
 
               <TabsContent value="scenarios" className="space-y-4 mt-4">
                 <div className="space-y-4">
-                  <Label>Select common scenarios you'd like to learn:</Label>
+                  <Label>
+                    Select common scenarios you&apos;d like to learn:
+                  </Label>
                   <div className="grid grid-cols-2 gap-4">
                     {Object.entries({
                       travel: 'Travel & Transportation',
@@ -442,8 +453,31 @@ export default function CreatePage() {
                     </Select>
                   </div>
                   <Button
+                    className="w-full"
+                    onClick={() => handleNextStep('email')}
+                  >
+                    Next Step
+                  </Button>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="email" className="space-y-4 mt-4">
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="email">Your Email</Label>
+                    <Input
+                      id="email"
+                      value={formData.email}
+                      onChange={(e) =>
+                        handleInputChange('email', e.target.value)
+                      }
+                      placeholder="Enter your email"
+                    />
+                  </div>
+                  <Button
                     className="w-full bg-green-600 hover:bg-green-700 text-white"
                     onClick={handleSubmit}
+                    disabled={!formData.email}
                   >
                     <Send className="w-4 h-4 mr-2" />
                     Generate Flashcards
