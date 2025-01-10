@@ -15,7 +15,23 @@
 - Add the ability to drill each island
 - Add ability to generate with ai
 
+- Make specifiically for spanish learning
+- Add ability for forums and practicing with other people like tandem
+- Also notes in phone
+
 ## Advanced
 
 - Add ability to add images to each island
 - Click on the text for the translation
+
+## Learn Todo
+
+- Tailwind
+- React 19
+- React hook form
+- react-query
+- Nextjs
+- Drizzle
+- Stripe
+- Cursor
+- Whats your email? part of the flow
