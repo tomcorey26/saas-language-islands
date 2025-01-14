@@ -35,3 +35,10 @@
 - Stripe
 - Cursor
 - Whats your email? part of the flow
+
+## Today todo
+
+- Make sure api limit is working correctly
+- Add in api endpoint for generating cards with validation
+- Add in I am not a robot captcha
+- We are recieivng a large volume of requests error message

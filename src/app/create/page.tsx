@@ -35,27 +35,39 @@ import {
   Hash,
   Mail,
 } from 'lucide-react';
+import { generateIslands } from '@/server/ai/flashcards';
+import {
+  FlashCardRequestSchema,
+  FlashCardResponseSchema,
+} from '@/zod/flashCardSchemas';
+import { z } from 'zod';
+import { cn } from '@/lib/utils';
 
-// Mock flashcards data structure
-const mockFlashcards = {
-  personal: [
-    { front: 'My name is...', back: '私の名前は...' },
-    { front: 'I am from...', back: '私は...から来ました' },
-  ],
-  work: [
-    { front: 'I work as a...', back: '私は...として働いています' },
-    { front: 'My company is...', back: '私の会社は...' },
-  ],
-  interests: [
-    { front: 'I like to...', back: '私は...が好きです' },
-    { front: 'My hobby is...', back: '私の趣味は...' },
-  ],
+export const LoadingSpinner = ({ className }: { className: string }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={cn('animate-spin', className)}
+    >
+      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+    </svg>
+  );
 };
 
 export default function CreatePage() {
   const [currentStep, setCurrentStep] = useState('language');
   const [showPreview, setShowPreview] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<
+    z.infer<typeof FlashCardRequestSchema>
+  >({
     language: '',
     name: '',
     occupation: '',
@@ -87,6 +99,10 @@ export default function CreatePage() {
     email: '',
   });
 
+  const [flashcards, setFlashcards] = useState<z.infer<
+    typeof FlashCardResponseSchema
+  > | null>(null);
+
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -111,11 +127,44 @@ export default function CreatePage() {
     setCurrentStep(step);
   };
 
+  const handleGenerate = async () => {
+    const data = await generateIslands(formData);
+    setFlashcards(data.flashcards);
+  };
+
   const handleSubmit = () => {
+    handleGenerate();
     setShowPreview(true);
   };
 
   if (showPreview) {
+    if (!flashcards)
+      return (
+        <div className="flex justify-center items-center h-screen">
+          <LoadingSpinner className="animate-spin" />
+        </div>
+      );
+
+    const accordionItems = Object.entries(flashcards).map(([key, value]) =>
+      value.length > 0 ? (
+        <AccordionItem key={key} value={key}>
+          <AccordionTrigger className="text-lg font-semibold">
+            {key.charAt(0).toUpperCase() + key.slice(1)}
+          </AccordionTrigger>
+          <AccordionContent className="space-y-2">
+            {value.map((card, index) => (
+              <Card key={index} className="p-4">
+                <div className="flex justify-between items-center">
+                  <div className="font-medium">{card.sentence}</div>
+                  <div className="text-gray-600">{card.translation}</div>
+                </div>
+              </Card>
+            ))}
+          </AccordionContent>
+        </AccordionItem>
+      ) : null
+    );
+
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-6">
         <div className="max-w-3xl mx-auto">
@@ -131,53 +180,7 @@ export default function CreatePage() {
             </CardHeader>
             <CardContent>
               <Accordion type="single" collapsible className="w-full space-y-4">
-                <AccordionItem value="personal">
-                  <AccordionTrigger className="text-lg font-semibold">
-                    Personal Information
-                  </AccordionTrigger>
-                  <AccordionContent className="space-y-2">
-                    {mockFlashcards.personal.map((card, index) => (
-                      <Card key={index} className="p-4">
-                        <div className="flex justify-between items-center">
-                          <div className="font-medium">{card.front}</div>
-                          <div className="text-gray-600">{card.back}</div>
-                        </div>
-                      </Card>
-                    ))}
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="work">
-                  <AccordionTrigger className="text-lg font-semibold">
-                    Work & Occupation
-                  </AccordionTrigger>
-                  <AccordionContent className="space-y-2">
-                    {mockFlashcards.work.map((card, index) => (
-                      <Card key={index} className="p-4">
-                        <div className="flex justify-between items-center">
-                          <div className="font-medium">{card.front}</div>
-                          <div className="text-gray-600">{card.back}</div>
-                        </div>
-                      </Card>
-                    ))}
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="interests">
-                  <AccordionTrigger className="text-lg font-semibold">
-                    Interests & Hobbies
-                  </AccordionTrigger>
-                  <AccordionContent className="space-y-2">
-                    {mockFlashcards.interests.map((card, index) => (
-                      <Card key={index} className="p-4">
-                        <div className="flex justify-between items-center">
-                          <div className="font-medium">{card.front}</div>
-                          <div className="text-gray-600">{card.back}</div>
-                        </div>
-                      </Card>
-                    ))}
-                  </AccordionContent>
-                </AccordionItem>
+                {accordionItems}
               </Accordion>
 
               <Button
