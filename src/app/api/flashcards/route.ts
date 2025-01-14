@@ -1,13 +1,10 @@
-import { generateFlashCards } from '@/app/api/openai';
+import { generateFlashCards } from '@/services/openai';
 import { NextResponse } from 'next/server';
-import { OpenAI } from 'openai';
-
-const openAiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function POST(request: Request) {
   const { prompt, language } = await request.json();
 
-  const response = await generateFlashCards(prompt, language, openAiClient);
+  const response = await generateFlashCards(prompt, language);
 
   if (!response) {
     return NextResponse.json(

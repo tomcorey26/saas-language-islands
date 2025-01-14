@@ -10,11 +10,9 @@ const generateFlashCardsPrompt = (prompt: string, language: string) => {
   return `The user will provide a prompt of a situation, and you need to generate flashcards of useful sentences to study pertaining to the prompt in ${language}. The sentence field is english, and the translation field is ${language}.`;
 };
 
-export async function generateFlashCards(
-  prompt: string,
-  language: string,
-  openAiClient: OpenAI
-) {
+const openAiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+export async function generateFlashCards(prompt: string, language: string) {
   const completion = await openAiClient.beta.chat.completions.parse({
     model: 'gpt-4o-mini',
     messages: [
@@ -35,24 +33,25 @@ export async function generateFlashCards(
 }
 
 const generateIslandsPrompt = (
-  language: string,
   request: z.infer<typeof FlashCardRequestSchema>
 ) => {
-  return `The user will provide a prompt of a situation, and you need to generate flashcards of useful sentences to study pertaining to the prompt in ${language}. The sentence field is english, and the translation field is ${language}. You will only generate flashcards for the fields that the user has selected/are truthy. ${JSON.stringify(
-    request
-  )}`;
+  return `The user will provide a prompt of a situation, and you need to generate flashcards of useful sentences to study pertaining to the prompt in ${
+    request.language
+  }. The sentence field is english, and the translation field is ${
+    request.language
+  }. You will only generate flashcards for the fields that the user has selected/are truthy. You will generate ${
+    request.cardsPerCategory
+  } flashcards per category. You will only generate flashcards for the fields that the user has selected/are truthy.
+  ${JSON.stringify(request)} 
+  `;
 };
 
 export async function generateIslands(
-  language: string,
-  request: z.infer<typeof FlashCardRequestSchema>,
-  openAiClient: OpenAI
+  request: z.infer<typeof FlashCardRequestSchema>
 ) {
   const completion = await openAiClient.beta.chat.completions.parse({
     model: 'gpt-4o-mini',
-    messages: [
-      { role: 'user', content: generateIslandsPrompt(language, request) },
-    ],
+    messages: [{ role: 'user', content: generateIslandsPrompt(request) }],
     response_format: zodResponseFormat(
       FlashCardResponseSchema,
       'flashcard_response'

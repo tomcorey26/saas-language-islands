@@ -280,11 +280,9 @@ export default function CreatePage() {
                         <SelectValue placeholder="Choose a language" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="japanese">Japanese</SelectItem>
                         <SelectItem value="spanish">Spanish</SelectItem>
                         <SelectItem value="french">French</SelectItem>
                         <SelectItem value="german">German</SelectItem>
-                        <SelectItem value="mandarin">Mandarin</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
