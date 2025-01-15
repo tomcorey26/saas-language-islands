@@ -143,8 +143,8 @@ export default function CreatePage() {
       alert('Please complete the CAPTCHA.');
       return;
     }
-    await handleGenerate();
     setShowPreview(true);
+    await handleGenerate();
   };
 
   if (showPreview) {
