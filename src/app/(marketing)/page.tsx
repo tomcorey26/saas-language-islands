@@ -1,5 +1,5 @@
-import { ClerkIcon } from "@/app/(marketing)/_icons/Clerk";
-import { Button } from "@/components/ui/button";
+import { ClerkIcon } from '@/app/(marketing)/_icons/Clerk';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -7,13 +7,13 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { subscriptionTiersInOrder } from "@/data/subscriptionTiers";
-import { formatCompactNumber } from "@/lib/formatters";
-import { cn } from "@/lib/utils";
-import { SignUpButton } from "@clerk/nextjs";
-import { ArrowRightIcon, CheckIcon } from "lucide-react";
-import Link from "next/link";
+} from '@/components/ui/card';
+import { subscriptionTiersInOrder } from '@/data/subscriptionTiers';
+import { formatCompactNumber } from '@/lib/formatters';
+import { cn } from '@/lib/utils';
+import { SignUpButton } from '@clerk/nextjs';
+import { ArrowRightIcon, CheckIcon } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Home() {
   // text-balance makes the text break into even lines when the container is resized
@@ -25,14 +25,24 @@ export default function Home() {
           Welcome to Language Islands
         </h1>
         <p className="text-lg lg:text-3xl max-w-screen-xl">
-          Master real conversations faster than ever and become conversational
-          in no time—start your language journey now!
+          Generate flashcards to master real conversations faster than ever and
+          become conversational in no time—start your language journey now!
         </p>
-        <SignUpButton>
-          <Button className="text-lg p-6 rounded-xl flex gap-2">
-            Get started for free <ArrowRightIcon className="size-5" />
-          </Button>
-        </SignUpButton>
+        <div className="flex flex-row gap-4">
+          <Link href="/create">
+            <Button
+              variant="outline"
+              className="text-lg p-6 rounded-xl flex gap-2"
+            >
+              Try it out
+            </Button>
+          </Link>
+          <SignUpButton>
+            <Button className="text-lg p-6 rounded-xl flex gap-2">
+              Get started for free <ArrowRightIcon className="size-5" />
+            </Button>
+          </SignUpButton>
+        </div>
       </section>
       <section className="bg-primary text-primary-foreground">
         <div className="container py-16 flex flex-col gap-16 px-8 md:px-16">
@@ -97,7 +107,7 @@ function PricingCard({
   canAccessMemorizationPractice,
   canDownloadAudio,
 }: (typeof subscriptionTiersInOrder)[number]) {
-  const isMostPopular = name === "Pro";
+  const isMostPopular = name === 'Pro';
 
   return (
     <Card>
@@ -108,14 +118,14 @@ function PricingCard({
         </CardTitle>
         <CardDescription>
           {formatCompactNumber(maxNumberOfGenerationsPerMonth)} flashcards
-          generations a month{" "}
+          generations a month{' '}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <SignUpButton>
           <Button
             className="text-lg w-full rounded-lg"
-            variant={isMostPopular ? "accent" : "default"}
+            variant={isMostPopular ? 'accent' : 'default'}
           >
             Get started
           </Button>
@@ -124,9 +134,9 @@ function PricingCard({
       <CardFooter className="flex flex-col gap-4 items-start">
         <Feature className="font-bold">
           {maxNumberOfLanguages === Infinity
-            ? "Unlimited languages"
+            ? 'Unlimited languages'
             : `${maxNumberOfLanguages} language${
-                maxNumberOfLanguages > 1 ? "s" : ""
+                maxNumberOfLanguages > 1 ? 's' : ''
               }`}
         </Feature>
         {canAccessMemorizationPractice && <Feature>Speaking Drills</Feature>}
@@ -148,7 +158,7 @@ function Feature({
   className?: string;
 }) {
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn('flex items-center gap-2', className)}>
       <CheckIcon className="size-4 stroke-accent bg-accent/25 p-0.5 rounded-full" />
       <span>{children}</span>
     </div>
