@@ -42,3 +42,12 @@
 - Add in api endpoint for generating cards with validation
 - Add in I am not a robot captcha
 - We are recieivng a large volume of requests error message
+
+## More ideas
+
+- Chrome extension for saving flashcards
+- Study tips section about active recall
+- Using eleven labs to generate audio
+- Youtube video each day explaining new concepts I learned like web dev Cody
+
+- LinkedIn posts of this content and building my saas app in publix

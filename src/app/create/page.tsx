@@ -42,6 +42,7 @@ import {
 } from '@/zod/flashCardSchemas';
 import { z } from 'zod';
 import { cn } from '@/lib/utils';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 export const LoadingSpinner = ({ className }: { className: string }) => {
   return (
@@ -97,6 +98,7 @@ export default function CreatePage() {
       culture: false,
     },
     email: '',
+    recaptchaToken: '',
   });
 
   const [flashcards, setFlashcards] = useState<z.infer<
@@ -132,8 +134,16 @@ export default function CreatePage() {
     setFlashcards(data.flashcards);
   };
 
-  const handleSubmit = () => {
-    handleGenerate();
+  const handleCaptchaChange = (token: string | null) => {
+    setFormData((prev) => ({ ...prev, recaptchaToken: token || '' }));
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.recaptchaToken) {
+      alert('Please complete the CAPTCHA.');
+      return;
+    }
+    await handleGenerate();
     setShowPreview(true);
   };
 
@@ -475,10 +485,14 @@ export default function CreatePage() {
                       placeholder="Enter your email"
                     />
                   </div>
+                  <ReCAPTCHA
+                    sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
+                    onChange={handleCaptchaChange}
+                  />
                   <Button
                     className="w-full bg-green-600 hover:bg-green-700 text-white"
                     onClick={handleSubmit}
-                    disabled={!formData.email}
+                    disabled={!formData.email || !formData.recaptchaToken}
                   >
                     <Send className="w-4 h-4 mr-2" />
                     Generate Flashcards

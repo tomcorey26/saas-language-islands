@@ -37,6 +37,7 @@ export const FlashCardRequestSchema = z.object({
     culture: z.boolean(),
   }),
   email: z.string().email(),
+  recaptchaToken: z.string(),
 });
 
 // the request schema will be the same as the flashcard request schema, but it will have arrays of the flashcard schema for each field
