@@ -40,14 +40,27 @@ export async function generateFlashCards(prompt: string, language: string) {
 const generateIslandsPrompt = (
   request: z.infer<typeof FlashCardRequestSchema>
 ) => {
-  return `The user has selected filled out a form related to with their name, occupation, and interests, and you need to generate flashcards of useful sentences that the user can study to become conversant in ${
+  return `
+  The user has selected filled out a form related to with their name, occupation, and interests, and you need to generate flashcards of useful sentences 
+  that the user can study to become conversant in ${
     request.language
   }. The sentence field is english, and the translation field is ${
     request.language
-  }. You will only generate flashcards for the fields that the user has selected/are truthy. You will generate ${
-    request.cardsPerCategory
-  } flashcards per category. You will only generate flashcards for the fields that the user has selected/are truthy. Here is the user's form data:
+  }.
+
+  Here is the user's form data:
   ${JSON.stringify(request)} 
+
+  List of things you must do:
+  - Generate ${
+    request.cardsPerCategory
+  } flashcards for each category that the user has selected/are truthy
+  - Do not generate flashcards for fields that the user has not selected/are not truthy
+  - Make sure the flashcards are relevant to the user's form data and that they don't all begin with I
+  - Make sure that the sentences generated are practical and useful for having a conversation with someone in ${
+    request.language
+  }.
+  - Make sure that at least 1 flashcard is a question that the user can ask, and at least 1 flashcard is a statement that the user can make.
   `;
 };
 
