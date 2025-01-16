@@ -28,20 +28,25 @@ export async function generateFlashCards(prompt: string, language: string) {
     ),
   });
 
-  const flashcards = completion.choices[0].message.parsed;
-  return flashcards;
+  const flashcards_response = completion.choices[0].message;
+
+  if (flashcards_response.refusal) {
+    throw new Error(flashcards_response.refusal);
+  }
+
+  return flashcards_response.parsed;
 }
 
 const generateIslandsPrompt = (
   request: z.infer<typeof FlashCardRequestSchema>
 ) => {
-  return `The user will provide a prompt of a situation, and you need to generate flashcards of useful sentences to study pertaining to the prompt in ${
+  return `The user has selected filled out a form related to with their name, occupation, and interests, and you need to generate flashcards of useful sentences that the user can study to become conversant in ${
     request.language
   }. The sentence field is english, and the translation field is ${
     request.language
   }. You will only generate flashcards for the fields that the user has selected/are truthy. You will generate ${
     request.cardsPerCategory
-  } flashcards per category. You will only generate flashcards for the fields that the user has selected/are truthy.
+  } flashcards per category. You will only generate flashcards for the fields that the user has selected/are truthy. Here is the user's form data:
   ${JSON.stringify(request)} 
   `;
 };
@@ -58,6 +63,11 @@ export async function generateIslands(
     ),
   });
 
-  const flashcards = completion.choices[0].message.parsed;
-  return flashcards;
+  const flashcards_response = completion.choices[0].message;
+
+  if (flashcards_response.refusal) {
+    throw new Error(flashcards_response.refusal);
+  }
+
+  return flashcards_response.parsed;
 }

@@ -10,7 +10,6 @@ export async function POST(request: Request) {
   const parsedData = FlashCardRequestSchema.safeParse(requestData);
 
   if (!parsedData.success) {
-    console.log(parsedData.error, 'parsedData');
     return NextResponse.json(
       { error: 'Invalid request data', issues: parsedData.error.errors },
       { status: 400 }
@@ -42,14 +41,22 @@ export async function POST(request: Request) {
   }
 
   // Generate flashcards using the validated data
-  const flashcards = await generateIslands(data);
+  try {
+    const flashcards = await generateIslands(data);
 
-  if (!flashcards) {
+    if (!flashcards) {
+      return NextResponse.json(
+        { error: 'No flashcards generated' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ flashcards });
+  } catch (error) {
+    console.error('Error generating flashcards:', error);
     return NextResponse.json(
-      { error: 'No flashcards generated' },
+      { error: 'Error generating flashcards' },
       { status: 500 }
     );
   }
-
-  return NextResponse.json({ flashcards });
 }
