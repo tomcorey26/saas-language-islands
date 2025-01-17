@@ -38,10 +38,17 @@
 
 ## Today todo
 
+- Coors to prevent cross origing request to endpoint
+- Fix loading state for form, Fix form clear, add validation
+
+  - Maybe do form action stuff
+  - Make it so instead of email it asks for user to create an account
+  - On account creation, use clerk webhook to get the user id and save it to the database
+    - create their world deck for them
+    - Redirect to the dashboard page
+
 - Make sure api rate limit is working correctly
 - Make the flashcard count per category work, in the select [x]
-- Fix form clear
-- Make it so instead of email it asks for user to create an account
 - Make sure shadcn styles are working correcly, add custom touch to it
 - Make sure landing page is working correctly
 - Just make everything free for now to get user sign ups, add in pricing stuff later

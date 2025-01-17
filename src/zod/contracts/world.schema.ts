@@ -30,7 +30,6 @@ export const CreateWorldRequestSchema = z.object({
     directions: z.boolean(),
     culture: z.boolean(),
   }),
-  email: z.string().email(),
   recaptchaToken: z.string(),
 });
 

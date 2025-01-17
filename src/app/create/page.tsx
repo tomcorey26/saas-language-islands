@@ -33,7 +33,7 @@ import {
   Send,
   Languages,
   Hash,
-  Mail,
+  Sparkles,
 } from 'lucide-react';
 import { generateIslands } from '@/server/ai/flashcards';
 import ReCAPTCHA from 'react-google-recaptcha';
@@ -42,6 +42,7 @@ import {
   CreateWorldRequest,
   CreateWorldResponse,
 } from '@/zod/contracts/world.schema';
+import { SignUpButton } from '@clerk/nextjs';
 
 export default function CreatePage() {
   const [currentStep, setCurrentStep] = useState('language');
@@ -75,7 +76,6 @@ export default function CreatePage() {
       directions: false,
       culture: false,
     },
-    email: '',
     recaptchaToken: '',
   });
 
@@ -171,12 +171,18 @@ export default function CreatePage() {
                 {accordionItems}
               </Accordion>
 
-              <Button
-                className="w-full mt-6"
-                onClick={() => setShowPreview(false)}
-              >
-                Back to Form
-              </Button>
+              <div className="flex gap-4 mt-6">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setShowPreview(false)}
+                >
+                  Back to Form
+                </Button>
+                <SignUpButton>
+                  <Button className="w-full">Study Deck</Button>
+                </SignUpButton>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -249,7 +255,7 @@ export default function CreatePage() {
                   value="email"
                   className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
                 >
-                  <Mail className="h-4 w-4" />
+                  <Sparkles className="h-4 w-4" />
                   <span>Generate</span>
                 </TabsTrigger>
               </TabsList>
@@ -452,17 +458,6 @@ export default function CreatePage() {
 
               <TabsContent value="email" className="space-y-4 mt-4">
                 <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="email">Your Email</Label>
-                    <Input
-                      id="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        handleInputChange('email', e.target.value)
-                      }
-                      placeholder="Enter your email"
-                    />
-                  </div>
                   <ReCAPTCHA
                     sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
                     onChange={handleCaptchaChange}
@@ -470,7 +465,7 @@ export default function CreatePage() {
                   <Button
                     className="w-full bg-green-600 hover:bg-green-700 text-white"
                     onClick={handleSubmit}
-                    disabled={!formData.email || !formData.recaptchaToken}
+                    disabled={!formData.recaptchaToken}
                   >
                     <Send className="w-4 h-4 mr-2" />
                     Generate Flashcards
