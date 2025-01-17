@@ -36,39 +36,17 @@ import {
   Mail,
 } from 'lucide-react';
 import { generateIslands } from '@/server/ai/flashcards';
-import {
-  FlashCardRequestSchema,
-  FlashCardResponseSchema,
-} from '@/zod/flashCardSchemas';
-import { z } from 'zod';
-import { cn } from '@/lib/utils';
 import ReCAPTCHA from 'react-google-recaptcha';
-
-export const LoadingSpinner = ({ className }: { className: string }) => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={cn('animate-spin', className)}
-    >
-      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-    </svg>
-  );
-};
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import {
+  CreateWorldRequest,
+  CreateWorldResponse,
+} from '@/zod/contracts/world.schema';
 
 export default function CreatePage() {
   const [currentStep, setCurrentStep] = useState('language');
   const [showPreview, setShowPreview] = useState(false);
-  const [formData, setFormData] = useState<
-    z.infer<typeof FlashCardRequestSchema>
-  >({
+  const [formData, setFormData] = useState<CreateWorldRequest>({
     language: '',
     name: '',
     occupation: '',
@@ -101,9 +79,9 @@ export default function CreatePage() {
     recaptchaToken: '',
   });
 
-  const [flashcards, setFlashcards] = useState<z.infer<
-    typeof FlashCardResponseSchema
-  > | null>(null);
+  const [flashcards, setFlashcards] = useState<
+    CreateWorldResponse['flashcards'] | null
+  >(null);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

@@ -1,11 +1,12 @@
-import {
-  FlashCardArray,
-  FlashCardRequestSchema,
-  FlashCardResponseSchema,
-} from '@/zod/flashCardSchemas';
 import { zodResponseFormat } from 'openai/helpers/zod';
 import { z } from 'zod';
 import { OpenAI } from 'openai';
+import {
+  CreateWorldRequest,
+  CreateWorldResponseSchema,
+} from '@/zod/contracts/world.schema';
+import { FlashCardSchema } from '@/zod/models/flashcard.model';
+
 const generateFlashCardsPrompt = (prompt: string, language: string) => {
   return `The user will provide a prompt of a situation, and you need to generate flashcards of useful sentences to study pertaining to the prompt in ${language}. The sentence field is english, and the translation field is ${language}.`;
 };
@@ -23,7 +24,7 @@ export async function generateFlashCards(prompt: string, language: string) {
       { role: 'user', content: prompt },
     ],
     response_format: zodResponseFormat(
-      z.object({ flashcards: FlashCardArray }),
+      z.object({ flashcards: z.array(FlashCardSchema) }),
       'flashcard'
     ),
   });
@@ -37,9 +38,7 @@ export async function generateFlashCards(prompt: string, language: string) {
   return flashcards_response.parsed;
 }
 
-const generateIslandsPrompt = (
-  request: z.infer<typeof FlashCardRequestSchema>
-) => {
+const generateIslandsPrompt = (request: CreateWorldRequest) => {
   return `
   The user has selected filled out a form related to with their name, occupation, and interests, and you need to generate flashcards of useful sentences 
   that the user can study to become conversant in ${
@@ -64,23 +63,21 @@ const generateIslandsPrompt = (
   `;
 };
 
-export async function generateIslands(
-  request: z.infer<typeof FlashCardRequestSchema>
-) {
+export async function generateWorld(request: CreateWorldRequest) {
   const completion = await openAiClient.beta.chat.completions.parse({
     model: 'gpt-4o-mini',
     messages: [{ role: 'user', content: generateIslandsPrompt(request) }],
     response_format: zodResponseFormat(
-      FlashCardResponseSchema,
-      'flashcard_response'
+      CreateWorldResponseSchema,
+      'world_response'
     ),
   });
 
-  const flashcards_response = completion.choices[0].message;
+  const world_response = completion.choices[0].message;
 
-  if (flashcards_response.refusal) {
-    throw new Error(flashcards_response.refusal);
+  if (world_response.refusal) {
+    throw new Error(world_response.refusal);
   }
 
-  return flashcards_response.parsed;
+  return world_response.parsed;
 }

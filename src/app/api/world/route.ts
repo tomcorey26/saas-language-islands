@@ -1,13 +1,13 @@
-import { generateIslands } from '@/services/openai';
-import { FlashCardRequestSchema } from '@/zod/flashCardSchemas';
+import { generateWorld } from '@/services/openai';
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 import { env } from '@/data/env/server';
+import { CreateWorldRequestSchema } from '@/zod/contracts/world.schema';
 
 export async function POST(request: Request) {
   const requestData = await request.json();
 
-  const parsedData = FlashCardRequestSchema.safeParse(requestData);
+  const parsedData = CreateWorldRequestSchema.safeParse(requestData);
 
   if (!parsedData.success) {
     return NextResponse.json(
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
 
   // Generate flashcards using the validated data
   try {
-    const flashcards = await generateIslands(data);
+    const flashcards = await generateWorld(data);
 
     if (!flashcards) {
       return NextResponse.json(
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({ flashcards });
+    return NextResponse.json(flashcards);
   } catch (error) {
     console.error('Error generating flashcards:', error);
     return NextResponse.json(
