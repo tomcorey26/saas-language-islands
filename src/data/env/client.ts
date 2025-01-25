@@ -5,7 +5,7 @@ export const env = createEnv({
   emptyStringAsUndefined: true,
   client: {
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string(),
-    NEXT_PUBLIC_API_URL: z.string(),
+    NEXT_PUBLIC_API_PATH: z.string(),
     NEXT_PUBLIC_CLERK_SIGN_IN_URL: z.string(),
     NEXT_PUBLIC_CLERK_SIGN_UP_URL: z.string(),
     NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL: z.string(),
@@ -15,7 +15,7 @@ export const env = createEnv({
   runtimeEnv: {
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_API_PATH: process.env.NEXT_PUBLIC_API_PATH,
     NEXT_PUBLIC_CLERK_SIGN_IN_URL: process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL,
     NEXT_PUBLIC_CLERK_SIGN_UP_URL: process.env.NEXT_PUBLIC_CLERK_SIGN_UP_URL,
     NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL:

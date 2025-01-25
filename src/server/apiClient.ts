@@ -13,7 +13,7 @@ type RequestOptions = {
 
 function buildUrlWithParams(
   url: string,
-  params?: RequestOptions["params"]
+  params?: RequestOptions['params']
 ): string {
   if (!params) return url;
   const filteredParams = Object.fromEntries(
@@ -33,36 +33,36 @@ async function fetchApi<T>(
   options: RequestOptions = {}
 ): Promise<T> {
   const {
-    method = "GET",
+    method = 'GET',
     headers = {},
     body,
     cookie,
     params,
-    cache = "no-store",
+    cache = 'no-store',
     next,
   } = options;
   const fullUrl = buildUrlWithParams(
-    `${process.env.NEXT_PUBLIC_API_URL}${url}`,
+    `${process.env.NEXT_PUBLIC_API_PATH}${url}`,
     params
   );
 
   const response = await fetch(fullUrl, {
     method,
     headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
       ...headers,
       ...(cookie ? { Cookie: cookie } : {}),
     },
     body: body ? JSON.stringify(body) : undefined,
-    credentials: "include",
+    credentials: 'include',
     cache,
     next,
   });
 
   if (!response.ok) {
     const message = (await response.json()).message || response.statusText;
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       // useNotifications.getState().addNotification({
       //   type: 'error',
       //   title: 'Error',
@@ -77,18 +77,18 @@ async function fetchApi<T>(
 
 export const api = {
   get<T>(url: string, options?: RequestOptions): Promise<T> {
-    return fetchApi<T>(url, { ...options, method: "GET" });
+    return fetchApi<T>(url, { ...options, method: 'GET' });
   },
   post<T>(url: string, body?: any, options?: RequestOptions): Promise<T> {
-    return fetchApi<T>(url, { ...options, method: "POST", body });
+    return fetchApi<T>(url, { ...options, method: 'POST', body });
   },
   put<T>(url: string, body?: any, options?: RequestOptions): Promise<T> {
-    return fetchApi<T>(url, { ...options, method: "PUT", body });
+    return fetchApi<T>(url, { ...options, method: 'PUT', body });
   },
   patch<T>(url: string, body?: any, options?: RequestOptions): Promise<T> {
-    return fetchApi<T>(url, { ...options, method: "PATCH", body });
+    return fetchApi<T>(url, { ...options, method: 'PATCH', body });
   },
   delete<T>(url: string, options?: RequestOptions): Promise<T> {
-    return fetchApi<T>(url, { ...options, method: "DELETE" });
+    return fetchApi<T>(url, { ...options, method: 'DELETE' });
   },
 };
