@@ -214,49 +214,49 @@ export default function CreatePage() {
                   className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
                 >
                   <Languages className="h-4 w-4" />
-                  <span>Language</span>
+                  <span className="hidden md:inline">Language</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="personal"
                   className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
                 >
                   <BookOpen className="h-4 w-4" />
-                  <span>Personal</span>
+                  <span className="hidden md:inline">Personal</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="work"
                   className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
                 >
                   <Briefcase className="h-4 w-4" />
-                  <span>Work</span>
+                  <span className="hidden md:inline">Work</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="interests"
                   className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
                 >
                   <Heart className="h-4 w-4" />
-                  <span>Interests</span>
+                  <span className="hidden md:inline">Interests</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="scenarios"
                   className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
                 >
                   <Globe className="h-4 w-4" />
-                  <span>Scenarios</span>
+                  <span className="hidden md:inline">Scenarios</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="count"
                   className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
                 >
                   <Hash className="h-4 w-4" />
-                  <span>Count</span>
+                  <span className="hidden md:inline">Count</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="email"
                   className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
                 >
                   <Sparkles className="h-4 w-4" />
-                  <span>Generate</span>
+                  <span className="hidden md:inline">Generate</span>
                 </TabsTrigger>
               </TabsList>
 

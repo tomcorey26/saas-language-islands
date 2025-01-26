@@ -45,6 +45,8 @@
 
   - refactor to use react-hook-form
   - refactor to use nextjs server actions with a uuid that saves the world to the database
+  - refactor the response object to just be an array with {category: string, cards: string[]} so that we don't have to update
+    response object everytime
   - Maybe do form action stuff
   - Make it so instead of email it asks for user to create an account
   - On account creation, use clerk webhook to get the user id and save it to the database
@@ -71,6 +73,7 @@
 - Update the home page to just be more of an about page, don't show the pricing stuff
 - Make a side bar for reporting bugs and feature requests, make it clear that this is a beta version
 - Refactor form to use react hook form
+- Add tests
 - DEPLOY
 
 - We are recieivng a large volume of requests error message
