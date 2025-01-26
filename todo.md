@@ -36,11 +36,15 @@
 - Cursor
 - Whats your email? part of the flow
 
-## Today todo
+## MVP DTOD
 
+- Undo stash to add stuff for rate limiting
 - Coors to prevent cross origing request to endpoint
+
 - Fix loading state for form, Fix form clear, add validation
 
+  - refactor to use react-hook-form
+  - refactor to use nextjs server actions with a uuid that saves the world to the database
   - Maybe do form action stuff
   - Make it so instead of email it asks for user to create an account
   - On account creation, use clerk webhook to get the user id and save it to the database
