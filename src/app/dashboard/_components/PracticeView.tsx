@@ -6,7 +6,6 @@ import React, {
   useState,
 } from "react";
 import { speak } from "@/lib/textToSpeech";
-import { FlashCard, FlashCardViews } from "@/app/flashcards/types";
 import {
   Card,
   CardContent,
@@ -14,6 +13,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { FlashCard, FlashCardViews } from "@/app/dashboard/types";
 
 interface PronouncePracticeViewProps {
   flashCards: FlashCard[];

@@ -1,30 +1,30 @@
-'use client';
-import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+"use client";
+import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion';
+} from "@/components/ui/accordion";
 import {
   BookOpen,
   Briefcase,
@@ -34,24 +34,24 @@ import {
   Languages,
   Hash,
   Sparkles,
-} from 'lucide-react';
-import { generateIslands } from '@/server/ai/flashcards';
-import ReCAPTCHA from 'react-google-recaptcha';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
+} from "lucide-react";
+import { generateIslands } from "@/server/ai/flashcards";
+import ReCAPTCHA from "react-google-recaptcha";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import {
   CreateWorldRequest,
   CreateWorldResponse,
-} from '@/zod/contracts/world.schema';
-import { SignUpButton } from '@clerk/nextjs';
+} from "@/zod/contracts/world.schema";
+import { SignUpButton } from "@clerk/nextjs";
 
 export default function CreatePage() {
-  const [currentStep, setCurrentStep] = useState('language');
+  const [currentStep, setCurrentStep] = useState("language");
   const [showPreview, setShowPreview] = useState(false);
   const [formData, setFormData] = useState<CreateWorldRequest>({
-    language: '',
-    name: '',
-    occupation: '',
-    cardsPerCategory: '5',
+    language: "",
+    name: "",
+    occupation: "",
+    cardsPerCategory: "5",
     interests: {
       reading: false,
       gaming: false,
@@ -76,11 +76,11 @@ export default function CreatePage() {
       directions: false,
       culture: false,
     },
-    recaptchaToken: '',
+    recaptchaToken: "",
   });
 
   const [flashcards, setFlashcards] = useState<
-    CreateWorldResponse['flashcards'] | null
+    CreateWorldResponse["flashcards"] | null
   >(null);
 
   const handleInputChange = (field: string, value: string) => {
@@ -94,7 +94,7 @@ export default function CreatePage() {
     setFormData((prev) => ({
       ...prev,
       [category]:
-        typeof prev[category] === 'object'
+        typeof prev[category] === "object"
           ? {
               ...prev[category],
               [key]: !prev[category][key],
@@ -113,12 +113,12 @@ export default function CreatePage() {
   };
 
   const handleCaptchaChange = (token: string | null) => {
-    setFormData((prev) => ({ ...prev, recaptchaToken: token || '' }));
+    setFormData((prev) => ({ ...prev, recaptchaToken: token || "" }));
   };
 
   const handleSubmit = async () => {
     if (!formData.recaptchaToken) {
-      alert('Please complete the CAPTCHA.');
+      alert("Please complete the CAPTCHA.");
       return;
     }
     setShowPreview(true);
@@ -162,7 +162,7 @@ export default function CreatePage() {
                 Your Generated Flashcards
               </CardTitle>
               <CardDescription className="text-center">
-                {formData.cardsPerCategory} cards per category in{' '}
+                {formData.cardsPerCategory} cards per category in{" "}
                 {formData.language}
               </CardDescription>
             </CardHeader>
@@ -267,7 +267,7 @@ export default function CreatePage() {
                     <Select
                       value={formData.language}
                       onValueChange={(value) =>
-                        handleInputChange('language', value)
+                        handleInputChange("language", value)
                       }
                     >
                       <SelectTrigger>
@@ -282,7 +282,7 @@ export default function CreatePage() {
                   </div>
                   <Button
                     className="w-full"
-                    onClick={() => handleNextStep('personal')}
+                    onClick={() => handleNextStep("personal")}
                     disabled={!formData.language}
                   >
                     Next Step
@@ -298,14 +298,14 @@ export default function CreatePage() {
                       id="name"
                       value={formData.name}
                       onChange={(e) =>
-                        handleInputChange('name', e.target.value)
+                        handleInputChange("name", e.target.value)
                       }
                       placeholder="Enter your name"
                     />
                   </div>
                   <Button
                     className="w-full"
-                    onClick={() => handleNextStep('work')}
+                    onClick={() => handleNextStep("work")}
                     disabled={!formData.name}
                   >
                     Next Step
@@ -321,14 +321,14 @@ export default function CreatePage() {
                       id="occupation"
                       value={formData.occupation}
                       onChange={(e) =>
-                        handleInputChange('occupation', e.target.value)
+                        handleInputChange("occupation", e.target.value)
                       }
                       placeholder="Enter your occupation"
                     />
                   </div>
                   <Button
                     className="w-full"
-                    onClick={() => handleNextStep('interests')}
+                    onClick={() => handleNextStep("interests")}
                     disabled={!formData.occupation}
                   >
                     Next Step
@@ -341,18 +341,18 @@ export default function CreatePage() {
                   <Label>Select your interests and hobbies:</Label>
                   <div className="grid grid-cols-2 gap-4">
                     {Object.entries({
-                      reading: 'Reading',
-                      gaming: 'Gaming',
-                      cooking: 'Cooking',
-                      music: 'Music',
-                      sports: 'Sports',
-                      art: 'Art',
-                      technology: 'Technology',
-                      photography: 'Photography',
-                      travel: 'Travel',
-                      writing: 'Writing',
-                      dancing: 'Dancing',
-                      gardening: 'Gardening',
+                      reading: "Reading",
+                      gaming: "Gaming",
+                      cooking: "Cooking",
+                      music: "Music",
+                      sports: "Sports",
+                      art: "Art",
+                      technology: "Technology",
+                      photography: "Photography",
+                      travel: "Travel",
+                      writing: "Writing",
+                      dancing: "Dancing",
+                      gardening: "Gardening",
                     }).map(([key, label]) => (
                       <div key={key} className="flex items-center space-x-2">
                         <Checkbox
@@ -362,8 +362,9 @@ export default function CreatePage() {
                               key as keyof typeof formData.interests
                             ]
                           }
-                          onCheckedChange={() =>
-                            handleCheckboxChange('interests', key)
+                          onCheckedChange={
+                            () =>
+                              handleCheckboxChange("interests", key as never) // TODO: fix this and use react-hook-form
                           }
                         />
                         <Label htmlFor={key}>{label}</Label>
@@ -372,7 +373,7 @@ export default function CreatePage() {
                   </div>
                   <Button
                     className="w-full"
-                    onClick={() => handleNextStep('scenarios')}
+                    onClick={() => handleNextStep("scenarios")}
                     disabled={!Object.values(formData.interests).some(Boolean)}
                   >
                     Next Step
@@ -387,14 +388,14 @@ export default function CreatePage() {
                   </Label>
                   <div className="grid grid-cols-2 gap-4">
                     {Object.entries({
-                      travel: 'Travel & Transportation',
-                      dining: 'Restaurants & Dining',
-                      shopping: 'Shopping & Services',
-                      healthcare: 'Healthcare & Emergencies',
-                      smallTalk: 'Small Talk & Greetings',
-                      emergencies: 'Emergency Situations',
-                      directions: 'Asking for Directions',
-                      culture: 'Cultural Topics & Customs',
+                      travel: "Travel & Transportation",
+                      dining: "Restaurants & Dining",
+                      shopping: "Shopping & Services",
+                      healthcare: "Healthcare & Emergencies",
+                      smallTalk: "Small Talk & Greetings",
+                      emergencies: "Emergency Situations",
+                      directions: "Asking for Directions",
+                      culture: "Cultural Topics & Customs",
                     }).map(([key, label]) => (
                       <div key={key} className="flex items-center space-x-2">
                         <Checkbox
@@ -405,7 +406,10 @@ export default function CreatePage() {
                             ]
                           }
                           onCheckedChange={() =>
-                            handleCheckboxChange('commonScenarios', key)
+                            handleCheckboxChange(
+                              "commonScenarios",
+                              key as never // TODO: fix this
+                            )
                           }
                         />
                         <Label htmlFor={key}>{label}</Label>
@@ -414,7 +418,7 @@ export default function CreatePage() {
                   </div>
                   <Button
                     className="w-full"
-                    onClick={() => handleNextStep('count')}
+                    onClick={() => handleNextStep("count")}
                     disabled={
                       !Object.values(formData.commonScenarios).some(Boolean)
                     }
@@ -433,7 +437,7 @@ export default function CreatePage() {
                     <Select
                       value={formData.cardsPerCategory}
                       onValueChange={(value) =>
-                        handleInputChange('cardsPerCategory', value)
+                        handleInputChange("cardsPerCategory", value)
                       }
                     >
                       <SelectTrigger>
@@ -449,7 +453,7 @@ export default function CreatePage() {
                   </div>
                   <Button
                     className="w-full"
-                    onClick={() => handleNextStep('email')}
+                    onClick={() => handleNextStep("email")}
                   >
                     Next Step
                   </Button>
