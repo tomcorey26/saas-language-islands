@@ -20,12 +20,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
   BookOpen,
   Briefcase,
   Heart,
@@ -37,13 +31,12 @@ import {
 } from "lucide-react";
 import { generateIslands } from "@/server/ai/flashcards";
 import ReCAPTCHA from "react-google-recaptcha";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
 import {
   CreateWorldRequest,
   CreateWorldResponse,
 } from "@/zod/contracts/world.schema";
-import { SignUpButton } from "@clerk/nextjs";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { PreviewFlashcards } from "@/app/create/_components/FlashCardsPreview";
 
 type Inputs = CreateWorldRequest;
 
@@ -135,6 +128,7 @@ export default function CreatePage() {
   >(null);
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    setShowPreview(true);
     const responseData = await generateIslands(data);
     setFlashcards(responseData.flashcards);
   };
@@ -150,67 +144,12 @@ export default function CreatePage() {
   };
 
   if (showPreview) {
-    if (!flashcards)
-      return (
-        <div className="flex justify-center items-center h-screen">
-          <LoadingSpinner className="animate-spin" />
-        </div>
-      );
-
-    const accordionItems = Object.entries(flashcards).map(([key, value]) =>
-      value.length > 0 ? (
-        <AccordionItem key={key} value={key}>
-          <AccordionTrigger className="text-lg font-semibold">
-            {key.charAt(0).toUpperCase() + key.slice(1)}
-          </AccordionTrigger>
-          <AccordionContent className="space-y-2">
-            {value.map((card, index) => (
-              <Card key={index} className="p-4">
-                <div className="flex justify-between items-center">
-                  <div className="font-medium">{card.sentence}</div>
-                  <div className="text-gray-600">{card.translation}</div>
-                </div>
-              </Card>
-            ))}
-          </AccordionContent>
-        </AccordionItem>
-      ) : null
-    );
-
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-6">
-        <div className="max-w-3xl mx-auto">
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold text-center text-blue-800">
-                Your Generated Flashcards
-              </CardTitle>
-              <CardDescription className="text-center">
-                {formValues.cardsPerCategory} cards per category in{" "}
-                {formValues.language}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Accordion type="single" collapsible className="w-full space-y-4">
-                {accordionItems}
-              </Accordion>
-
-              <div className="flex gap-4 mt-6">
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setShowPreview(false)}
-                >
-                  Back to Form
-                </Button>
-                <SignUpButton>
-                  <Button className="w-full">Study Deck</Button>
-                </SignUpButton>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      <PreviewFlashcards
+        flashcards={flashcards}
+        formData={formValues}
+        onBack={() => setShowPreview(false)}
+      />
     );
   }
   return (
@@ -407,7 +346,10 @@ export default function CreatePage() {
                       <div key={key} className="flex items-center space-x-2">
                         <Checkbox
                           id={key}
-                          {...register(`commonScenarios.${key}`)}
+                          checked={formValues.commonScenarios[key]}
+                          onCheckedChange={(checked) => {
+                            setValue(`commonScenarios.${key}`, checked);
+                          }}
                         />
                         <Label htmlFor={key}>
                           {SCENARIOS_FORM_LABELS[key]}
