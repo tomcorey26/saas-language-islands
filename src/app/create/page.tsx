@@ -45,6 +45,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 type Inputs = CreateWorldRequest;
 
@@ -150,7 +152,8 @@ const scenario_items = [
 
 export default function CreatePage() {
   const [currentStep, setCurrentStep] = useState<FormStep>("language");
-  const [showPreview, setShowPreview] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { toast } = useToast();
 
   const form = useForm<Inputs>({
     defaultValues: {
@@ -169,9 +172,19 @@ export default function CreatePage() {
   >(null);
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    setShowPreview(true);
-    const responseData = await generateIslands(data);
-    setFlashcards(responseData.flashcards);
+    setIsGenerating(true);
+    try {
+      const responseData = await generateIslands(data);
+      setFlashcards(responseData.flashcards);
+    } catch {
+      toast({
+        title: "Error",
+        description:
+          "An error occurred while generating flashcards. We are recieving a lot of requests, please try again later.",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleNextStep = (step: FormStep) => {
@@ -184,12 +197,20 @@ export default function CreatePage() {
     form.setValue("recaptchaToken", token || "");
   };
 
-  if (showPreview) {
+  if (isGenerating) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <LoadingSpinner className="animate-spin" />
+      </div>
+    );
+  }
+
+  if (flashcards) {
     return (
       <PreviewFlashcards
         flashcards={flashcards}
         formData={formValues}
-        onBack={() => setShowPreview(false)}
+        onBack={() => setFlashcards(null)}
       />
     );
   }

@@ -12,7 +12,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { SignUpButton } from "@clerk/nextjs";
 import {
   CreateWorldRequest,
@@ -20,7 +19,7 @@ import {
 } from "@/zod/contracts/world.schema";
 
 interface PreviewFlashcardsProps {
-  flashcards: CreateWorldResponse["flashcards"] | null;
+  flashcards: CreateWorldResponse["flashcards"];
   formData: CreateWorldRequest;
   onBack: () => void;
 }
@@ -30,14 +29,6 @@ export function PreviewFlashcards({
   formData,
   onBack,
 }: PreviewFlashcardsProps) {
-  if (!flashcards) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <LoadingSpinner className="animate-spin" />
-      </div>
-    );
-  }
-
   const accordionItems = flashcards.map((section) =>
     section.flashcards.length > 0 ? (
       <AccordionItem key={section.category} value={section.category}>
