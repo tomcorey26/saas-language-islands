@@ -14,11 +14,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { SignUpButton } from "@clerk/nextjs";
-import { CreateWorldRequest } from "@/zod/contracts/world.schema";
-import { FlashCard } from "@/zod/models/flashcard.model";
+import {
+  CreateWorldRequest,
+  CreateWorldResponse,
+} from "@/zod/contracts/world.schema";
 
 interface PreviewFlashcardsProps {
-  flashcards: Record<string, FlashCard[]> | null;
+  flashcards: CreateWorldResponse["flashcards"] | null;
   formData: CreateWorldRequest;
   onBack: () => void;
 }
@@ -36,18 +38,18 @@ export function PreviewFlashcards({
     );
   }
 
-  const accordionItems = Object.entries(flashcards).map(([key, value]) =>
-    value.length > 0 ? (
-      <AccordionItem key={key} value={key}>
+  const accordionItems = flashcards.map((section) =>
+    section.flashcards.length > 0 ? (
+      <AccordionItem key={section.category} value={section.category}>
         <AccordionTrigger className="text-lg font-semibold">
-          {key.charAt(0).toUpperCase() + key.slice(1)}
+          {section.category.charAt(0).toUpperCase() + section.category.slice(1)}
         </AccordionTrigger>
         <AccordionContent className="space-y-2">
-          {value.map((card, index) => (
+          {section.flashcards.map((flashcard, index) => (
             <Card key={index} className="p-4">
               <div className="flex justify-between items-center">
-                <div className="font-medium">{card.sentence}</div>
-                <div className="text-gray-600">{card.translation}</div>
+                <div className="font-medium">{flashcard.sentence}</div>
+                <div className="text-gray-600">{flashcard.translation}</div>
               </div>
             </Card>
           ))}
