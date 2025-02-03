@@ -144,7 +144,8 @@ const scenario_items = [
 ] as const;
 
 // TODO: Use the Shadcn form component to make the form
-// TODO: Add validation
+// TODO: Fix broken AI generation
+// TODO: Add validation to form
 // TODO: Add a loading state
 
 export default function CreatePage() {
