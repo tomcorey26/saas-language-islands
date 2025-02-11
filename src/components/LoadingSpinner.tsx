@@ -1,20 +1,41 @@
-import { cn } from '@/lib/utils';
+import * as React from "react";
 
-export const LoadingSpinner = ({ className }: { className: string }) => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={cn('animate-spin', className)}
-    >
-      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-    </svg>
-  );
-};
+import { Progress } from "@/components/ui/progress";
+
+export function LoadingSpinner() {
+  const [progress, setProgress] = React.useState(13);
+  const countRef = React.useRef(0);
+  const intervalRef = React.useRef<NodeJS.Timeout>(null);
+
+  React.useEffect(() => {
+    // Clear any existing interval first
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    // Reset count when effect runs
+    countRef.current = 0;
+    setProgress(13);
+
+    intervalRef.current = setInterval(() => {
+      countRef.current += 1;
+      setProgress(() => {
+        if (countRef.current >= 7) {
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+          }
+          return 95;
+        }
+        return 13 + countRef.current * 13;
+      });
+    }, 1000);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
+
+  return <Progress value={progress} className="w-[60%]" />;
+}

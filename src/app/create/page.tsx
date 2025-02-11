@@ -47,6 +47,7 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { motion } from "motion/react";
 
 type Inputs = CreateWorldRequest;
 
@@ -199,9 +200,29 @@ export default function CreatePage() {
 
   if (isGenerating) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <LoadingSpinner className="animate-spin" />
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="flex justify-center items-center min-h-[50vh]"
+      >
+        <motion.div
+          initial={{ scale: 0.9 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="text-2xl font-bold"
+          >
+            Generating your flashcards...
+          </motion.p>
+          <LoadingSpinner />
+        </motion.div>
+      </motion.div>
     );
   }
 
@@ -216,10 +237,7 @@ export default function CreatePage() {
   }
   return (
     <Form {...form}>
-      <form
-        className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-6"
-        onSubmit={form.handleSubmit(onSubmit)}
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="max-w-2xl mx-auto">
           <Card className="shadow-lg">
             <CardHeader>
