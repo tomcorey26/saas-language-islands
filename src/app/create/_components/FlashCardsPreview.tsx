@@ -17,6 +17,7 @@ import {
   CreateWorldRequest,
   CreateWorldResponse,
 } from "@/zod/contracts/world.schema";
+import { useMemo } from "react";
 
 interface PreviewFlashcardsProps {
   flashcards: CreateWorldResponse["flashcards"];
@@ -29,7 +30,18 @@ export function PreviewFlashcards({
   formData,
   onBack,
 }: PreviewFlashcardsProps) {
-  const accordionItems = flashcards.map((section) =>
+  const memoizedFlashcards = useMemo(() => {
+    const categories = Object.entries(flashcards)
+      .map(([category, cards]) => ({
+        category,
+        flashcards: cards,
+      }))
+      .filter((section) => section.flashcards.length > 0);
+
+    return categories;
+  }, [flashcards]);
+
+  const accordionItems = memoizedFlashcards.map((section) =>
     section.flashcards.length > 0 ? (
       <AccordionItem key={section.category} value={section.category}>
         <AccordionTrigger className="text-lg font-semibold">

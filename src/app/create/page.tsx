@@ -113,10 +113,6 @@ const interest_items = [
 
 const scenario_items = [
   {
-    id: "travel",
-    label: "Travel",
-  },
-  {
     id: "dining",
     label: "Dining",
   },
@@ -143,6 +139,10 @@ const scenario_items = [
   {
     id: "culture",
     label: "Culture",
+  },
+  {
+    id: "dating",
+    label: "Dating",
   },
 ] as const;
 

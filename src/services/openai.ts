@@ -51,20 +51,10 @@ const generateIslandsPrompt = (request: CreateWorldRequest) => {
   ${JSON.stringify(request)} 
 
   List of things you must do:
-  - You must generate a set of flashcards for each intereest that the user has selected ${request.interests
-    .map((interest) => `"${interest}"`)
-    .join(", ")}
-  - You must generate a set of flashcards for each scenario that the user has selected ${request.commonScenarios
-    .map((scenario) => `"${scenario}"`)
-    .join(", ")}
-  - You must generate a set a flashcards for the user's name ${request.name}
-  - You must generate a set of flashcards for the user's occupation ${
-    request.occupation
-  }
   - Generate ${
     request.cardsPerCategory
   } flashcards for each category that the user has selected 
-  - Do not generate flashcards for fields that the user has not selected/are not truthy
+  - Do not generate flashcards for fields that the user has not selected, just return an empty array for that category
   - Make sure the flashcards are relevant to the user's form data and that they don't all begin with I
   - Make sure that the sentences generated are practical and useful for having a conversation with someone in ${
     request.language
