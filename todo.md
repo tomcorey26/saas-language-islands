@@ -41,6 +41,19 @@
 - Undo stash to add stuff for rate limiting
 - Coors to prevent cross origing request to endpoint
 
+- Form refactor
+
+  - Refactor to be server action
+    - Add validation and error handling
+    - Add better loading state
+      - Message saying that it might take some time
+      - Something to fill in the white space
+    - Add better error handling
+  - Refactor to be react hook form
+  - Refactor to be nextjs server actions with a uuid that saves the world to the database
+  - Refactor the response object to just be an array with {category: string, cards: string[]} so that we don't have to update
+    response object everytime
+
 - Fix loading state for form, Fix form clear, add validation
 
   - refactor to use react-hook-form
@@ -53,6 +66,7 @@
     - create their world deck for them
     - Redirect to the dashboard page
 
+- Add google analytics
 - Make sure api rate limit is working correctly
 - Make the flashcard count per category work, in the select [x]
 - Make sure shadcn styles are working correcly, add custom touch to it

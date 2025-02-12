@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -19,12 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import {
   BookOpen,
   Briefcase,
@@ -37,449 +30,611 @@ import {
 } from "lucide-react";
 import { generateIslands } from "@/server/ai/flashcards";
 import ReCAPTCHA from "react-google-recaptcha";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
 import {
   CreateWorldRequest,
   CreateWorldResponse,
 } from "@/zod/contracts/world.schema";
-import { SignUpButton } from "@clerk/nextjs";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { PreviewFlashcards } from "@/app/create/_components/FlashCardsPreview";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { motion } from "motion/react";
+
+type Inputs = CreateWorldRequest;
+
+type FormStep =
+  | "language"
+  | "personal"
+  | "work"
+  | "interests"
+  | "scenarios"
+  | "count"
+  | "generate";
+
+const interest_items = [
+  {
+    id: "reading",
+    label: "Reading",
+  },
+  {
+    id: "gaming",
+    label: "Gaming",
+  },
+  {
+    id: "cooking",
+    label: "Cooking",
+  },
+  {
+    id: "music",
+    label: "Music",
+  },
+  {
+    id: "sports",
+    label: "Sports",
+  },
+  {
+    id: "art",
+    label: "Art",
+  },
+  {
+    id: "technology",
+    label: "Technology",
+  },
+  {
+    id: "photography",
+    label: "Photography",
+  },
+  {
+    id: "travel",
+    label: "Travel",
+  },
+  {
+    id: "writing",
+    label: "Writing",
+  },
+  {
+    id: "dancing",
+    label: "Dancing",
+  },
+  {
+    id: "gardening",
+    label: "Gardening",
+  },
+] as const;
+
+const scenario_items = [
+  {
+    id: "dining",
+    label: "Dining",
+  },
+  {
+    id: "shopping",
+    label: "Shopping",
+  },
+  {
+    id: "healthcare",
+    label: "Healthcare",
+  },
+  {
+    id: "smallTalk",
+    label: "Small Talk",
+  },
+  {
+    id: "emergencies",
+    label: "Emergencies",
+  },
+  {
+    id: "directions",
+    label: "Directions",
+  },
+  {
+    id: "culture",
+    label: "Culture",
+  },
+  {
+    id: "dating",
+    label: "Dating",
+  },
+] as const;
+
+// TODO: Use the Shadcn form component to make the form
+// TODO: Fix broken AI generation
+// TODO: Add validation to form
+// TODO: Add a loading state
 
 export default function CreatePage() {
-  const [currentStep, setCurrentStep] = useState("language");
-  const [showPreview, setShowPreview] = useState(false);
-  const [formData, setFormData] = useState<CreateWorldRequest>({
-    language: "",
-    name: "",
-    occupation: "",
-    cardsPerCategory: "5",
-    interests: {
-      reading: false,
-      gaming: false,
-      cooking: false,
-      music: false,
-      sports: false,
-      art: false,
-      technology: false,
-      photography: false,
-      travel: false,
-      writing: false,
-      dancing: false,
-      gardening: false,
+  const [currentStep, setCurrentStep] = useState<FormStep>("language");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { toast } = useToast();
+
+  const form = useForm<Inputs>({
+    defaultValues: {
+      language: "spanish",
+      name: "",
+      occupation: "",
+      cardsPerCategory: 5,
+      interests: [],
+      commonScenarios: [],
+      recaptchaToken: "",
     },
-    commonScenarios: {
-      travel: false,
-      dining: false,
-      shopping: false,
-      healthcare: false,
-      smallTalk: false,
-      emergencies: false,
-      directions: false,
-      culture: false,
-    },
-    recaptchaToken: "",
   });
 
   const [flashcards, setFlashcards] = useState<
     CreateWorldResponse["flashcards"] | null
   >(null);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    setIsGenerating(true);
+    try {
+      const responseData = await generateIslands(data);
+      setFlashcards(responseData.flashcards);
+    } catch {
+      toast({
+        title: "Error",
+        description:
+          "An error occurred while generating flashcards. We are recieving a lot of requests, please try again later.",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
-  const handleCheckboxChange = (
-    category: keyof typeof formData,
-    key: keyof (typeof formData)[typeof category]
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [category]:
-        typeof prev[category] === "object"
-          ? {
-              ...prev[category],
-              [key]: !prev[category][key],
-            }
-          : prev[category],
-    }));
-  };
-
-  const handleNextStep = (step: string) => {
+  const handleNextStep = (step: FormStep) => {
     setCurrentStep(step);
   };
 
-  const handleGenerate = async () => {
-    const data = await generateIslands(formData);
-    setFlashcards(data.flashcards);
-  };
+  const formValues = form.watch();
 
   const handleCaptchaChange = (token: string | null) => {
-    setFormData((prev) => ({ ...prev, recaptchaToken: token || "" }));
+    form.setValue("recaptchaToken", token || "");
   };
 
-  const handleSubmit = async () => {
-    if (!formData.recaptchaToken) {
-      alert("Please complete the CAPTCHA.");
-      return;
-    }
-    setShowPreview(true);
-    await handleGenerate();
-  };
-
-  if (showPreview) {
-    if (!flashcards)
-      return (
-        <div className="flex justify-center items-center h-screen">
-          <LoadingSpinner className="animate-spin" />
-        </div>
-      );
-
-    const accordionItems = Object.entries(flashcards).map(([key, value]) =>
-      value.length > 0 ? (
-        <AccordionItem key={key} value={key}>
-          <AccordionTrigger className="text-lg font-semibold">
-            {key.charAt(0).toUpperCase() + key.slice(1)}
-          </AccordionTrigger>
-          <AccordionContent className="space-y-2">
-            {value.map((card, index) => (
-              <Card key={index} className="p-4">
-                <div className="flex justify-between items-center">
-                  <div className="font-medium">{card.sentence}</div>
-                  <div className="text-gray-600">{card.translation}</div>
-                </div>
-              </Card>
-            ))}
-          </AccordionContent>
-        </AccordionItem>
-      ) : null
-    );
-
+  if (isGenerating) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-6">
-        <div className="max-w-3xl mx-auto">
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold text-center text-blue-800">
-                Your Generated Flashcards
-              </CardTitle>
-              <CardDescription className="text-center">
-                {formData.cardsPerCategory} cards per category in{" "}
-                {formData.language}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Accordion type="single" collapsible className="w-full space-y-4">
-                {accordionItems}
-              </Accordion>
-
-              <div className="flex gap-4 mt-6">
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setShowPreview(false)}
-                >
-                  Back to Form
-                </Button>
-                <SignUpButton>
-                  <Button className="w-full">Study Deck</Button>
-                </SignUpButton>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="flex justify-center items-center min-h-[50vh]"
+      >
+        <motion.div
+          initial={{ scale: 0.9 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="text-2xl font-bold"
+          >
+            Generating your flashcards...
+          </motion.p>
+          <LoadingSpinner />
+        </motion.div>
+      </motion.div>
     );
   }
 
+  if (flashcards) {
+    return (
+      <PreviewFlashcards
+        flashcards={flashcards}
+        formData={formValues}
+        onBack={() => setFlashcards(null)}
+      />
+    );
+  }
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-6">
-      <div className="max-w-2xl mx-auto">
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center text-blue-800">
-              Personalized Language Flashcards
-            </CardTitle>
-            <CardDescription className="text-center">
-              Let&apos;s create flashcards tailored to your interests and needs
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs
-              value={currentStep}
-              className="w-full"
-              onValueChange={(value) => setCurrentStep(value)}
-            >
-              <TabsList className="grid w-full grid-cols-7 h-min">
-                <TabsTrigger
-                  value="language"
-                  className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                >
-                  <Languages className="h-4 w-4" />
-                  <span className="hidden md:inline">Language</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="personal"
-                  className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                >
-                  <BookOpen className="h-4 w-4" />
-                  <span className="hidden md:inline">Personal</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="work"
-                  className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                >
-                  <Briefcase className="h-4 w-4" />
-                  <span className="hidden md:inline">Work</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="interests"
-                  className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                >
-                  <Heart className="h-4 w-4" />
-                  <span className="hidden md:inline">Interests</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="scenarios"
-                  className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                >
-                  <Globe className="h-4 w-4" />
-                  <span className="hidden md:inline">Scenarios</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="count"
-                  className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                >
-                  <Hash className="h-4 w-4" />
-                  <span className="hidden md:inline">Count</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="email"
-                  className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  <span className="hidden md:inline">Generate</span>
-                </TabsTrigger>
-              </TabsList>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="max-w-2xl mx-auto">
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-center text-blue-800">
+                Personalized Language Flashcards
+              </CardTitle>
+              <CardDescription className="text-center">
+                Let&apos;s create flashcards tailored to your interests and
+                needs
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs
+                value={currentStep}
+                className="w-full"
+                onValueChange={(value) => setCurrentStep(value as FormStep)}
+              >
+                <TabsList className="grid w-full grid-cols-7 h-min">
+                  <TabsTrigger
+                    value="language"
+                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
+                  >
+                    <Languages className="h-4 w-4" />
+                    <span className="hidden md:inline">Language</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="personal"
+                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    <span className="hidden md:inline">Personal</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="work"
+                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
+                  >
+                    <Briefcase className="h-4 w-4" />
+                    <span className="hidden md:inline">Work</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="interests"
+                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
+                  >
+                    <Heart className="h-4 w-4" />
+                    <span className="hidden md:inline">Interests</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="scenarios"
+                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
+                  >
+                    <Globe className="h-4 w-4" />
+                    <span className="hidden md:inline">Scenarios</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="count"
+                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
+                  >
+                    <Hash className="h-4 w-4" />
+                    <span className="hidden md:inline">Count</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="generate"
+                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    <span className="hidden md:inline">Generate</span>
+                  </TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="language" className="space-y-4 mt-4">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="language">Select Language</Label>
-                    <Select
-                      value={formData.language}
-                      onValueChange={(value) =>
-                        handleInputChange("language", value)
-                      }
+                <TabsContent value="language" className="space-y-4 mt-4">
+                  <div className="space-y-4">
+                    <div>
+                      <FormField
+                        control={form.control}
+                        name="language"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Select Language</FormLabel>
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Choose a language" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="spanish">
+                                  Spanish 🇪🇸
+                                </SelectItem>
+                                <SelectItem value="french">
+                                  French 🇫🇷
+                                </SelectItem>
+                                <SelectItem value="german">
+                                  German 🇩🇪
+                                </SelectItem>
+                                <SelectItem value="italian">
+                                  Italian 🇮🇹
+                                </SelectItem>
+                                <SelectItem value="portuguese">
+                                  Portuguese 🇵🇹
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormDescription>
+                              Select the language you want to learn.
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <Button
+                      className="w-full"
+                      onClick={() => handleNextStep("personal")}
+                      disabled={!formValues.language}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choose a language" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="spanish">Spanish</SelectItem>
-                        <SelectItem value="french">French</SelectItem>
-                        <SelectItem value="german">German</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      Next Step
+                    </Button>
                   </div>
-                  <Button
-                    className="w-full"
-                    onClick={() => handleNextStep("personal")}
-                    disabled={!formData.language}
-                  >
-                    Next Step
-                  </Button>
-                </div>
-              </TabsContent>
+                </TabsContent>
 
-              <TabsContent value="personal" className="space-y-4 mt-4">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="name">Your Name</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) =>
-                        handleInputChange("name", e.target.value)
-                      }
-                      placeholder="Enter your name"
+                <TabsContent value="personal" className="space-y-4 mt-4">
+                  <div className="space-y-4">
+                    <div>
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Your Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter your name" {...field} />
+                            </FormControl>
+                            <FormDescription>
+                              Your name will be used to personalize the
+                              flashcards.
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <Button
+                      className="w-full"
+                      onClick={() => handleNextStep("work")}
+                      disabled={!formValues.name}
+                    >
+                      Next Step
+                    </Button>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="work" className="space-y-4 mt-4">
+                  <div className="space-y-4">
+                    <div>
+                      <FormField
+                        control={form.control}
+                        name="occupation"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Your Occupation</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Enter your occupation"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Your occupation will be used to personalize the
+                              flashcards.
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <Button
+                      className="w-full"
+                      onClick={() => handleNextStep("interests")}
+                      disabled={!formValues.occupation}
+                    >
+                      Next Step
+                    </Button>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="interests" className="space-y-4 mt-4">
+                  <div className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="interests"
+                      render={() => (
+                        <FormItem>
+                          <div className="mb-4">
+                            <FormLabel className="text-base">Sidebar</FormLabel>
+                            <FormDescription>
+                              Select the items you want to display in the
+                              sidebar.
+                            </FormDescription>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            {interest_items.map((item) => (
+                              <FormField
+                                key={item.id}
+                                control={form.control}
+                                name="interests"
+                                render={({ field }) => {
+                                  return (
+                                    <FormItem
+                                      key={item.id}
+                                      className="flex flex-row items-start space-x-3 space-y-0"
+                                    >
+                                      <FormControl>
+                                        <Checkbox
+                                          checked={field.value?.includes(
+                                            item.id
+                                          )}
+                                          onCheckedChange={(checked) => {
+                                            return checked
+                                              ? field.onChange([
+                                                  ...field.value,
+                                                  item.id,
+                                                ])
+                                              : field.onChange(
+                                                  field.value?.filter(
+                                                    (value) => value !== item.id
+                                                  )
+                                                );
+                                          }}
+                                        />
+                                      </FormControl>
+                                      <FormLabel className="font-normal">
+                                        {item.label}
+                                      </FormLabel>
+                                    </FormItem>
+                                  );
+                                }}
+                              />
+                            ))}
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </div>
-                  <Button
-                    className="w-full"
-                    onClick={() => handleNextStep("work")}
-                    disabled={!formData.name}
-                  >
-                    Next Step
-                  </Button>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="work" className="space-y-4 mt-4">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="occupation">Your Occupation</Label>
-                    <Input
-                      id="occupation"
-                      value={formData.occupation}
-                      onChange={(e) =>
-                        handleInputChange("occupation", e.target.value)
-                      }
-                      placeholder="Enter your occupation"
-                    />
-                  </div>
-                  <Button
-                    className="w-full"
-                    onClick={() => handleNextStep("interests")}
-                    disabled={!formData.occupation}
-                  >
-                    Next Step
-                  </Button>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="interests" className="space-y-4 mt-4">
-                <div className="space-y-4">
-                  <Label>Select your interests and hobbies:</Label>
-                  <div className="grid grid-cols-2 gap-4">
-                    {Object.entries({
-                      reading: "Reading",
-                      gaming: "Gaming",
-                      cooking: "Cooking",
-                      music: "Music",
-                      sports: "Sports",
-                      art: "Art",
-                      technology: "Technology",
-                      photography: "Photography",
-                      travel: "Travel",
-                      writing: "Writing",
-                      dancing: "Dancing",
-                      gardening: "Gardening",
-                    }).map(([key, label]) => (
-                      <div key={key} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={key}
-                          checked={
-                            formData.interests[
-                              key as keyof typeof formData.interests
-                            ]
-                          }
-                          onCheckedChange={
-                            () =>
-                              handleCheckboxChange("interests", key as never) // TODO: fix this and use react-hook-form
-                          }
-                        />
-                        <Label htmlFor={key}>{label}</Label>
-                      </div>
-                    ))}
                   </div>
                   <Button
                     className="w-full"
                     onClick={() => handleNextStep("scenarios")}
-                    disabled={!Object.values(formData.interests).some(Boolean)}
+                    disabled={
+                      !Object.values(formValues.interests).some(Boolean)
+                    }
                   >
                     Next Step
                   </Button>
-                </div>
-              </TabsContent>
+                </TabsContent>
 
-              <TabsContent value="scenarios" className="space-y-4 mt-4">
-                <div className="space-y-4">
-                  <Label>
-                    Select common scenarios you&apos;d like to learn:
-                  </Label>
-                  <div className="grid grid-cols-2 gap-4">
-                    {Object.entries({
-                      travel: "Travel & Transportation",
-                      dining: "Restaurants & Dining",
-                      shopping: "Shopping & Services",
-                      healthcare: "Healthcare & Emergencies",
-                      smallTalk: "Small Talk & Greetings",
-                      emergencies: "Emergency Situations",
-                      directions: "Asking for Directions",
-                      culture: "Cultural Topics & Customs",
-                    }).map(([key, label]) => (
-                      <div key={key} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={key}
-                          checked={
-                            formData.commonScenarios[
-                              key as keyof typeof formData.commonScenarios
-                            ]
-                          }
-                          onCheckedChange={() =>
-                            handleCheckboxChange(
-                              "commonScenarios",
-                              key as never // TODO: fix this
-                            )
-                          }
-                        />
-                        <Label htmlFor={key}>{label}</Label>
-                      </div>
-                    ))}
+                <TabsContent value="scenarios" className="space-y-4 mt-4">
+                  <div className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="commonScenarios"
+                      render={() => (
+                        <FormItem>
+                          <div className="mb-4">
+                            <FormLabel className="text-base">Sidebar</FormLabel>
+                            <FormDescription>
+                              Select the items you want to display in the
+                              sidebar.
+                            </FormDescription>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            {scenario_items.map((item) => (
+                              <FormField
+                                key={item.id}
+                                control={form.control}
+                                name="commonScenarios"
+                                render={({ field }) => {
+                                  return (
+                                    <FormItem
+                                      key={item.id}
+                                      className="flex flex-row items-start space-x-3 space-y-0"
+                                    >
+                                      <FormControl>
+                                        <Checkbox
+                                          checked={field.value?.includes(
+                                            item.id
+                                          )}
+                                          onCheckedChange={(checked) => {
+                                            return checked
+                                              ? field.onChange([
+                                                  ...field.value,
+                                                  item.id,
+                                                ])
+                                              : field.onChange(
+                                                  field.value?.filter(
+                                                    (value) => value !== item.id
+                                                  )
+                                                );
+                                          }}
+                                        />
+                                      </FormControl>
+                                      <FormLabel className="font-normal">
+                                        {item.label}
+                                      </FormLabel>
+                                    </FormItem>
+                                  );
+                                }}
+                              />
+                            ))}
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                   <Button
                     className="w-full"
                     onClick={() => handleNextStep("count")}
                     disabled={
-                      !Object.values(formData.commonScenarios).some(Boolean)
+                      !Object.values(formValues.commonScenarios).some(Boolean)
                     }
                   >
                     Next Step
                   </Button>
-                </div>
-              </TabsContent>
+                </TabsContent>
 
-              <TabsContent value="count" className="space-y-4 mt-4">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="cardsPerCategory">
-                      How many flashcards per category?
-                    </Label>
-                    <Select
-                      value={formData.cardsPerCategory}
-                      onValueChange={(value) =>
-                        handleInputChange("cardsPerCategory", value)
-                      }
+                <TabsContent value="count" className="space-y-4 mt-4">
+                  <div className="space-y-4">
+                    <div>
+                      <FormField
+                        control={form.control}
+                        name="cardsPerCategory"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              How many flashcards per category?
+                            </FormLabel>
+                            <FormControl>
+                              <Select
+                                value={field.value.toString()}
+                                onValueChange={(value) =>
+                                  field.onChange(parseInt(value))
+                                }
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Choose number of cards" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="5">5 cards</SelectItem>
+                                  <SelectItem value="10">10 cards</SelectItem>
+                                  <SelectItem value="15">15 cards</SelectItem>
+                                  <SelectItem value="20">20 cards</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <Button
+                      className="w-full"
+                      onClick={() => handleNextStep("generate")}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choose number of cards" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="5">5 cards</SelectItem>
-                        <SelectItem value="10">10 cards</SelectItem>
-                        <SelectItem value="15">15 cards</SelectItem>
-                        <SelectItem value="20">20 cards</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      Next Step
+                    </Button>
                   </div>
-                  <Button
-                    className="w-full"
-                    onClick={() => handleNextStep("email")}
-                  >
-                    Next Step
-                  </Button>
-                </div>
-              </TabsContent>
+                </TabsContent>
 
-              <TabsContent value="email" className="space-y-4 mt-4">
-                <div className="space-y-4">
-                  <ReCAPTCHA
-                    sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
-                    onChange={handleCaptchaChange}
-                  />
-                  <Button
-                    className="w-full bg-green-600 hover:bg-green-700 text-white"
-                    onClick={handleSubmit}
-                    disabled={!formData.recaptchaToken}
-                  >
-                    <Send className="w-4 h-4 mr-2" />
-                    Generate Flashcards
-                  </Button>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+                <TabsContent value="generate" className="space-y-4 mt-4">
+                  <div className="space-y-4">
+                    <ReCAPTCHA
+                      sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
+                      onChange={handleCaptchaChange}
+                    />
+                    <Button
+                      className="w-full bg-green-600 hover:bg-green-700 text-white"
+                      disabled={!formValues.recaptchaToken}
+                      type="submit"
+                    >
+                      <Send className="w-4 h-4 mr-2" />
+                      Generate Flashcards
+                    </Button>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+          <div className="mt-4 p-4 bg-gray-100 rounded-lg">
+            <pre className="whitespace-pre-wrap break-words font-mono text-sm">
+              {JSON.stringify(formValues, null, 2)}
+            </pre>
+          </div>
+        </div>
+      </form>
+    </Form>
   );
 }

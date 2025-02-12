@@ -1,11 +1,11 @@
-import { zodResponseFormat } from 'openai/helpers/zod';
-import { z } from 'zod';
-import { OpenAI } from 'openai';
+import { zodResponseFormat } from "openai/helpers/zod";
+import { z } from "zod";
+import { OpenAI } from "openai";
 import {
   CreateWorldRequest,
   CreateWorldResponseSchema,
-} from '@/zod/contracts/world.schema';
-import { FlashCardSchema } from '@/zod/models/flashcard.model';
+} from "@/zod/contracts/world.schema";
+import { FlashCardSchema } from "@/zod/models/flashcard.model";
 
 const generateFlashCardsPrompt = (prompt: string, language: string) => {
   return `The user will provide a prompt of a situation, and you need to generate flashcards of useful sentences to study pertaining to the prompt in ${language}. The sentence field is english, and the translation field is ${language}.`;
@@ -15,17 +15,17 @@ const openAiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function generateFlashCards(prompt: string, language: string) {
   const completion = await openAiClient.beta.chat.completions.parse({
-    model: 'gpt-4o-mini',
+    model: "gpt-4o-mini",
     messages: [
       {
-        role: 'system',
+        role: "system",
         content: generateFlashCardsPrompt(prompt, language),
       },
-      { role: 'user', content: prompt },
+      { role: "user", content: prompt },
     ],
     response_format: zodResponseFormat(
       z.object({ flashcards: z.array(FlashCardSchema) }),
-      'flashcard'
+      "flashcard"
     ),
   });
 
@@ -53,8 +53,8 @@ const generateIslandsPrompt = (request: CreateWorldRequest) => {
   List of things you must do:
   - Generate ${
     request.cardsPerCategory
-  } flashcards for each category that the user has selected/are truthy
-  - Do not generate flashcards for fields that the user has not selected/are not truthy
+  } flashcards for each category that the user has selected 
+  - Do not generate flashcards for fields that the user has not selected, just return an empty array for that category
   - Make sure the flashcards are relevant to the user's form data and that they don't all begin with I
   - Make sure that the sentences generated are practical and useful for having a conversation with someone in ${
     request.language
@@ -65,11 +65,11 @@ const generateIslandsPrompt = (request: CreateWorldRequest) => {
 
 export async function generateWorld(request: CreateWorldRequest) {
   const completion = await openAiClient.beta.chat.completions.parse({
-    model: 'gpt-4o-mini',
-    messages: [{ role: 'user', content: generateIslandsPrompt(request) }],
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: generateIslandsPrompt(request) }],
     response_format: zodResponseFormat(
       CreateWorldResponseSchema,
-      'world_response'
+      "world_response"
     ),
   });
 

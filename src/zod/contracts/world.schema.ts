@@ -1,34 +1,16 @@
-import { FlashCardSchema } from '@/zod/models/flashcard.model';
-import { z } from 'zod';
+import { FlashCardSchema } from "@/zod/models/flashcard.model";
+import { z } from "zod";
 
 export const CreateWorldRequestSchema = z.object({
   language: z.string(),
   name: z.string(),
   occupation: z.string(),
-  cardsPerCategory: z.string(),
-  interests: z.object({
-    reading: z.boolean(),
-    gaming: z.boolean(),
-    cooking: z.boolean(),
-    music: z.boolean(),
-    sports: z.boolean(),
-    art: z.boolean(),
-    technology: z.boolean(),
-    photography: z.boolean(),
-    travel: z.boolean(),
-    writing: z.boolean(),
-    dancing: z.boolean(),
-    gardening: z.boolean(),
+  cardsPerCategory: z.number(),
+  interests: z.array(z.string()).refine((value) => value.length > 0, {
+    message: "You have to select at least one item.",
   }),
-  commonScenarios: z.object({
-    travel: z.boolean(),
-    dining: z.boolean(),
-    shopping: z.boolean(),
-    healthcare: z.boolean(),
-    smallTalk: z.boolean(),
-    emergencies: z.boolean(),
-    directions: z.boolean(),
-    culture: z.boolean(),
+  commonScenarios: z.array(z.string()).refine((value) => value.length > 0, {
+    message: "You have to select at least one item.",
   }),
   recaptchaToken: z.string(),
 });
@@ -37,19 +19,26 @@ export type CreateWorldRequest = z.infer<typeof CreateWorldRequestSchema>;
 
 export const CreateWorldResponseSchema = z.object({
   flashcards: z.object({
+    // General categories
+    introduction: z.array(FlashCardSchema),
+    location: z.array(FlashCardSchema),
     occupation: z.array(FlashCardSchema),
+
+    // Interest categories
     reading: z.array(FlashCardSchema),
-    gaming: z.array(FlashCardSchema),
     cooking: z.array(FlashCardSchema),
-    music: z.array(FlashCardSchema),
     sports: z.array(FlashCardSchema),
-    art: z.array(FlashCardSchema),
     technology: z.array(FlashCardSchema),
-    photography: z.array(FlashCardSchema),
     travel: z.array(FlashCardSchema),
-    writing: z.array(FlashCardSchema),
     dancing: z.array(FlashCardSchema),
+    gaming: z.array(FlashCardSchema),
+    art: z.array(FlashCardSchema),
+    music: z.array(FlashCardSchema),
+    photography: z.array(FlashCardSchema),
+    writing: z.array(FlashCardSchema),
     gardening: z.array(FlashCardSchema),
+
+    // Scenario categories
     dining: z.array(FlashCardSchema),
     shopping: z.array(FlashCardSchema),
     healthcare: z.array(FlashCardSchema),
@@ -57,6 +46,7 @@ export const CreateWorldResponseSchema = z.object({
     emergencies: z.array(FlashCardSchema),
     directions: z.array(FlashCardSchema),
     culture: z.array(FlashCardSchema),
+    dating: z.array(FlashCardSchema),
   }),
 });
 
