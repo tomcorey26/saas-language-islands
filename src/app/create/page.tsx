@@ -155,6 +155,9 @@ export default function CreatePage() {
   const [currentStep, setCurrentStep] = useState<FormStep>("language");
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
+  const [completedSteps, setCompletedSteps] = useState<FormStep[]>([
+    "language",
+  ]);
 
   const form = useForm<Inputs>({
     defaultValues: {
@@ -188,8 +191,28 @@ export default function CreatePage() {
     }
   };
 
+  const isStepCompleted = (step: FormStep) => completedSteps.includes(step);
+
   const handleNextStep = (step: FormStep) => {
     setCurrentStep(step);
+    if (!completedSteps.includes(step)) {
+      setCompletedSteps([...completedSteps, step]);
+    }
+  };
+
+  const isStepAccessible = (step: FormStep): boolean => {
+    const stepOrder: FormStep[] = [
+      "language",
+      "personal",
+      "work",
+      "interests",
+      "scenarios",
+      "count",
+      "generate",
+    ];
+    const currentStepIndex = stepOrder.indexOf(currentStep);
+    const targetStepIndex = stepOrder.indexOf(step);
+    return targetStepIndex <= currentStepIndex || isStepCompleted(step);
   };
 
   const formValues = form.watch();
@@ -253,58 +276,37 @@ export default function CreatePage() {
               <Tabs
                 value={currentStep}
                 className="w-full"
-                onValueChange={(value) => setCurrentStep(value as FormStep)}
+                onValueChange={(value) => {
+                  const step = value as FormStep;
+                  if (isStepAccessible(step)) {
+                    setCurrentStep(step);
+                  }
+                }}
               >
                 <TabsList className="grid w-full grid-cols-7 h-min">
-                  <TabsTrigger
-                    value="language"
-                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                  >
-                    <Languages className="h-4 w-4" />
-                    <span className="hidden md:inline">Language</span>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="personal"
-                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                  >
-                    <BookOpen className="h-4 w-4" />
-                    <span className="hidden md:inline">Personal</span>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="work"
-                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                  >
-                    <Briefcase className="h-4 w-4" />
-                    <span className="hidden md:inline">Work</span>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="interests"
-                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                  >
-                    <Heart className="h-4 w-4" />
-                    <span className="hidden md:inline">Interests</span>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="scenarios"
-                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                  >
-                    <Globe className="h-4 w-4" />
-                    <span className="hidden md:inline">Scenarios</span>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="count"
-                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                  >
-                    <Hash className="h-4 w-4" />
-                    <span className="hidden md:inline">Count</span>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="generate"
-                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    <span className="hidden md:inline">Generate</span>
-                  </TabsTrigger>
+                  {[
+                    { value: "language", icon: Languages, label: "Language" },
+                    { value: "personal", icon: BookOpen, label: "Personal" },
+                    { value: "work", icon: Briefcase, label: "Work" },
+                    { value: "interests", icon: Heart, label: "Interests" },
+                    { value: "scenarios", icon: Globe, label: "Scenarios" },
+                    { value: "count", icon: Hash, label: "Count" },
+                    { value: "generate", icon: Sparkles, label: "Generate" },
+                  ].map(({ value, icon: Icon, label }) => (
+                    <TabsTrigger
+                      key={value}
+                      value={value}
+                      className={`flex flex-col items-center gap-2 ${
+                        !isStepAccessible(value as FormStep)
+                          ? "opacity-50 cursor-not-allowed"
+                          : "data-[state=active]:bg-blue-100"
+                      }`}
+                      disabled={!isStepAccessible(value as FormStep)}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span className="hidden md:inline">{label}</span>
+                    </TabsTrigger>
+                  ))}
                 </TabsList>
 
                 <TabsContent value="language" className="space-y-4 mt-4">
@@ -344,20 +346,22 @@ export default function CreatePage() {
                               </SelectContent>
                             </Select>
                             <FormDescription>
-                              Select the language you want to learn.
+                              Select the language you want to generate
+                              flashcards for.
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                     </div>
-                    <Button
-                      className="w-full"
-                      onClick={() => handleNextStep("personal")}
-                      disabled={!formValues.language}
-                    >
-                      Next Step
-                    </Button>
+                    <div className="flex justify-end">
+                      <Button
+                        onClick={() => handleNextStep("personal")}
+                        disabled={!formValues.language}
+                      >
+                        Next Step
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
 
@@ -382,13 +386,20 @@ export default function CreatePage() {
                         )}
                       />
                     </div>
-                    <Button
-                      className="w-full"
-                      onClick={() => handleNextStep("work")}
-                      disabled={!formValues.name}
-                    >
-                      Next Step
-                    </Button>
+                    <div className="flex justify-between">
+                      <Button
+                        variant="outline"
+                        onClick={() => setCurrentStep("language")}
+                      >
+                        Previous
+                      </Button>
+                      <Button
+                        onClick={() => handleNextStep("work")}
+                        disabled={!formValues.name}
+                      >
+                        Next Step
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
 
@@ -416,13 +427,20 @@ export default function CreatePage() {
                         )}
                       />
                     </div>
-                    <Button
-                      className="w-full"
-                      onClick={() => handleNextStep("interests")}
-                      disabled={!formValues.occupation}
-                    >
-                      Next Step
-                    </Button>
+                    <div className="flex justify-between">
+                      <Button
+                        variant="outline"
+                        onClick={() => setCurrentStep("personal")}
+                      >
+                        Previous
+                      </Button>
+                      <Button
+                        onClick={() => handleNextStep("interests")}
+                        disabled={!formValues.occupation}
+                      >
+                        Next Step
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
 
@@ -434,10 +452,11 @@ export default function CreatePage() {
                       render={() => (
                         <FormItem>
                           <div className="mb-4">
-                            <FormLabel className="text-base">Sidebar</FormLabel>
+                            <FormLabel className="text-base">
+                              Interests
+                            </FormLabel>
                             <FormDescription>
-                              Select the items you want to display in the
-                              sidebar.
+                              Choose your interests (Pick at least 3)
                             </FormDescription>
                           </div>
                           <div className="grid grid-cols-2 gap-4">
@@ -485,15 +504,22 @@ export default function CreatePage() {
                       )}
                     />
                   </div>
-                  <Button
-                    className="w-full"
-                    onClick={() => handleNextStep("scenarios")}
-                    disabled={
-                      !Object.values(formValues.interests).some(Boolean)
-                    }
-                  >
-                    Next Step
-                  </Button>
+                  <div className="flex justify-between">
+                    <Button
+                      variant="outline"
+                      onClick={() => setCurrentStep("work")}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      onClick={() => handleNextStep("scenarios")}
+                      disabled={
+                        !Object.values(formValues.interests).some(Boolean)
+                      }
+                    >
+                      Next Step
+                    </Button>
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="scenarios" className="space-y-4 mt-4">
@@ -504,10 +530,12 @@ export default function CreatePage() {
                       render={() => (
                         <FormItem>
                           <div className="mb-4">
-                            <FormLabel className="text-base">Sidebar</FormLabel>
+                            <FormLabel className="text-base">
+                              Scenarios
+                            </FormLabel>
                             <FormDescription>
-                              Select the items you want to display in the
-                              sidebar.
+                              Choose the scenarios you want to generate
+                              flashcards for.
                             </FormDescription>
                           </div>
                           <div className="grid grid-cols-2 gap-4">
@@ -555,15 +583,22 @@ export default function CreatePage() {
                       )}
                     />
                   </div>
-                  <Button
-                    className="w-full"
-                    onClick={() => handleNextStep("count")}
-                    disabled={
-                      !Object.values(formValues.commonScenarios).some(Boolean)
-                    }
-                  >
-                    Next Step
-                  </Button>
+                  <div className="flex justify-between">
+                    <Button
+                      variant="outline"
+                      onClick={() => setCurrentStep("interests")}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      onClick={() => handleNextStep("count")}
+                      disabled={
+                        !Object.values(formValues.commonScenarios).some(Boolean)
+                      }
+                    >
+                      Next Step
+                    </Button>
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="count" className="space-y-4 mt-4">
@@ -600,12 +635,17 @@ export default function CreatePage() {
                         )}
                       />
                     </div>
-                    <Button
-                      className="w-full"
-                      onClick={() => handleNextStep("generate")}
-                    >
-                      Next Step
-                    </Button>
+                    <div className="flex justify-between">
+                      <Button
+                        variant="outline"
+                        onClick={() => setCurrentStep("scenarios")}
+                      >
+                        Previous
+                      </Button>
+                      <Button onClick={() => handleNextStep("generate")}>
+                        Next Step
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
 
@@ -615,14 +655,22 @@ export default function CreatePage() {
                       sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
                       onChange={handleCaptchaChange}
                     />
-                    <Button
-                      className="w-full bg-green-600 hover:bg-green-700 text-white"
-                      disabled={!formValues.recaptchaToken}
-                      type="submit"
-                    >
-                      <Send className="w-4 h-4 mr-2" />
-                      Generate Flashcards
-                    </Button>
+                    <div className="flex justify-between">
+                      <Button
+                        variant="outline"
+                        onClick={() => setCurrentStep("count")}
+                      >
+                        Previous
+                      </Button>
+                      <Button
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                        disabled={!formValues.recaptchaToken}
+                        type="submit"
+                      >
+                        <Send className="w-4 h-4 mr-2" />
+                        Generate Flashcards
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
               </Tabs>
