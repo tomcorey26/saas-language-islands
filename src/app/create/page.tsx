@@ -146,6 +146,37 @@ const scenario_items = [
   },
 ] as const;
 
+const languageColors = {
+  spanish: {
+    primary: "bg-[#F1BF00] hover:bg-[#DFB200] text-black",
+    secondary: "bg-[#C60B1E] hover:bg-[#B00A1B] text-white",
+  },
+  french: {
+    primary: "bg-[#002395] hover:bg-[#001B70] text-white",
+    secondary: "bg-[#ED2939] hover:bg-[#D62533] text-white",
+  },
+  german: {
+    primary: "bg-[#000000] hover:bg-[#1A1A1A] text-white",
+    secondary: "bg-[#DD0000] hover:bg-[#C70000] text-white",
+  },
+  italian: {
+    primary: "bg-[#009246] hover:bg-[#007A3B] text-white",
+    secondary: "bg-[#CE2B37] hover:bg-[#B82631] text-white",
+  },
+  portuguese: {
+    primary: "bg-[#006600] hover:bg-[#005500] text-white",
+    secondary: "bg-[#FF0000] hover:bg-[#E60000] text-white",
+  },
+} as const;
+
+const languageFlags = {
+  spanish: "🇪🇸",
+  french: "🇫🇷",
+  german: "🇩🇪",
+  italian: "🇮🇹",
+  portuguese: "🇵🇹",
+} as const;
+
 // TODO: Use the Shadcn form component to make the form
 // TODO: Fix broken AI generation
 // TODO: Add validation to form
@@ -271,8 +302,27 @@ export default function CreatePage() {
         <div className="max-w-2xl mx-auto">
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle className="text-2xl font-bold text-center text-blue-800">
-                Personalized Language Flashcards
+              <CardTitle
+                className={`text-2xl font-bold text-center ${
+                  formValues.language === "spanish"
+                    ? "text-[#F1BF00]"
+                    : formValues.language === "french"
+                    ? "text-[#002395]"
+                    : formValues.language === "german"
+                    ? "text-[#000000]"
+                    : formValues.language === "italian"
+                    ? "text-[#009246]"
+                    : formValues.language === "portuguese"
+                    ? "text-[#006600]"
+                    : "text-blue-800"
+                }`}
+              >
+                Personalized Language Flashcards{" "}
+                {
+                  languageFlags[
+                    formValues.language as keyof typeof languageFlags
+                  ]
+                }
               </CardTitle>
               <CardDescription className="text-center">
                 Let&apos;s create flashcards tailored to your interests and
@@ -367,6 +417,11 @@ export default function CreatePage() {
                       <Button
                         onClick={() => handleNextStep("personal")}
                         disabled={!formValues.language}
+                        className={
+                          languageColors[
+                            formValues.language as keyof typeof languageColors
+                          ]?.primary
+                        }
                       >
                         Next Step
                       </Button>
@@ -440,6 +495,11 @@ export default function CreatePage() {
                       <Button
                         variant="outline"
                         onClick={() => setCurrentStep("language")}
+                        className={
+                          languageColors[
+                            formValues.language as keyof typeof languageColors
+                          ]?.secondary
+                        }
                       >
                         Previous
                       </Button>
@@ -449,6 +509,11 @@ export default function CreatePage() {
                           !formValues.name ||
                           !formValues.occupation ||
                           !formValues.location
+                        }
+                        className={
+                          languageColors[
+                            formValues.language as keyof typeof languageColors
+                          ]?.primary
                         }
                       >
                         Next Step
@@ -521,6 +586,11 @@ export default function CreatePage() {
                     <Button
                       variant="outline"
                       onClick={() => setCurrentStep("personal")}
+                      className={
+                        languageColors[
+                          formValues.language as keyof typeof languageColors
+                        ]?.secondary
+                      }
                     >
                       Previous
                     </Button>
@@ -528,6 +598,11 @@ export default function CreatePage() {
                       onClick={() => handleNextStep("scenarios")}
                       disabled={
                         !Object.values(formValues.interests).some(Boolean)
+                      }
+                      className={
+                        languageColors[
+                          formValues.language as keyof typeof languageColors
+                        ]?.primary
                       }
                     >
                       Next Step
@@ -600,6 +675,11 @@ export default function CreatePage() {
                     <Button
                       variant="outline"
                       onClick={() => setCurrentStep("interests")}
+                      className={
+                        languageColors[
+                          formValues.language as keyof typeof languageColors
+                        ]?.secondary
+                      }
                     >
                       Previous
                     </Button>
@@ -607,6 +687,11 @@ export default function CreatePage() {
                       onClick={() => handleNextStep("count")}
                       disabled={
                         !Object.values(formValues.commonScenarios).some(Boolean)
+                      }
+                      className={
+                        languageColors[
+                          formValues.language as keyof typeof languageColors
+                        ]?.primary
                       }
                     >
                       Next Step
@@ -651,10 +736,22 @@ export default function CreatePage() {
                       <Button
                         variant="outline"
                         onClick={() => setCurrentStep("scenarios")}
+                        className={
+                          languageColors[
+                            formValues.language as keyof typeof languageColors
+                          ]?.secondary
+                        }
                       >
                         Previous
                       </Button>
-                      <Button onClick={() => handleNextStep("generate")}>
+                      <Button
+                        onClick={() => handleNextStep("generate")}
+                        className={
+                          languageColors[
+                            formValues.language as keyof typeof languageColors
+                          ]?.primary
+                        }
+                      >
                         Next Step
                       </Button>
                     </div>
@@ -671,15 +768,24 @@ export default function CreatePage() {
                       <Button
                         variant="outline"
                         onClick={() => setCurrentStep("count")}
+                        className={
+                          languageColors[
+                            formValues.language as keyof typeof languageColors
+                          ]?.secondary
+                        }
                       >
                         Previous
                       </Button>
                       <Button
-                        className="bg-green-600 hover:bg-green-700 text-white"
+                        className={`${
+                          languageColors[
+                            formValues.language as keyof typeof languageColors
+                          ]?.primary
+                        } flex items-center gap-2`}
                         disabled={!formValues.recaptchaToken}
                         type="submit"
                       >
-                        <Send className="w-4 h-4 mr-2" />
+                        <Send className="w-4 h-4" />
                         Generate Flashcards
                       </Button>
                     </div>
