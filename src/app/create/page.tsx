@@ -223,6 +223,11 @@ export default function CreatePage() {
     form.setValue("recaptchaToken", token || "");
   };
 
+  function returnToForm() {
+    setFlashcards(null);
+    handleCaptchaChange(null);
+  }
+
   if (isGenerating) {
     return (
       <motion.div
@@ -256,7 +261,7 @@ export default function CreatePage() {
       <PreviewFlashcards
         flashcards={flashcards}
         formData={formValues}
-        onBack={() => setFlashcards(null)}
+        onBack={returnToForm}
       />
     );
   }
@@ -351,7 +356,7 @@ export default function CreatePage() {
                             </Select>
                             <FormDescription>
                               Select the language you want to generate
-                              flashcards for.
+                              flashcards for
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -464,7 +469,7 @@ export default function CreatePage() {
                               Interests
                             </FormLabel>
                             <FormDescription>
-                              Choose your interests (Pick at least 3)
+                              Choose your interests (Pick at least 1)
                             </FormDescription>
                           </div>
                           <div className="grid grid-cols-2 gap-4">
@@ -543,7 +548,7 @@ export default function CreatePage() {
                             </FormLabel>
                             <FormDescription>
                               Choose the scenarios you want to generate
-                              flashcards for.
+                              flashcards for (Pick at least 1)
                             </FormDescription>
                           </div>
                           <div className="grid grid-cols-2 gap-4">

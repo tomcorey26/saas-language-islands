@@ -43,6 +43,7 @@
 
 - Form refactor
 
+  - Set up to add what language the user speaks, use
   - Refactor to be server action
     - Add validation and error handling
     - Add better loading state
@@ -77,6 +78,8 @@
   - Page that shows all the decks, on the deck page, can see all the cards in the deck, and can crud the cards
   - Little star icon for appending to the deck with ai. Choose how many cards to generate, can preview the cards and choose to append more or all
   - CRUD decks, and the cards in the deck
+  - Set up so you can translate to multiple languages
+  - Auto translate the cards
   - Sound for card pronunciation
   - Can mark card as easy, medium, hard then sort by that (In the future would be spaced repetition algorithm)
 - Learn how openai token usage and cost works, and try to use the least amount of tokens possible, make sure quota is working correctly
