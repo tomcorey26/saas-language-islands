@@ -273,14 +273,17 @@ export default function CreatePage() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="flex flex-col items-center gap-4"
         >
-          <motion.p
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="text-2xl font-bold"
+            className="text-center"
           >
-            Generating your flashcards...
-          </motion.p>
+            <h2 className="text-2xl font-bold">
+              Generating your flashcards...
+            </h2>
+            <p className="text-sm text-gray-500 mt-2">This may take a bit</p>
+          </motion.div>
           <LoadingSpinner />
         </motion.div>
       </motion.div>

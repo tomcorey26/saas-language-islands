@@ -91,6 +91,7 @@
 - Make a side bar for reporting bugs and feature requests, make it clear that this is a beta version
 - Refactor form to use react hook form
 - Add tests
+- Add sentry, posthog, or google analytics
 - DEPLOY
 
 - We are recieivng a large volume of requests error message
