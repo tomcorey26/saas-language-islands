@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/select";
 import {
   BookOpen,
-  Briefcase,
   Heart,
   Globe,
   Send,
@@ -32,6 +31,7 @@ import { generateIslands } from "@/server/ai/flashcards";
 import ReCAPTCHA from "react-google-recaptcha";
 import {
   CreateWorldRequest,
+  CreateWorldRequestSchema,
   CreateWorldResponse,
 } from "@/zod/contracts/world.schema";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -48,13 +48,13 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { motion } from "motion/react";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 type Inputs = CreateWorldRequest;
 
 type FormStep =
   | "language"
   | "personal"
-  | "work"
   | "interests"
   | "scenarios"
   | "count"
@@ -164,11 +164,14 @@ export default function CreatePage() {
       language: "spanish",
       name: "",
       occupation: "",
+      location: "",
       cardsPerCategory: 5,
       interests: [],
       commonScenarios: [],
       recaptchaToken: "",
     },
+    resolver: zodResolver(CreateWorldRequestSchema),
+    mode: "onTouched",
   });
 
   const [flashcards, setFlashcards] = useState<
@@ -204,7 +207,6 @@ export default function CreatePage() {
     const stepOrder: FormStep[] = [
       "language",
       "personal",
-      "work",
       "interests",
       "scenarios",
       "count",
@@ -283,11 +285,10 @@ export default function CreatePage() {
                   }
                 }}
               >
-                <TabsList className="grid w-full grid-cols-7 h-min">
+                <TabsList className="grid w-full grid-cols-6 h-min">
                   {[
                     { value: "language", icon: Languages, label: "Language" },
                     { value: "personal", icon: BookOpen, label: "Personal" },
-                    { value: "work", icon: Briefcase, label: "Work" },
                     { value: "interests", icon: Heart, label: "Interests" },
                     { value: "scenarios", icon: Globe, label: "Scenarios" },
                     { value: "count", icon: Hash, label: "Count" },
@@ -317,7 +318,10 @@ export default function CreatePage() {
                         name="language"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Select Language</FormLabel>
+                            <FormLabel>
+                              Select Language
+                              <span className="text-red-500 ml-1">*</span>
+                            </FormLabel>
                             <Select
                               value={field.value}
                               onValueChange={field.onChange}
@@ -373,14 +377,55 @@ export default function CreatePage() {
                         name="name"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Your Name</FormLabel>
+                            <FormLabel>
+                              Your Name
+                              <span className="text-red-500 ml-1">*</span>
+                            </FormLabel>
                             <FormControl>
                               <Input placeholder="Enter your name" {...field} />
                             </FormControl>
-                            <FormDescription>
-                              Your name will be used to personalize the
-                              flashcards.
-                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div>
+                      <FormField
+                        control={form.control}
+                        name="occupation"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Your Occupation
+                              <span className="text-red-500 ml-1">*</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Enter your occupation"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div>
+                      <FormField
+                        control={form.control}
+                        name="location"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Your Location
+                              <span className="text-red-500 ml-1">*</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Enter your city/country"
+                                {...field}
+                              />
+                            </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -394,49 +439,12 @@ export default function CreatePage() {
                         Previous
                       </Button>
                       <Button
-                        onClick={() => handleNextStep("work")}
-                        disabled={!formValues.name}
-                      >
-                        Next Step
-                      </Button>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="work" className="space-y-4 mt-4">
-                  <div className="space-y-4">
-                    <div>
-                      <FormField
-                        control={form.control}
-                        name="occupation"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Your Occupation</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="Enter your occupation"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormDescription>
-                              Your occupation will be used to personalize the
-                              flashcards.
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <div className="flex justify-between">
-                      <Button
-                        variant="outline"
-                        onClick={() => setCurrentStep("personal")}
-                      >
-                        Previous
-                      </Button>
-                      <Button
                         onClick={() => handleNextStep("interests")}
-                        disabled={!formValues.occupation}
+                        disabled={
+                          !formValues.name ||
+                          !formValues.occupation ||
+                          !formValues.location
+                        }
                       >
                         Next Step
                       </Button>
@@ -507,7 +515,7 @@ export default function CreatePage() {
                   <div className="flex justify-between">
                     <Button
                       variant="outline"
-                      onClick={() => setCurrentStep("work")}
+                      onClick={() => setCurrentStep("personal")}
                     >
                       Previous
                     </Button>
@@ -626,7 +634,6 @@ export default function CreatePage() {
                                   <SelectItem value="5">5 cards</SelectItem>
                                   <SelectItem value="10">10 cards</SelectItem>
                                   <SelectItem value="15">15 cards</SelectItem>
-                                  <SelectItem value="20">20 cards</SelectItem>
                                 </SelectContent>
                               </Select>
                             </FormControl>
