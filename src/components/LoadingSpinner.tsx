@@ -37,5 +37,5 @@ export function LoadingSpinner() {
     };
   }, []);
 
-  return <Progress value={progress} className="w-[60%]" />;
+  return <Progress value={progress} className="w-[100%]" />;
 }

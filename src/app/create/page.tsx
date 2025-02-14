@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/select";
 import {
   BookOpen,
-  Briefcase,
   Heart,
   Globe,
   Send,
@@ -32,6 +31,7 @@ import { generateIslands } from "@/server/ai/flashcards";
 import ReCAPTCHA from "react-google-recaptcha";
 import {
   CreateWorldRequest,
+  CreateWorldRequestSchema,
   CreateWorldResponse,
 } from "@/zod/contracts/world.schema";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -48,13 +48,14 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { motion } from "motion/react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AnimatedPalmTree } from "@/components/AnimatedPalmTree";
 
 type Inputs = CreateWorldRequest;
 
 type FormStep =
   | "language"
   | "personal"
-  | "work"
   | "interests"
   | "scenarios"
   | "count"
@@ -146,6 +147,37 @@ const scenario_items = [
   },
 ] as const;
 
+const languageColors = {
+  spanish: {
+    primary: "bg-[#F1BF00] hover:bg-[#DFB200] text-black",
+    secondary: "bg-[#C60B1E] hover:bg-[#B00A1B] text-white",
+  },
+  french: {
+    primary: "bg-[#002395] hover:bg-[#001B70] text-white",
+    secondary: "bg-[#ED2939] hover:bg-[#D62533] text-white",
+  },
+  german: {
+    primary: "bg-[#000000] hover:bg-[#1A1A1A] text-white",
+    secondary: "bg-[#DD0000] hover:bg-[#C70000] text-white",
+  },
+  italian: {
+    primary: "bg-[#009246] hover:bg-[#007A3B] text-white",
+    secondary: "bg-[#CE2B37] hover:bg-[#B82631] text-white",
+  },
+  portuguese: {
+    primary: "bg-[#006600] hover:bg-[#005500] text-white",
+    secondary: "bg-[#FF0000] hover:bg-[#E60000] text-white",
+  },
+} as const;
+
+const languageFlags = {
+  spanish: "🇪🇸",
+  french: "🇫🇷",
+  german: "🇩🇪",
+  italian: "🇮🇹",
+  portuguese: "🇵🇹",
+} as const;
+
 // TODO: Use the Shadcn form component to make the form
 // TODO: Fix broken AI generation
 // TODO: Add validation to form
@@ -155,17 +187,23 @@ export default function CreatePage() {
   const [currentStep, setCurrentStep] = useState<FormStep>("language");
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
+  const [completedSteps, setCompletedSteps] = useState<FormStep[]>([
+    "language",
+  ]);
 
   const form = useForm<Inputs>({
     defaultValues: {
       language: "spanish",
       name: "",
       occupation: "",
+      location: "",
       cardsPerCategory: 5,
       interests: [],
       commonScenarios: [],
       recaptchaToken: "",
     },
+    resolver: zodResolver(CreateWorldRequestSchema),
+    mode: "onTouched",
   });
 
   const [flashcards, setFlashcards] = useState<
@@ -188,8 +226,27 @@ export default function CreatePage() {
     }
   };
 
+  const isStepCompleted = (step: FormStep) => completedSteps.includes(step);
+
   const handleNextStep = (step: FormStep) => {
     setCurrentStep(step);
+    if (!completedSteps.includes(step)) {
+      setCompletedSteps([...completedSteps, step]);
+    }
+  };
+
+  const isStepAccessible = (step: FormStep): boolean => {
+    const stepOrder: FormStep[] = [
+      "language",
+      "personal",
+      "interests",
+      "scenarios",
+      "count",
+      "generate",
+    ];
+    const currentStepIndex = stepOrder.indexOf(currentStep);
+    const targetStepIndex = stepOrder.indexOf(step);
+    return targetStepIndex <= currentStepIndex || isStepCompleted(step);
   };
 
   const formValues = form.watch();
@@ -197,6 +254,11 @@ export default function CreatePage() {
   const handleCaptchaChange = (token: string | null) => {
     form.setValue("recaptchaToken", token || "");
   };
+
+  function returnToForm() {
+    setFlashcards(null);
+    handleCaptchaChange(null);
+  }
 
   if (isGenerating) {
     return (
@@ -212,14 +274,18 @@ export default function CreatePage() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="flex flex-col items-center gap-4"
         >
-          <motion.p
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="text-2xl font-bold"
+            className="text-center flex flex-col items-center"
           >
-            Generating your flashcards...
-          </motion.p>
+            <AnimatedPalmTree />
+            <h2 className="text-2xl font-bold">
+              Generating your flashcards...
+            </h2>
+            <p className="text-sm text-gray-500 mt-2">This may take a bit</p>
+          </motion.div>
           <LoadingSpinner />
         </motion.div>
       </motion.div>
@@ -231,7 +297,7 @@ export default function CreatePage() {
       <PreviewFlashcards
         flashcards={flashcards}
         formData={formValues}
-        onBack={() => setFlashcards(null)}
+        onBack={returnToForm}
       />
     );
   }
@@ -241,8 +307,27 @@ export default function CreatePage() {
         <div className="max-w-2xl mx-auto">
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle className="text-2xl font-bold text-center text-blue-800">
-                Personalized Language Flashcards
+              <CardTitle
+                className={`text-2xl font-bold text-center ${
+                  formValues.language === "spanish"
+                    ? "text-[#F1BF00]"
+                    : formValues.language === "french"
+                    ? "text-[#002395]"
+                    : formValues.language === "german"
+                    ? "text-[#000000]"
+                    : formValues.language === "italian"
+                    ? "text-[#009246]"
+                    : formValues.language === "portuguese"
+                    ? "text-[#006600]"
+                    : "text-blue-800"
+                }`}
+              >
+                Personalized Language Flashcards{" "}
+                {
+                  languageFlags[
+                    formValues.language as keyof typeof languageFlags
+                  ]
+                }
               </CardTitle>
               <CardDescription className="text-center">
                 Let&apos;s create flashcards tailored to your interests and
@@ -253,58 +338,36 @@ export default function CreatePage() {
               <Tabs
                 value={currentStep}
                 className="w-full"
-                onValueChange={(value) => setCurrentStep(value as FormStep)}
+                onValueChange={(value) => {
+                  const step = value as FormStep;
+                  if (isStepAccessible(step)) {
+                    setCurrentStep(step);
+                  }
+                }}
               >
-                <TabsList className="grid w-full grid-cols-7 h-min">
-                  <TabsTrigger
-                    value="language"
-                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                  >
-                    <Languages className="h-4 w-4" />
-                    <span className="hidden md:inline">Language</span>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="personal"
-                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                  >
-                    <BookOpen className="h-4 w-4" />
-                    <span className="hidden md:inline">Personal</span>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="work"
-                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                  >
-                    <Briefcase className="h-4 w-4" />
-                    <span className="hidden md:inline">Work</span>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="interests"
-                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                  >
-                    <Heart className="h-4 w-4" />
-                    <span className="hidden md:inline">Interests</span>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="scenarios"
-                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                  >
-                    <Globe className="h-4 w-4" />
-                    <span className="hidden md:inline">Scenarios</span>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="count"
-                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                  >
-                    <Hash className="h-4 w-4" />
-                    <span className="hidden md:inline">Count</span>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="generate"
-                    className="flex flex-col items-center gap-2 data-[state=active]:bg-blue-100"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    <span className="hidden md:inline">Generate</span>
-                  </TabsTrigger>
+                <TabsList className="grid w-full grid-cols-6 h-min">
+                  {[
+                    { value: "language", icon: Languages, label: "Language" },
+                    { value: "personal", icon: BookOpen, label: "Personal" },
+                    { value: "interests", icon: Heart, label: "Interests" },
+                    { value: "scenarios", icon: Globe, label: "Scenarios" },
+                    { value: "count", icon: Hash, label: "Count" },
+                    { value: "generate", icon: Sparkles, label: "Generate" },
+                  ].map(({ value, icon: Icon, label }) => (
+                    <TabsTrigger
+                      key={value}
+                      value={value}
+                      className={`flex flex-col items-center gap-2 ${
+                        !isStepAccessible(value as FormStep)
+                          ? "opacity-50 cursor-not-allowed"
+                          : "data-[state=active]:bg-blue-100"
+                      }`}
+                      disabled={!isStepAccessible(value as FormStep)}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span className="hidden md:inline">{label}</span>
+                    </TabsTrigger>
+                  ))}
                 </TabsList>
 
                 <TabsContent value="language" className="space-y-4 mt-4">
@@ -315,7 +378,10 @@ export default function CreatePage() {
                         name="language"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Select Language</FormLabel>
+                            <FormLabel>
+                              Select Language
+                              <span className="text-red-500 ml-1">*</span>
+                            </FormLabel>
                             <Select
                               value={field.value}
                               onValueChange={field.onChange}
@@ -344,20 +410,27 @@ export default function CreatePage() {
                               </SelectContent>
                             </Select>
                             <FormDescription>
-                              Select the language you want to learn.
+                              Select the language you want to generate
+                              flashcards for
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                     </div>
-                    <Button
-                      className="w-full"
-                      onClick={() => handleNextStep("personal")}
-                      disabled={!formValues.language}
-                    >
-                      Next Step
-                    </Button>
+                    <div className="flex justify-end">
+                      <Button
+                        onClick={() => handleNextStep("personal")}
+                        disabled={!formValues.language}
+                        className={
+                          languageColors[
+                            formValues.language as keyof typeof languageColors
+                          ]?.primary
+                        }
+                      >
+                        Next Step
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
 
@@ -369,60 +442,88 @@ export default function CreatePage() {
                         name="name"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Your Name</FormLabel>
+                            <FormLabel>
+                              Your Name
+                              <span className="text-red-500 ml-1">*</span>
+                            </FormLabel>
                             <FormControl>
                               <Input placeholder="Enter your name" {...field} />
                             </FormControl>
-                            <FormDescription>
-                              Your name will be used to personalize the
-                              flashcards.
-                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                     </div>
-                    <Button
-                      className="w-full"
-                      onClick={() => handleNextStep("work")}
-                      disabled={!formValues.name}
-                    >
-                      Next Step
-                    </Button>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="work" className="space-y-4 mt-4">
-                  <div className="space-y-4">
                     <div>
                       <FormField
                         control={form.control}
                         name="occupation"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Your Occupation</FormLabel>
+                            <FormLabel>
+                              Your Occupation
+                              <span className="text-red-500 ml-1">*</span>
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 placeholder="Enter your occupation"
                                 {...field}
                               />
                             </FormControl>
-                            <FormDescription>
-                              Your occupation will be used to personalize the
-                              flashcards.
-                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                     </div>
-                    <Button
-                      className="w-full"
-                      onClick={() => handleNextStep("interests")}
-                      disabled={!formValues.occupation}
-                    >
-                      Next Step
-                    </Button>
+                    <div>
+                      <FormField
+                        control={form.control}
+                        name="location"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Your Location
+                              <span className="text-red-500 ml-1">*</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Enter your city/country"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="flex justify-between">
+                      <Button
+                        variant="outline"
+                        onClick={() => setCurrentStep("language")}
+                        className={
+                          languageColors[
+                            formValues.language as keyof typeof languageColors
+                          ]?.secondary
+                        }
+                      >
+                        Previous
+                      </Button>
+                      <Button
+                        onClick={() => handleNextStep("interests")}
+                        disabled={
+                          !formValues.name ||
+                          !formValues.occupation ||
+                          !formValues.location
+                        }
+                        className={
+                          languageColors[
+                            formValues.language as keyof typeof languageColors
+                          ]?.primary
+                        }
+                      >
+                        Next Step
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
 
@@ -434,10 +535,11 @@ export default function CreatePage() {
                       render={() => (
                         <FormItem>
                           <div className="mb-4">
-                            <FormLabel className="text-base">Sidebar</FormLabel>
+                            <FormLabel className="text-base">
+                              Interests
+                            </FormLabel>
                             <FormDescription>
-                              Select the items you want to display in the
-                              sidebar.
+                              Choose your interests (Pick at least 1)
                             </FormDescription>
                           </div>
                           <div className="grid grid-cols-2 gap-4">
@@ -485,15 +587,32 @@ export default function CreatePage() {
                       )}
                     />
                   </div>
-                  <Button
-                    className="w-full"
-                    onClick={() => handleNextStep("scenarios")}
-                    disabled={
-                      !Object.values(formValues.interests).some(Boolean)
-                    }
-                  >
-                    Next Step
-                  </Button>
+                  <div className="flex justify-between">
+                    <Button
+                      variant="outline"
+                      onClick={() => setCurrentStep("personal")}
+                      className={
+                        languageColors[
+                          formValues.language as keyof typeof languageColors
+                        ]?.secondary
+                      }
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      onClick={() => handleNextStep("scenarios")}
+                      disabled={
+                        !Object.values(formValues.interests).some(Boolean)
+                      }
+                      className={
+                        languageColors[
+                          formValues.language as keyof typeof languageColors
+                        ]?.primary
+                      }
+                    >
+                      Next Step
+                    </Button>
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="scenarios" className="space-y-4 mt-4">
@@ -504,10 +623,12 @@ export default function CreatePage() {
                       render={() => (
                         <FormItem>
                           <div className="mb-4">
-                            <FormLabel className="text-base">Sidebar</FormLabel>
+                            <FormLabel className="text-base">
+                              Scenarios
+                            </FormLabel>
                             <FormDescription>
-                              Select the items you want to display in the
-                              sidebar.
+                              Choose the scenarios you want to generate
+                              flashcards for (Pick at least 1)
                             </FormDescription>
                           </div>
                           <div className="grid grid-cols-2 gap-4">
@@ -555,15 +676,32 @@ export default function CreatePage() {
                       )}
                     />
                   </div>
-                  <Button
-                    className="w-full"
-                    onClick={() => handleNextStep("count")}
-                    disabled={
-                      !Object.values(formValues.commonScenarios).some(Boolean)
-                    }
-                  >
-                    Next Step
-                  </Button>
+                  <div className="flex justify-between">
+                    <Button
+                      variant="outline"
+                      onClick={() => setCurrentStep("interests")}
+                      className={
+                        languageColors[
+                          formValues.language as keyof typeof languageColors
+                        ]?.secondary
+                      }
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      onClick={() => handleNextStep("count")}
+                      disabled={
+                        !Object.values(formValues.commonScenarios).some(Boolean)
+                      }
+                      className={
+                        languageColors[
+                          formValues.language as keyof typeof languageColors
+                        ]?.primary
+                      }
+                    >
+                      Next Step
+                    </Button>
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="count" className="space-y-4 mt-4">
@@ -591,7 +729,6 @@ export default function CreatePage() {
                                   <SelectItem value="5">5 cards</SelectItem>
                                   <SelectItem value="10">10 cards</SelectItem>
                                   <SelectItem value="15">15 cards</SelectItem>
-                                  <SelectItem value="20">20 cards</SelectItem>
                                 </SelectContent>
                               </Select>
                             </FormControl>
@@ -600,12 +737,29 @@ export default function CreatePage() {
                         )}
                       />
                     </div>
-                    <Button
-                      className="w-full"
-                      onClick={() => handleNextStep("generate")}
-                    >
-                      Next Step
-                    </Button>
+                    <div className="flex justify-between">
+                      <Button
+                        variant="outline"
+                        onClick={() => setCurrentStep("scenarios")}
+                        className={
+                          languageColors[
+                            formValues.language as keyof typeof languageColors
+                          ]?.secondary
+                        }
+                      >
+                        Previous
+                      </Button>
+                      <Button
+                        onClick={() => handleNextStep("generate")}
+                        className={
+                          languageColors[
+                            formValues.language as keyof typeof languageColors
+                          ]?.primary
+                        }
+                      >
+                        Next Step
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
 
@@ -615,14 +769,31 @@ export default function CreatePage() {
                       sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
                       onChange={handleCaptchaChange}
                     />
-                    <Button
-                      className="w-full bg-green-600 hover:bg-green-700 text-white"
-                      disabled={!formValues.recaptchaToken}
-                      type="submit"
-                    >
-                      <Send className="w-4 h-4 mr-2" />
-                      Generate Flashcards
-                    </Button>
+                    <div className="flex justify-between">
+                      <Button
+                        variant="outline"
+                        onClick={() => setCurrentStep("count")}
+                        className={
+                          languageColors[
+                            formValues.language as keyof typeof languageColors
+                          ]?.secondary
+                        }
+                      >
+                        Previous
+                      </Button>
+                      <Button
+                        className={`${
+                          languageColors[
+                            formValues.language as keyof typeof languageColors
+                          ]?.primary
+                        } flex items-center gap-2`}
+                        disabled={!formValues.recaptchaToken}
+                        type="submit"
+                      >
+                        <Send className="w-4 h-4" />
+                        Generate Flashcards
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
               </Tabs>
