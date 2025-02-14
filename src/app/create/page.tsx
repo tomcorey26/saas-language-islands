@@ -49,6 +49,7 @@ import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { motion } from "motion/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AnimatedPalmTree } from "@/components/AnimatedPalmTree";
 
 type Inputs = CreateWorldRequest;
 
@@ -277,8 +278,9 @@ export default function CreatePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="text-center"
+            className="text-center flex flex-col items-center"
           >
+            <AnimatedPalmTree />
             <h2 className="text-2xl font-bold">
               Generating your flashcards...
             </h2>
