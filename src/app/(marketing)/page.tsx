@@ -1,5 +1,5 @@
-import { ClerkIcon } from '@/app/(marketing)/_icons/Clerk';
-import { Button } from '@/components/ui/button';
+import { ClerkIcon } from "@/app/(marketing)/_icons/Clerk";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,13 +7,13 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { subscriptionTiersInOrder } from '@/data/subscriptionTiers';
-import { formatCompactNumber } from '@/lib/formatters';
-import { cn } from '@/lib/utils';
-import { SignUpButton } from '@clerk/nextjs';
-import { ArrowRightIcon, CheckIcon } from 'lucide-react';
-import Link from 'next/link';
+} from "@/components/ui/card";
+import { subscriptionTiersInOrder } from "@/data/subscriptionTiers";
+import { formatCompactNumber } from "@/lib/formatters";
+import { cn } from "@/lib/utils";
+import { SignUpButton } from "@clerk/nextjs";
+import { ArrowRightIcon, CheckIcon } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
   // text-balance makes the text break into even lines when the container is resized
@@ -87,7 +87,7 @@ export default function Home() {
         <h2 className="text-4xl text-center text-balance font-semibold mb-8">
           Save time and money from expensive tutors and courses
         </h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-screen-xl mx-auto">
+        <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 max-w-screen-xl mx-auto">
           {subscriptionTiersInOrder.map((tier) => (
             <PricingCard {...tier} key={tier.name} />
           ))}
@@ -107,7 +107,13 @@ function PricingCard({
   canAccessMemorizationPractice,
   canDownloadAudio,
 }: (typeof subscriptionTiersInOrder)[number]) {
-  const isMostPopular = name === 'Pro';
+  const isMostPopular = name === "Pro";
+
+  const description =
+    maxNumberOfGenerationsPerMonth === Infinity
+      ? "Unlimited flashcards generations"
+      : `${formatCompactNumber(maxNumberOfGenerationsPerMonth)} flashcards
+          generations a month`;
 
   return (
     <Card>
@@ -116,16 +122,13 @@ function PricingCard({
         <CardTitle className="text-xl font-bold">
           ${priceInCents / 100} /mo
         </CardTitle>
-        <CardDescription>
-          {formatCompactNumber(maxNumberOfGenerationsPerMonth)} flashcards
-          generations a month{' '}
-        </CardDescription>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
         <SignUpButton>
           <Button
             className="text-lg w-full rounded-lg"
-            variant={isMostPopular ? 'accent' : 'default'}
+            variant={isMostPopular ? "accent" : "default"}
           >
             Get started
           </Button>
@@ -134,14 +137,14 @@ function PricingCard({
       <CardFooter className="flex flex-col gap-4 items-start">
         <Feature className="font-bold">
           {maxNumberOfLanguages === Infinity
-            ? 'Unlimited languages'
+            ? "Unlimited languages"
             : `${maxNumberOfLanguages} language${
-                maxNumberOfLanguages > 1 ? 's' : ''
+                maxNumberOfLanguages > 1 ? "s" : ""
               }`}
         </Feature>
         {canAccessMemorizationPractice && <Feature>Speaking Drills</Feature>}
-        {canSaveFlashcards && <Feature>Save and export flashcards</Feature>}
         {canDownloadAudio && <Feature>Download audio</Feature>}
+        {canSaveFlashcards && <Feature>Save and export flashcards</Feature>}
         {canAccessCommunityFlashCards && (
           <Feature>Community flashcards</Feature>
         )}
@@ -158,7 +161,7 @@ function Feature({
   className?: string;
 }) {
   return (
-    <div className={cn('flex items-center gap-2', className)}>
+    <div className={cn("flex items-center gap-2", className)}>
       <CheckIcon className="size-4 stroke-accent bg-accent/25 p-0.5 rounded-full" />
       <span>{children}</span>
     </div>
