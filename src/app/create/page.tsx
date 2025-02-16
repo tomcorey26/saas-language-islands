@@ -24,7 +24,6 @@ import {
   Globe,
   Send,
   Languages,
-  Hash,
   Sparkles,
 } from "lucide-react";
 import { generateIslands } from "@/server/ai/flashcards";
@@ -58,7 +57,6 @@ type FormStep =
   | "personal"
   | "interests"
   | "scenarios"
-  | "count"
   | "generate";
 
 const interest_items = [
@@ -178,11 +176,6 @@ const languageFlags = {
   portuguese: "🇵🇹",
 } as const;
 
-// TODO: Use the Shadcn form component to make the form
-// TODO: Fix broken AI generation
-// TODO: Add validation to form
-// TODO: Add a loading state
-
 export default function CreatePage() {
   const [currentStep, setCurrentStep] = useState<FormStep>("language");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -197,7 +190,6 @@ export default function CreatePage() {
       name: "",
       occupation: "",
       location: "",
-      cardsPerCategory: 5,
       interests: [],
       commonScenarios: [],
       recaptchaToken: "",
@@ -241,7 +233,6 @@ export default function CreatePage() {
       "personal",
       "interests",
       "scenarios",
-      "count",
       "generate",
     ];
     const currentStepIndex = stepOrder.indexOf(currentStep);
@@ -345,13 +336,12 @@ export default function CreatePage() {
                   }
                 }}
               >
-                <TabsList className="grid w-full grid-cols-6 h-min">
+                <TabsList className="grid w-full grid-cols-5 h-min">
                   {[
                     { value: "language", icon: Languages, label: "Language" },
                     { value: "personal", icon: BookOpen, label: "Personal" },
                     { value: "interests", icon: Heart, label: "Interests" },
                     { value: "scenarios", icon: Globe, label: "Scenarios" },
-                    { value: "count", icon: Hash, label: "Count" },
                     { value: "generate", icon: Sparkles, label: "Generate" },
                   ].map(({ value, icon: Icon, label }) => (
                     <TabsTrigger
@@ -689,7 +679,7 @@ export default function CreatePage() {
                       Previous
                     </Button>
                     <Button
-                      onClick={() => handleNextStep("count")}
+                      onClick={() => handleNextStep("generate")}
                       disabled={
                         !Object.values(formValues.commonScenarios).some(Boolean)
                       }
@@ -704,65 +694,6 @@ export default function CreatePage() {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="count" className="space-y-4 mt-4">
-                  <div className="space-y-4">
-                    <div>
-                      <FormField
-                        control={form.control}
-                        name="cardsPerCategory"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              How many flashcards per category?
-                            </FormLabel>
-                            <FormControl>
-                              <Select
-                                value={field.value.toString()}
-                                onValueChange={(value) =>
-                                  field.onChange(parseInt(value))
-                                }
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Choose number of cards" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="5">5 cards</SelectItem>
-                                  <SelectItem value="10">10 cards</SelectItem>
-                                  <SelectItem value="15">15 cards</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <div className="flex justify-between">
-                      <Button
-                        variant="outline"
-                        onClick={() => setCurrentStep("scenarios")}
-                        className={
-                          languageColors[
-                            formValues.language as keyof typeof languageColors
-                          ]?.secondary
-                        }
-                      >
-                        Previous
-                      </Button>
-                      <Button
-                        onClick={() => handleNextStep("generate")}
-                        className={
-                          languageColors[
-                            formValues.language as keyof typeof languageColors
-                          ]?.primary
-                        }
-                      >
-                        Next Step
-                      </Button>
-                    </div>
-                  </div>
-                </TabsContent>
-
                 <TabsContent value="generate" className="space-y-4 mt-4">
                   <div className="space-y-4">
                     <ReCAPTCHA
@@ -772,7 +703,7 @@ export default function CreatePage() {
                     <div className="flex justify-between">
                       <Button
                         variant="outline"
-                        onClick={() => setCurrentStep("count")}
+                        onClick={() => setCurrentStep("scenarios")}
                         className={
                           languageColors[
                             formValues.language as keyof typeof languageColors
@@ -799,11 +730,13 @@ export default function CreatePage() {
               </Tabs>
             </CardContent>
           </Card>
-          <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-            <pre className="whitespace-pre-wrap break-words font-mono text-sm">
-              {JSON.stringify(formValues, null, 2)}
-            </pre>
-          </div>
+          {/* {process.env.NODE_ENV === "development" && (
+            <div className="mt-4 p-4 bg-gray-100 rounded-lg">
+              <pre className="whitespace-pre-wrap break-words font-mono text-sm">
+                {JSON.stringify(formValues, null, 2)}
+              </pre>
+            </div>
+          )} */}
         </div>
       </form>
     </Form>

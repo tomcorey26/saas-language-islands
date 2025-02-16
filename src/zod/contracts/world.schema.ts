@@ -6,7 +6,6 @@ export const CreateWorldRequestSchema = z.object({
   name: z.string().min(1, "Name is required"),
   occupation: z.string().min(1, "Occupation is required"),
   location: z.string().min(1, "Location is required"),
-  cardsPerCategory: z.number(),
   interests: z.array(z.string()).refine((value) => value.length > 0, {
     message: "You have to select at least one item.",
   }),

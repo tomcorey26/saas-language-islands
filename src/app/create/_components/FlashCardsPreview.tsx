@@ -70,8 +70,7 @@ export function PreviewFlashcards({
               Your Generated Flashcards
             </CardTitle>
             <CardDescription className="text-center">
-              {formData.cardsPerCategory} cards per category in{" "}
-              {formData.language}
+              Language: {formData.language}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -84,7 +83,7 @@ export function PreviewFlashcards({
                 Back to Form
               </Button>
               <SignUpButton>
-                <Button className="w-full">Study Deck</Button>
+                <Button className="w-full">Save & Study Deck</Button>
               </SignUpButton>
             </div>
           </CardContent>
