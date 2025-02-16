@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       // User Created
       createUserSubscription({
         clerkUserId: event.data.id,
-        tier: "Free",
+        tier: "Hobby",
       });
       break;
     }
