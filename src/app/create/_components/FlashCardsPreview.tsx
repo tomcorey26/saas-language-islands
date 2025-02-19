@@ -18,7 +18,7 @@ import {
   CreateWorldResponse,
 } from "@/zod/contracts/world.schema";
 import { useMemo, useEffect } from "react";
-
+import { capitalize } from "@/lib/formatters";
 interface PreviewFlashcardsProps {
   flashcards: CreateWorldResponse["flashcards"];
   formData: CreateWorldRequest;
@@ -81,7 +81,7 @@ export function PreviewFlashcards({
               Your Generated Flashcards
             </CardTitle>
             <CardDescription className="text-center">
-              Language: {formData.language}
+              Language: {capitalize(formData.language)}
             </CardDescription>
           </CardHeader>
           <CardContent>
