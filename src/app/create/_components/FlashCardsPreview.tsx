@@ -17,7 +17,7 @@ import {
   CreateWorldRequest,
   CreateWorldResponse,
 } from "@/zod/contracts/world.schema";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 
 interface PreviewFlashcardsProps {
   flashcards: CreateWorldResponse["flashcards"];
@@ -41,6 +41,17 @@ export function PreviewFlashcards({
     return categories;
   }, [flashcards]);
 
+  useEffect(() => {
+    localStorage.setItem(
+      "pendingDeck",
+      JSON.stringify({
+        name: formData.name,
+        flashcards: memoizedFlashcards,
+        timestamp: Date.now(),
+      })
+    );
+  }, [formData.name, memoizedFlashcards]);
+
   const accordionItems = memoizedFlashcards.map((section) =>
     section.flashcards.length > 0 ? (
       <AccordionItem key={section.category} value={section.category}>
@@ -51,7 +62,7 @@ export function PreviewFlashcards({
           {section.flashcards.map((flashcard, index) => (
             <Card key={index} className="p-4">
               <div className="flex justify-between items-center">
-                <div className="font-medium">{flashcard.sentence}</div>
+                <div className="font-medium">{flashcard.phrase}</div>
                 <div className="text-gray-600">{flashcard.translation}</div>
               </div>
             </Card>
@@ -83,7 +94,7 @@ export function PreviewFlashcards({
                 Back to Form
               </Button>
               <SignUpButton>
-                <Button className="w-full">Save & Study Deck</Button>
+                <Button className="w-full">Sign Up to Save Deck</Button>
               </SignUpButton>
             </div>
           </CardContent>

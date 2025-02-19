@@ -1,7 +1,8 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const FlashCardSchema = z.object({
-  sentence: z.string(),
+  category: z.string(),
+  phrase: z.string(),
   translation: z.string(),
 });
 

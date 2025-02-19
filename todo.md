@@ -3,6 +3,13 @@ Today:
 <!-- - Just have one subscription tier for now to start, Maybe
   put others behind a toggle -->
 
+Generation Step:
+
+- Save the users deck into the db after it is generated with an id
+- Redirect to serverside generated page with id
+- On save & study click, after webhook. Assign deck to userId
+- On dashbaord, show them the premium option with a modal
+
 - Fix problem with mikaylas form not working
 - Add in the thing that saves the world to the database
 - Maybe use a different ai model for the flashcards
