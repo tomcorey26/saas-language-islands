@@ -1,31 +1,36 @@
-"use client";
-import { PracticeView } from "@/app/dashboard/_components/PracticeView";
-import { GenerateView } from "@/app/dashboard/_components/GenerateView";
 import Link from "next/link";
-import { useState } from "react";
-import type { FlashCard, FlashCardViews } from "@/app/dashboard/types";
+import { auth } from "@clerk/nextjs/server";
 
-export default function FlashCards() {
-  const [view, setView] = useState<FlashCardViews>("edit");
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [flashCards, setFlashCards] = useState<FlashCard[]>([]);
+/*
+  TODO:
+  - Add a login count to the user subscription
+  - upon first login, check if the user has cards in local storage
+  - if they do, add them to the database
+  - if they don't, prompt them to generate cards
+  - Create UI from https://bolt.new/~/bolt-shadcn-xwqb6qvu
+*/
 
-  if (view === "practice") {
-    return <PracticeView flashCards={flashCards} setView={setView} />;
-  }
+export default async function Dashboard() {
+  // const [view, setView] = useState<FlashCardViews>("edit");
+  // const [isDarkMode, setIsDarkMode] = useState(true);
+  // const [flashCards, setFlashCards] = useState<FlashCard[]>([]);
+
+  // if (view === "practice") {
+  //   return <PracticeView flashCards={flashCards} setView={setView} />;
+  // }
 
   return (
     <>
       <header className="flex justify-between items-center">
         <Link
           href="/"
-          className={`text-2xl font-bold mb-4 ${
-            isDarkMode ? "text-indigo-400" : "text-indigo-700"
-          }`}
+          // className={`text-2xl font-bold mb-4 ${
+          //   isDarkMode ? "text-indigo-400" : "text-indigo-700"
+          // }`}
         >
           Language Study
         </Link>
-        <button
+        {/* <button
           onClick={() => setIsDarkMode(!isDarkMode)}
           className={`px-4 py-2 rounded ${
             isDarkMode
@@ -34,20 +39,21 @@ export default function FlashCards() {
           }`}
         >
           {isDarkMode ? "Light Mode" : "Dark Mode"}
-        </button>
+        </button> */}
       </header>
       <main className="flex flex-col gap-8">
-        <GenerateView
+        <h1>Dashboard</h1>
+        {/* <GenerateView
           setView={setView}
           isDarkMode={isDarkMode}
           flashCards={flashCards}
           setFlashCards={setFlashCards}
-        />
+        /> */}
       </main>
       <footer
-        className={`text-center text-sm ${
-          isDarkMode ? "text-indigo-400" : "text-indigo-600"
-        }`}
+      // className={`text-center text-sm ${
+      //   isDarkMode ? "text-indigo-400" : "text-indigo-600"
+      // }`}
       >
         © 2024 Language Study App
       </footer>

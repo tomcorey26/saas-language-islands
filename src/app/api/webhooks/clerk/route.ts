@@ -37,8 +37,8 @@ export async function POST(req: Request) {
 
   switch (event.type) {
     case "user.created": {
-      // User Created
-      createUserSubscription({
+      // Create user subscription
+      await createUserSubscription({
         clerkUserId: event.data.id,
         tier: "Hobby",
       });
@@ -46,6 +46,7 @@ export async function POST(req: Request) {
     }
     case "user.deleted": {
       // User Deleted
+      break;
     }
   }
 

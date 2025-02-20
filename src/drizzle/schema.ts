@@ -43,7 +43,9 @@ export const CardTable = pgTable(
       .references(() => DeckTable.id, { onDelete: "cascade" }),
     phrase: text("phrase").notNull(),
     translation: text("translation").notNull(),
-    // link to audio file
+    category: text("category").notNull(),
+    // //TOMDO: audio: link to audio file
+    // audio: text("audio"),
     createdAt,
     updatedAt,
   },
