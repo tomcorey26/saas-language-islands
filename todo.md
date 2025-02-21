@@ -3,7 +3,11 @@ Today:
 <!-- - Just have one subscription tier for now to start, Maybe
   put others behind a toggle -->
 
-Generation Step:
+DRIZZLE + ZOD: ?????? https://orm.drizzle.team/docs/zod
+
+1. Just have zod schemas for contracts
+2. Use the inferred DB type for frontend types
+   Generation Step:
 
 - Save the users deck into the db after it is generated with an id
 - Redirect to serverside generated page with id

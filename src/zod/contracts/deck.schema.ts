@@ -1,14 +1,11 @@
 import { z } from "zod";
-import { FlashCardSchema } from "@/zod/models/flashcard.model";
-import { DeckSchema } from "@/zod/models/deck.model";
+import { DeckTable } from "@/drizzle/schema";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-export const CreateDeckRequestSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  flashcards: z.array(FlashCardSchema),
-});
+export const DeckModel = createSelectSchema(DeckTable);
+
+export type Deck = z.infer<typeof DeckModel>;
+
+export const CreateDeckRequestSchema = createInsertSchema(DeckTable);
 
 export type CreateDeckRequest = z.infer<typeof CreateDeckRequestSchema>;
-
-export const DeckResponseSchema = DeckSchema;
-
-export type DeckResponse = z.infer<typeof DeckResponseSchema>;

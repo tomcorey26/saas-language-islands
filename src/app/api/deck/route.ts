@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { CreateDeckRequestSchema } from "@/zod/contracts/deck.schema";
-import { createCards } from "@/server/db/cards";
 import { createDeck } from "@/server/db/decks";
 
 export async function POST(req: Request) {
@@ -21,19 +20,12 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const { name, flashcards } = parsedData.data;
+    const { name } = parsedData.data;
 
     const deck = await createDeck({
       name,
       clerkUserId: userId,
     });
-
-    await createCards(
-      flashcards.map((card) => ({
-        ...card,
-        deckId: deck.id,
-      }))
-    );
 
     return NextResponse.json({ deckId: deck.id });
   } catch (error) {

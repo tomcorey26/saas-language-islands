@@ -1,3 +1,4 @@
+import { cardDifficulties, CardDifficulty } from "@/data/cardDifficulties";
 import { subscriptionTiers, TierNames } from "@/data/subscriptionTiers";
 import { relations } from "drizzle-orm";
 import {
@@ -34,6 +35,11 @@ export const deckRelations = relations(DeckTable, ({ many }) => ({
   cards: many(CardTable),
 }));
 
+const DifficultyEnum = pgEnum(
+  "difficulty",
+  Object.keys(cardDifficulties) as [CardDifficulty]
+);
+
 export const CardTable = pgTable(
   "cards",
   {
@@ -45,6 +51,7 @@ export const CardTable = pgTable(
     translation: text("translation").notNull(),
     category: text("category").notNull(),
     // //TOMDO: audio: link to audio file
+    difficulty: DifficultyEnum("difficulty").notNull().default("again"),
     // audio: text("audio"),
     createdAt,
     updatedAt,
