@@ -1,18 +1,14 @@
-'use client';
-// import { useState } from 'react';
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
 
-export default function FlashCardsLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  // const [isDarkMode, setIsDarkMode] = useState(true);
-
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className={`grid grid-rows-[auto_1fr_auto] min-h-screen p-8 gap-8 bg-gray-100 text-gray-800`}
-    >
-      {children}
-    </div>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarTrigger />
+      <main className="min-h-screen bg-background grow container mx-auto p-6">
+        {children}
+      </main>
+    </SidebarProvider>
   );
 }

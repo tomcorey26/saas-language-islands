@@ -1,8 +1,7 @@
-import { z } from 'zod';
+import { CardTable } from "@/drizzle/schema";
+import { createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
-export const FlashCardSchema = z.object({
-  sentence: z.string(),
-  translation: z.string(),
-});
+export const FlashCardModel = createSelectSchema(CardTable);
 
-export type FlashCard = z.infer<typeof FlashCardSchema>;
+export type FlashCard = z.infer<typeof FlashCardModel>;

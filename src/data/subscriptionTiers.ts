@@ -1,12 +1,12 @@
 /* 
 
-1. Free Tier
+1. Hobby Tier
 Access: Limited access to a few basic “islands” with beginner-level sentences.
 Features: Core sentence drills, limited daily practice, and basic spaced repetition.
 Goal: Offer a taste of the app’s value to hook new users.
 
-2. Basic Tier
-Monthly Price: $5–$10
+2. Pro Tier
+Monthly Price: $20
 Access: Unlocks more islands with essential conversation themes.
 Features:
 Access to intermediate sentence packs and cultural insights.
@@ -14,8 +14,8 @@ Enhanced spaced repetition for better retention.
 Offline mode for practicing on the go.
 Goal: Provide a budget-friendly option for casual learners.
 
-3. Pro Tier
-Monthly Price: $10–$20
+3. Polyglot Tier
+Monthly Price: $40
 Access: Full access to all islands, including advanced and niche conversation themes.
 Features:
 AI-powered custom sentence generation for specific scenarios.
@@ -24,15 +24,6 @@ Access to local slang and region-specific sentences.
 Customizable daily practice reminders.
 Goal: Ideal for users serious about reaching fluency with immersive features.
 
-4. Premium Plus (Yearly Subscription)
-Annual Price: $80–$120
-Access: Everything in Pro, plus exclusive content and early access to new features.
-Features:
-Personalized learning paths and insights based on progress.
-Access to special “islands” like business language or travel-specific phrases.
-Priority support and language coaching tips.
-Invite-only language partner community for conversation practice.
-Goal: Provides an annual option with a slight discount and premium perks for long-term commitment.
 */
 
 // Buying tokens to unlock more island generations?
@@ -40,10 +31,10 @@ Goal: Provides an annual option with a slight discount and premium perks for lon
 export type TierNames = keyof typeof subscriptionTiers;
 
 export const subscriptionTiers = {
-  Free: {
-    name: "Free",
+  Hobby: {
+    name: "Hobby",
     priceInCents: 0,
-    maxNumberOfGenerationsPerMonth: 50,
+    maxNumberOfGenerationsPerMonth: 200,
     // canAccessAdvancedSentencePacks: false,
     maxNumberOfLanguages: 1, // just one language
     canSaveFlashcards: false,
@@ -60,15 +51,15 @@ export const subscriptionTiers = {
     // canAccessSpecialIslands: false,
     // canAccessPrioritySupport: false,
   },
-  Starter: {
-    name: "Starter",
-    priceInCents: 199,
-    maxNumberOfGenerationsPerMonth: 500,
-    maxNumberOfLanguages: 3,
+  Pro: {
+    name: "Pro",
+    priceInCents: 2000,
+    maxNumberOfGenerationsPerMonth: Infinity,
+    maxNumberOfLanguages: Infinity,
     canSaveFlashcards: true,
     canAccessCommunityFlashCards: false,
     canAccessMemorizationPractice: true,
-    canDownloadAudio: false,
+    canDownloadAudio: true,
     // canAccessAdvancedSentencePacks: false,
     // canAccessAdvancedSpacedRepetition: false,
     // canAccessOfflineMode: true,
@@ -81,53 +72,53 @@ export const subscriptionTiers = {
     // canAccessPrioritySupport: false,
     // canAccessCommunityFlashCards: false,
   },
-  Pro: {
-    name: "Pro",
-    priceInCents: 499,
-    maxNumberOfGenerationsPerMonth: 2500,
-    maxNumberOfLanguages: 5,
-    canSaveFlashcards: true,
-    canAccessCommunityFlashCards: false,
-    canAccessMemorizationPractice: true,
-    canDownloadAudio: true,
-    // canAccessAdvancedSentencePacks: true,
-    // canAccessAdvancedSpacedRepetition: true,
-    // canAccessOfflineMode: true,
-    // canAccessCustomSentenceGeneration: true,
-    // canAccessPronunciationFeedback: true,
-    // canAccessLocalSlang: true,
-    // canAccessCustomPracticeReminders: true,
-    // canAccessPersonalizedLearningPaths: false,
-    // canAccessSpecialIslands: false,
-    // canAccessPrioritySupport: false,
-    // canAccessCommunityFlashCards: false,
-  },
-  Premium: {
-    name: "Premium",
-    priceInCents: 999,
-    maxNumberOfGenerationsPerMonth: 5000,
-    maxNumberOfLanguages: Infinity,
-    canSaveFlashcards: true,
-    canAccessCommunityFlashCards: true,
-    canAccessMemorizationPractice: true,
-    canDownloadAudio: true,
-    // canAccessAdvancedSentencePacks: true,
-    // canAccessAdvancedSpacedRepetition: true,
-    // canAccessOfflineMode: true,
-    // canAccessCustomSentenceGeneration: true,
-    // canAccessPronunciationFeedback: true,
-    // canAccessLocalSlang: true,
-    // canAccessCustomPracticeReminders: true,
-    // canAccessPersonalizedLearningPaths: true,
-    // canAccessSpecialIslands: true,
-    // canAccessPrioritySupport: true,
-    // canAccessLanguagePartnerCommunity: true,
-  },
+  // Polyglot: {
+  //   name: "Polyglot",
+  //   priceInCents: 4000,
+  //   maxNumberOfGenerationsPerMonth: Infinity,
+  //   maxNumberOfLanguages: Infinity,
+  //   canSaveFlashcards: true,
+  //   canAccessCommunityFlashCards: false,
+  //   canAccessMemorizationPractice: true,
+  //   canDownloadAudio: true,
+  //   // canAccessAdvancedSentencePacks: true,
+  //   // canAccessAdvancedSpacedRepetition: true,
+  //   // canAccessOfflineMode: true,
+  //   // canAccessCustomSentenceGeneration: true,
+  //   // canAccessPronunciationFeedback: true,
+  //   // canAccessLocalSlang: true,
+  //   // canAccessCustomPracticeReminders: true,
+  //   // canAccessPersonalizedLearningPaths: false,
+  //   // canAccessSpecialIslands: false,
+  //   // canAccessPrioritySupport: false,
+  //   // canAccessCommunityFlashCards: false,
+  // },
+  // Premium: {
+  //   name: "Premium",
+  //   priceInCents: 999,
+  //   maxNumberOfGenerationsPerMonth: 5000,
+  //   maxNumberOfLanguages: Infinity,
+  //   canSaveFlashcards: true,
+  //   canAccessCommunityFlashCards: true,
+  //   canAccessMemorizationPractice: true,
+  //   canDownloadAudio: true,
+  //   // canAccessAdvancedSentencePacks: true,
+  //   // canAccessAdvancedSpacedRepetition: true,
+  //   // canAccessOfflineMode: true,
+  //   // canAccessCustomSentenceGeneration: true,
+  //   // canAccessPronunciationFeedback: true,
+  //   // canAccessLocalSlang: true,
+  //   // canAccessCustomPracticeReminders: true,
+  //   // canAccessPersonalizedLearningPaths: true,
+  //   // canAccessSpecialIslands: true,
+  //   // canAccessPrioritySupport: true,
+  //   // canAccessLanguagePartnerCommunity: true,
+  // },
 } as const;
 
 export const subscriptionTiersInOrder = [
-  subscriptionTiers.Free,
-  subscriptionTiers.Starter,
+  subscriptionTiers.Hobby,
   subscriptionTiers.Pro,
-  subscriptionTiers.Premium,
+  // subscriptionTiers.Polyglot,
+  // subscriptionTiers.Premium,
 ] as const;

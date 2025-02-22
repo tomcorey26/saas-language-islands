@@ -1,270 +1,76 @@
-"use client";
-import { PracticeView } from "@/app/dashboard/_components/PracticeView";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { speak } from "@/lib/textToSpeech";
-import { generateFlashCards } from "@/server/ai/flashcards";
-import { useState } from "react";
-import type { FlashCard, FlashCardViews } from "@/app/dashboard/types";
-import Link from "next/link";
+import { auth } from "@clerk/nextjs/server";
+import { db } from "@/drizzle/db";
+import { DeckTable } from "@/drizzle/schema";
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { CreateDeckRequest } from "@/zod/contracts/deck.schema";
+import { createDeck } from "@/server/db/decks";
+import { DashboardClient } from "./_components/DashboardClient";
 
-export default function FlashCards() {
-  const [view, setView] = useState<FlashCardViews>("edit");
+/*
+  TODO:
+  - Add a login count to the user subscription
+  - upon first login, check if the user has cards in local storage
+  - if they do, add them to the database. Or just regenerate the deck
+  - if they don't, prompt them to generate cards
+  - Create UI from https://bolt.new/~/bolt-shadcn-xwqb6qvu
+*/
 
-  const [flashCards, setFlashCards] = useState<FlashCard[]>([]);
-  const [aiPrompt, setAiPrompt] = useState("");
-  const [newSentence, setNewSentence] = useState("");
-  const [language, setLanguage] = useState<"spanish" | "french" | "german">(
-    "spanish"
-  );
-  const [newTranslation, setNewTranslation] = useState("");
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+// Cards
+// Each card has the deck name and photo
+// Each card is a link to the deck
+// If no decks added have one with the dash outline, with a plus button in
+// the center of the card that says "Create Deck"
 
-  const handleAddFlashCard = () => {
-    if (newSentence && newTranslation) {
-      const newCard: FlashCard = {
-        id: window.crypto.randomUUID(),
-        sentence: newSentence,
-        translation: newTranslation,
-        isFavorite: false,
-      };
-      setFlashCards([...flashCards, newCard]);
-      setNewSentence("");
-      setNewTranslation("");
-    }
-  };
+// TODO:
+// Make it so
+// Deck Generation form
+// + Add a island name
+// + Add a name
+// + Add a description
+// + Add a photo
+// + Add a language
+// + Add a category
+// + Add a difficulty
+// Add card count you want to generate
+// add the prompt you want to use to generate the deck (optional)
+// can choose to auto translate when editing individual cards
+// Can add individual islands to the deck with just the island
+// part of the form, creating the world requires multiple of these forms
 
-  const handleGenerateFlashCards = async () => {
-    setIsLoading(true);
-    const res = await generateFlashCards(aiPrompt, language);
-    const flashcards = res.flashcards.map<FlashCard>((fc) => ({
-      id: window.crypto.randomUUID(),
-      sentence: fc.sentence,
-      translation: fc.translation,
-      isFavorite: false,
-    }));
-
-    setFlashCards(flashcards);
-    setIsLoading(false);
-  };
-
-  const handleToggleFavorite = (id: string) => {
-    setFlashCards(
-      flashCards.map((card) =>
-        card.id === id ? { ...card, isFavorite: !card.isFavorite } : card
-      )
-    );
-  };
-
-  const displayedFlashCards = showFavoritesOnly
-    ? flashCards.filter((card) => card.isFavorite)
-    : flashCards;
-
-  if (view === "practice") {
-    return <PracticeView flashCards={flashCards} setView={setView} />;
-  }
-
-  return (
-    <>
-      <header className="flex justify-between items-center">
-        <Link
-          href="/"
-          className={`text-2xl font-bold mb-4 ${
-            isDarkMode ? "text-indigo-400" : "text-indigo-700"
-          }`}
-        >
-          Language Study
-        </Link>
-        <button
-          onClick={() => setIsDarkMode(!isDarkMode)}
-          className={`px-4 py-2 rounded ${
-            isDarkMode
-              ? "bg-gray-700 text-gray-200"
-              : "bg-gray-200 text-gray-800"
-          }`}
-        >
-          {isDarkMode ? "Light Mode" : "Dark Mode"}
-        </button>
-      </header>
-      <main className="flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
-          <h1 className="text-2xl">Generate Flashcards</h1>
-          <div className="flex gap-2">
-            <Input
-              type="text"
-              placeholder="Have AI generate flash cards"
-              value={aiPrompt}
-              onChange={(e) => setAiPrompt(e.target.value)}
-              className={`flex-grow border p-2 rounded ${
-                isDarkMode
-                  ? "bg-gray-800 text-white border-gray-700"
-                  : "bg-white text-gray-800 border-gray-300"
-              }`}
-            />
-            <select
-              value={language}
-              onChange={(e) =>
-                setLanguage(e.target.value as "spanish" | "french" | "german")
-              }
-              className={`border p-2 rounded ${
-                isDarkMode
-                  ? "bg-gray-800 text-white border-gray-700"
-                  : "bg-white text-gray-800 border-gray-300"
-              }`}
-            >
-              <option value="spanish">🇪🇸 Spanish</option>
-              <option value="french">🇫🇷 French</option>
-              <option value="german">🇩🇪 German</option>
-            </select>
-          </div>
-          <Button onClick={handleGenerateFlashCards} disabled={isLoading}>
-            {isLoading ? "Generating..." : "Generate Flash Cards"}
-          </Button>
-
-          {flashCards.length > 0 && (
-            <div className="flex gap-2 items-center">
-              <div>
-                <label
-                  className={`flex items-center gap-2 ${
-                    isDarkMode ? "text-gray-300" : "text-gray-700"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={showFavoritesOnly}
-                    onChange={() => setShowFavoritesOnly(!showFavoritesOnly)}
-                  />
-                  Show favorites only
-                </label>
-              </div>
-              <Button>Export Flashcards</Button>
-              <Button>Edit</Button>
-              <Button
-                onClick={() => setView("practice")}
-                variant="secondary"
-                size="sm"
-              >
-                Practice
-              </Button>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {displayedFlashCards.map((card) => (
-              <FlashCard
-                key={card.id}
-                card={card}
-                onToggleFavorite={handleToggleFavorite}
-                isDarkMode={isDarkMode}
-              />
-            ))}
-          </div>
-          <h1 className="text-2xl">Create Flashcards</h1>
-          <div className="flex gap-2">
-            <Input
-              type="text"
-              placeholder="Enter sentence"
-              value={newSentence}
-              onChange={(e) => setNewSentence(e.target.value)}
-              className={`border p-2 rounded flex-grow ${
-                isDarkMode
-                  ? "bg-gray-800 text-white border-gray-700"
-                  : "bg-white text-gray-800 border-gray-300"
-              }`}
-            />
-            <Input
-              type="text"
-              placeholder="Enter translation"
-              value={newTranslation}
-              onChange={(e) => setNewTranslation(e.target.value)}
-              className={`border p-2 rounded flex-grow ${
-                isDarkMode
-                  ? "bg-gray-800 text-white border-gray-700"
-                  : "bg-white text-gray-800 border-gray-300"
-              }`}
-            />
-          </div>
-          <Button onClick={handleAddFlashCard}>Add Flash Card</Button>
-        </div>
-      </main>
-      <footer
-        className={`text-center text-sm ${
-          isDarkMode ? "text-indigo-400" : "text-indigo-600"
-        }`}
-      >
-        © 2024 Language Study App
-      </footer>
-    </>
-  );
+async function getDecks(userId: string) {
+  return db.query.DeckTable.findMany({
+    where: eq(DeckTable.clerkUserId, userId),
+    orderBy: (decks) => decks.createdAt,
+  });
 }
 
-function FlashCard({
-  card,
-  onToggleFavorite,
-  isDarkMode,
-}: {
-  card: FlashCard;
-  onToggleFavorite: (id: string) => void;
-  isDarkMode: boolean;
-}) {
-  const [showTranslation, setShowTranslation] = useState(true);
+async function createDeckAction(data: CreateDeckRequest) {
+  "use server";
 
-  const handlePlayAudio = () => {
-    speak(card.translation, "es-ES");
-  };
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Not authenticated");
+  }
+
+  const deck = await createDeck({
+    ...data,
+    clerkUserId: userId,
+  });
+
+  revalidatePath("/dashboard");
+  return deck;
+}
+
+export default async function DashboardPage() {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Not authenticated");
+  }
+
+  const decks = await getDecks(userId);
 
   return (
-    <div
-      className={`border p-4 rounded shadow ${
-        isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-      }`}
-    >
-      <p
-        className={`font-bold mb-2 ${
-          isDarkMode ? "text-indigo-400" : "text-indigo-700"
-        }`}
-      >
-        {card.sentence}
-      </p>
-      {showTranslation && (
-        <p className={isDarkMode ? "text-gray-300 mb-2" : "text-gray-700 mb-2"}>
-          {card.translation}
-        </p>
-      )}
-      <div className="flex justify-between items-center">
-        <button
-          onClick={() => setShowTranslation(!showTranslation)}
-          className={`${
-            isDarkMode
-              ? "text-indigo-400 hover:text-indigo-300"
-              : "text-indigo-600 hover:text-indigo-800"
-          } transition duration-300`}
-        >
-          {showTranslation ? "Hide" : "Show"} Translation
-        </button>
-        <button
-          onClick={handlePlayAudio}
-          className={`${
-            isDarkMode
-              ? "text-emerald-400 hover:text-emerald-300"
-              : "text-emerald-600 hover:text-emerald-800"
-          } transition duration-300`}
-        >
-          Play Translation
-        </button>
-        <button
-          onClick={() => onToggleFavorite(card.id)}
-          className={`${
-            isDarkMode
-              ? "text-yellow-400 hover:text-yellow-300"
-              : "text-amber-500 hover:text-amber-600"
-          } transition duration-300 ${card.isFavorite ? "font-bold" : ""}`}
-        >
-          {card.isFavorite ? "★" : "☆"}
-        </button>
-      </div>
-    </div>
+    <DashboardClient initialDecks={decks} createDeckAction={createDeckAction} />
   );
 }

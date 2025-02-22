@@ -1,3 +1,4 @@
+import { cardDifficulties, CardDifficulty } from "@/data/cardDifficulties";
 import { subscriptionTiers, TierNames } from "@/data/subscriptionTiers";
 import { relations } from "drizzle-orm";
 import {
@@ -18,12 +19,24 @@ const updatedAt = timestamp("updated_at", { withTimezone: true })
   .defaultNow()
   .$onUpdate(() => new Date());
 
+// Define enums first
+const DifficultyEnum = pgEnum(
+  "difficulty",
+  Object.keys(cardDifficulties) as [CardDifficulty]
+);
+
+const TierEnum = pgEnum("tier", Object.keys(subscriptionTiers) as [TierNames]);
+
+// Then define tables
 export const DeckTable = pgTable(
   "decks",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     clerkUserId: text("clerk_user_id").notNull(),
     name: text("name").notNull(),
+    description: text("description").notNull(),
+    imageUrl: text("image_url").notNull(),
+    languages: text("languages").array().notNull(),
     createdAt,
     updatedAt,
   },
@@ -43,7 +56,8 @@ export const CardTable = pgTable(
       .references(() => DeckTable.id, { onDelete: "cascade" }),
     phrase: text("phrase").notNull(),
     translation: text("translation").notNull(),
-    // link to audio file
+    category: text("category").notNull(),
+    difficulty: DifficultyEnum("difficulty").notNull().default("again"),
     createdAt,
     updatedAt,
   },
@@ -56,11 +70,6 @@ export const cardRelations = relations(CardTable, ({ one }) => ({
     references: [DeckTable.id],
   }),
 }));
-
-export const TierEnum = pgEnum(
-  "tier",
-  Object.keys(subscriptionTiers) as [TierNames]
-);
 
 export const UserSubscriptionTable = pgTable(
   "user_subscriptions",

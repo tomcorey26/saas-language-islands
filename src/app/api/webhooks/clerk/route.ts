@@ -37,15 +37,16 @@ export async function POST(req: Request) {
 
   switch (event.type) {
     case "user.created": {
-      // User Created
-      createUserSubscription({
+      // Create user subscription
+      await createUserSubscription({
         clerkUserId: event.data.id,
-        tier: "Free",
+        tier: "Hobby",
       });
       break;
     }
     case "user.deleted": {
       // User Deleted
+      break;
     }
   }
 
