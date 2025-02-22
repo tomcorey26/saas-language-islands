@@ -1,7 +1,12 @@
-export default function FlashCardsLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return <div className={`min-h-screen bg-background`}>{children}</div>;
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarTrigger />
+      <main className="min-h-screen bg-background grow">{children}</main>
+    </SidebarProvider>
+  );
 }

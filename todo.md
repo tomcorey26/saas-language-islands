@@ -3,18 +3,26 @@ Today:
 <!-- - Just have one subscription tier for now to start, Maybe
   put others behind a toggle -->
 
-DRIZZLE + ZOD: ?????? https://orm.drizzle.team/docs/zod
+- Add basically the elevator pitch to the home page, explain why this is better then other flashcard apps, cite polyglots,
+- Create a functional dashboard
 
-1. Just have zod schemas for contracts
-2. Use the inferred DB type for frontend types
-   Generation Step:
+  - Switch between languages in the deck study,
+    configure what languages you want
+  - Can edit and create decks with the ai
+  - View decks
+  - Create decks
+  - Delete decks
+  - Study decks,
+    - Just make the same as espanol deck
+  - View stats
+  - Add flashcards to deck
+  - Delete flashcards from deck
 
 - Save the users deck into the db after it is generated with an id
 - Redirect to serverside generated page with id
 - On save & study click, after webhook. Assign deck to userId
 - On dashbaord, show them the premium option with a modal
 
-- Fix problem with mikaylas form not working
 - Add in the thing that saves the world to the database
 - Maybe use a different ai model for the flashcards
 - Do something that pre-renders the captcha

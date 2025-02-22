@@ -84,7 +84,7 @@ export default function FlashcardGrid() {
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Spanish Flashcards</h1>
+        <h1 className="text-3xl font-bold">Language Islands</h1>
         <div className="flex gap-2">
           <Button
             onClick={() => setIsStudyMode(true)}
