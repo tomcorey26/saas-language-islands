@@ -28,7 +28,6 @@ export const DeckTable = pgTable(
     description: text("description").notNull(),
     imageUrl: text("image_url").notNull(),
     languages: text("languages").array().notNull(),
-    category: text("category").notNull(),
     createdAt,
     updatedAt,
   },

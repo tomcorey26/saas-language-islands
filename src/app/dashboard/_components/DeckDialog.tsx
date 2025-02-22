@@ -19,7 +19,11 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
-import { CreateDeckRequestSchema, Deck } from "@/zod/contracts/deck.schema";
+import {
+  CreateDeckRequest,
+  CreateDeckRequestSchema,
+  Deck,
+} from "@/zod/contracts/deck.schema";
 import { supportedLanguagesArray } from "@/data/supportedLanguages";
 import { formatLanguageName } from "@/lib/formatters";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,24 +32,13 @@ import { z } from "zod";
 interface DeckDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (
-    deck: Omit<Deck, "id" | "createdAt" | "updatedAt" | "clerkUserId">
-  ) => void;
+  onSave: (deck: CreateDeckRequest) => void;
   deck?: Deck | null;
 }
 
-const formSchema = CreateDeckRequestSchema.omit({
-  clerkUserId: true,
-});
+const formSchema = CreateDeckRequestSchema;
 
 type FormValues = z.infer<typeof formSchema>;
-
-// Function to get a random Unsplash image URL for language learning
-const getRandomImageUrl = () => {
-  // Using a specific collection for language learning related images
-  // Collection ID: 'education-learning' - you can change this to any other relevant collection
-  return `https://source.unsplash.com/1600x900/?language,learning,education`;
-};
 
 export default function DeckDialog({
   open,
@@ -65,9 +58,8 @@ export default function DeckDialog({
     defaultValues: {
       name: "",
       description: "",
-      imageUrl: getRandomImageUrl(),
+      imageUrl: "",
       languages: [],
-      category: "Vocabulary",
     },
   });
 
@@ -96,15 +88,13 @@ export default function DeckDialog({
         description: deck.description || "",
         imageUrl: deck.imageUrl,
         languages: deck.languages || [],
-        category: deck.category,
       });
     } else {
       reset({
         name: "",
         description: "",
-        imageUrl: getRandomImageUrl(),
+        imageUrl: "",
         languages: [],
-        category: "Vocabulary",
       });
     }
   }, [deck, reset]);
@@ -117,10 +107,6 @@ export default function DeckDialog({
         </DialogHeader>
         <form
           onSubmit={handleSubmit((data) => {
-            // If it's a new deck, generate a new random image
-            if (!deck) {
-              data.imageUrl = getRandomImageUrl();
-            }
             onSave(data);
             reset();
           })}

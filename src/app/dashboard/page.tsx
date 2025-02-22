@@ -5,7 +5,7 @@ import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DeckItem from "./_components/DeckItem";
 import DeckDialog from "./_components/DeckDialog";
-import { Deck } from "@/zod/contracts/deck.schema";
+import { CreateDeckRequest, Deck } from "@/zod/contracts/deck.schema";
 
 /*
   TODO:
@@ -22,6 +22,8 @@ import { Deck } from "@/zod/contracts/deck.schema";
 // If no decks added have one with the dash outline, with a plus button in
 // the center of the card that says "Create Deck"
 
+// TODO:
+// Make it so
 // Deck Generation form
 // + Add a island name
 // + Add a name
@@ -41,7 +43,7 @@ export default function Dashboard() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingDeck, setEditingDeck] = useState<Deck | null>(null);
 
-  const handleSave = (deck: Omit<Deck, "id" | "createdAt" | "updatedAt">) => {
+  const handleSave = (deck: CreateDeckRequest) => {
     if (editingDeck) {
       setDecks(
         decks.map((d) =>
@@ -55,7 +57,7 @@ export default function Dashboard() {
         )
       );
     } else {
-      const newDeck: Deck = {
+      const newDeck: CreateDeckRequest = {
         id: crypto.randomUUID(),
         ...deck,
         createdAt: new Date(),

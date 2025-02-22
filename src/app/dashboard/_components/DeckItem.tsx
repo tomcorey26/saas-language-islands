@@ -31,7 +31,7 @@ export default function DeckItem({ deck, onEdit, onDelete }: DeckItemProps) {
         <Link href={`/deck/${deck.id}`} className="block">
           <div className="relative h-48 w-full">
             <Image
-              src={deck.imageUrl || "/placeholder-deck.jpg"}
+              src={deck.imageUrl || "/images/logo.webp"}
               alt={deck.name}
               fill
               className="object-cover transition-transform group-hover:scale-105"
@@ -52,9 +52,6 @@ export default function DeckItem({ deck, onEdit, onDelete }: DeckItemProps) {
                   {lang}
                 </span>
               ))}
-              <span className="text-xs px-2 py-1 bg-purple-100 text-purple-800 rounded-full">
-                {deck.category}
-              </span>
             </div>
           </div>
         </Link>
