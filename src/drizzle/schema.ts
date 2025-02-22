@@ -19,6 +19,15 @@ const updatedAt = timestamp("updated_at", { withTimezone: true })
   .defaultNow()
   .$onUpdate(() => new Date());
 
+// Define enums first
+const DifficultyEnum = pgEnum(
+  "difficulty",
+  Object.keys(cardDifficulties) as [CardDifficulty]
+);
+
+const TierEnum = pgEnum("tier", Object.keys(subscriptionTiers) as [TierNames]);
+
+// Then define tables
 export const DeckTable = pgTable(
   "decks",
   {
@@ -38,11 +47,6 @@ export const deckRelations = relations(DeckTable, ({ many }) => ({
   cards: many(CardTable),
 }));
 
-const DifficultyEnum = pgEnum(
-  "difficulty",
-  Object.keys(cardDifficulties) as [CardDifficulty]
-);
-
 export const CardTable = pgTable(
   "cards",
   {
@@ -53,9 +57,7 @@ export const CardTable = pgTable(
     phrase: text("phrase").notNull(),
     translation: text("translation").notNull(),
     category: text("category").notNull(),
-    // //TOMDO: audio: link to audio file
     difficulty: DifficultyEnum("difficulty").notNull().default("again"),
-    // audio: text("audio"),
     createdAt,
     updatedAt,
   },
@@ -68,11 +70,6 @@ export const cardRelations = relations(CardTable, ({ one }) => ({
     references: [DeckTable.id],
   }),
 }));
-
-export const TierEnum = pgEnum(
-  "tier",
-  Object.keys(subscriptionTiers) as [TierNames]
-);
 
 export const UserSubscriptionTable = pgTable(
   "user_subscriptions",

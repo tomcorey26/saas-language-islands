@@ -25,6 +25,9 @@ export async function POST(req: Request) {
     const deck = await createDeck({
       name,
       clerkUserId: userId,
+      description: "",
+      imageUrl: "",
+      languages: [],
     });
 
     return NextResponse.json({ deckId: deck.id });

@@ -1,11 +1,11 @@
-"use client";
-
-import { useState } from "react";
-import { Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import DeckItem from "./_components/DeckItem";
-import DeckDialog from "./_components/DeckDialog";
-import { CreateDeckRequest, Deck } from "@/zod/contracts/deck.schema";
+import { auth } from "@clerk/nextjs/server";
+import { db } from "@/drizzle/db";
+import { DeckTable } from "@/drizzle/schema";
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { CreateDeckRequest } from "@/zod/contracts/deck.schema";
+import { createDeck } from "@/server/db/decks";
+import { DashboardClient } from "./_components/DashboardClient";
 
 /*
   TODO:
@@ -38,99 +38,39 @@ import { CreateDeckRequest, Deck } from "@/zod/contracts/deck.schema";
 // Can add individual islands to the deck with just the island
 // part of the form, creating the world requires multiple of these forms
 
-export default function Dashboard() {
-  const [decks, setDecks] = useState<Deck[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingDeck, setEditingDeck] = useState<Deck | null>(null);
+async function getDecks(userId: string) {
+  return db.query.DeckTable.findMany({
+    where: eq(DeckTable.clerkUserId, userId),
+    orderBy: (decks) => decks.createdAt,
+  });
+}
 
-  const handleSave = (deck: CreateDeckRequest) => {
-    if (editingDeck) {
-      setDecks(
-        decks.map((d) =>
-          d.id === editingDeck.id
-            ? {
-                ...d,
-                ...deck,
-                updatedAt: new Date(),
-              }
-            : d
-        )
-      );
-    } else {
-      const newDeck: CreateDeckRequest = {
-        id: crypto.randomUUID(),
-        ...deck,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      setDecks([newDeck, ...decks]);
-    }
-    setIsDialogOpen(false);
-    setEditingDeck(null);
-  };
+async function createDeckAction(data: CreateDeckRequest) {
+  "use server";
 
-  const handleEdit = (deck: Deck) => {
-    setEditingDeck(deck);
-    setIsDialogOpen(true);
-  };
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Not authenticated");
+  }
 
-  const handleDelete = (id: string) => {
-    setDecks(decks.filter((deck) => deck.id !== id));
-  };
+  const deck = await createDeck({
+    ...data,
+    clerkUserId: userId,
+  });
+
+  revalidatePath("/dashboard");
+  return deck;
+}
+
+export default async function DashboardPage() {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Not authenticated");
+  }
+
+  const decks = await getDecks(userId);
 
   return (
-    <>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Language Islands</h1>
-        <div className="flex gap-2">
-          <Button
-            onClick={() => {
-              setEditingDeck(null);
-              setIsDialogOpen(true);
-            }}
-            className="flex items-center gap-2"
-            variant="secondary"
-          >
-            <Sparkles className="h-4 w-4" />
-            Create Deck
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {decks.map((deck) => (
-          <DeckItem
-            key={deck.id}
-            deck={deck}
-            onEdit={() => handleEdit(deck)}
-            onDelete={() => handleDelete(deck.id)}
-          />
-        ))}
-        {decks.length === 0 && (
-          <Button
-            variant="outline"
-            className="h-[300px] border-dashed"
-            onClick={() => {
-              setEditingDeck(null);
-              setIsDialogOpen(true);
-            }}
-          >
-            <div className="flex flex-col items-center gap-2">
-              <Sparkles className="h-8 w-8" />
-              <span className="text-lg font-medium">
-                Create Your First Deck
-              </span>
-            </div>
-          </Button>
-        )}
-      </div>
-
-      <DeckDialog
-        open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        onSave={handleSave}
-        deck={editingDeck}
-      />
-    </>
+    <DashboardClient initialDecks={decks} createDeckAction={createDeckAction} />
   );
 }
