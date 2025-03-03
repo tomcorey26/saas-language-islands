@@ -42,7 +42,7 @@ export async function generateCards(data: CreateIslandRequest) {
     // Save cards to database
     const cards = completion.island.map((card) => ({
       deckId,
-      category: deck.name,
+      category: parsedData.data.category,
       phrase: card.phrase,
       translation: card.translation,
       difficulty: "again" as CardDifficulty,

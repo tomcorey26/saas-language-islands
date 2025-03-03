@@ -2,7 +2,7 @@ import { z } from "zod";
 import { FlashCardModel } from "../models/flashcard.model";
 export const CreateIslandRequestSchema = z.object({
   deckId: z.string(),
-  name: z.string(),
+  category: z.string(),
   count: z.number(),
   prompt: z.string(),
   languages: z.array(z.string()),

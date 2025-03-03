@@ -46,7 +46,7 @@ export function DeckClient({ deck, cardsByCategory }: DeckClientProps) {
 
     try {
       const result = await generateCards({
-        name: formData.islandName,
+        category: formData.islandName,
         deckId: deck.id,
         count: formData.cardCount,
         prompt: formData.prompt,
