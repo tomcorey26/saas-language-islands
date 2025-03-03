@@ -4,7 +4,8 @@ import {
   CreateWorldRequest,
   CreateWorldResponseSchema,
 } from "@/zod/contracts/world.schema";
-
+import { CreateIslandRequest } from "@/zod/contracts/island.schema";
+import { z } from "zod";
 const openAiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const generateIslandsPrompt = (request: CreateWorldRequest) => {
@@ -62,4 +63,46 @@ export async function generateWorld(request: CreateWorldRequest) {
   }
 
   return world_response.parsed;
+}
+
+function generateFlashcardsIslandPrompt(request: CreateIslandRequest) {
+  const translationLanguage = request.languages[0];
+
+  return `You are a helpful assistant that generates flashcards that are useful for a conversation with a native speaker. 
+  You will generate a sentence in english, for the phrase field, and the translation field will be the translation of the sentence in ${translationLanguage}.
+  The flashcards should be relevant to the user's prompt: ${request.prompt}.
+  The flashcards should be ${request.count} flashcards.
+  Please make sure that the flashcards are relevant to the user's prompt and that they are useful for a conversation with a native speaker of ${translationLanguage}.
+  `;
+}
+
+export async function generateFlashcardsIsland(request: CreateIslandRequest) {
+  const completion = await openAiClient.beta.chat.completions.parse({
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "user",
+        content: generateFlashcardsIslandPrompt(request),
+      },
+    ],
+    response_format: zodResponseFormat(
+      z.object({
+        island: z.array(
+          z.object({
+            phrase: z.string(),
+            translation: z.string(),
+          })
+        ),
+      }),
+      "island_response"
+    ),
+  });
+
+  const island_response = completion.choices[0].message;
+
+  if (island_response.refusal) {
+    throw new Error(island_response.refusal);
+  }
+
+  return island_response.parsed;
 }

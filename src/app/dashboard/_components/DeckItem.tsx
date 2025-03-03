@@ -28,7 +28,7 @@ export default function DeckItem({ deck, onEdit, onDelete }: DeckItemProps) {
   return (
     <>
       <Card className="relative group overflow-hidden">
-        <Link href={`/deck/${deck.id}`} className="block">
+        <Link href={`/decks/${deck.id}`} className="block">
           <div className="relative h-48 w-full">
             <Image
               src={deck.imageUrl || "/images/logo.webp"}
