@@ -50,7 +50,7 @@ export async function generateCards(data: CreateIslandRequest) {
 
     await createCards(cards);
 
-    revalidatePath(`/decks/${deckId}`);
+    revalidatePath(`/dashboard/decks/${deckId}`);
     return { success: true };
   } catch (error) {
     console.error("Error generating cards:", error);
