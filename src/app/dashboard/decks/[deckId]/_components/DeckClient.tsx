@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Island from "@/components/Island";
 import { generateCards } from "../actions";
 import { deleteIsland } from "@/app/decks/[deckId]/actions";
+import { PlusCircle } from "lucide-react";
 
 interface DeckClientProps {
   deck: Deck & { cards: FlashCard[] };
@@ -70,14 +71,21 @@ export function DeckClient({ deck, cardsByCategory }: DeckClientProps) {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">{deck.name}</h1>
-          <p className="text-gray-600">{deck.description}</p>
+      <div className="flex justify-between">
+        <div className="space-y-2 max-w-2xl">
+          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent drop-shadow-sm">
+            {deck.name}
+          </h1>
+          <p className="text-gray-600 text-lg font-light leading-relaxed italic border-l-4 border-primary/30 pl-3">
+            {deck.description}
+          </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button>Create New Island</Button>
+            <Button className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 px-5 py-2 rounded-lg">
+              <PlusCircle className="h-4 w-4" />
+              <span>Create New Island</span>
+            </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
