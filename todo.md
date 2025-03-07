@@ -3,6 +3,16 @@ Today:
 <!-- - Just have one subscription tier for now to start, Maybe
   put others behind a toggle -->
 
+- Different UIs,
+
+  - Tabs like in excel
+    -grid
+    -rows
+
+- login
+
+- Migrate to using supabase
+
 - Add basically the elevator pitch to the home page, explain why this is better then other flashcard apps, cite polyglots,
 - Create a functional dashboard
 

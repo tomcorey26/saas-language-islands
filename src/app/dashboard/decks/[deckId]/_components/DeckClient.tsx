@@ -14,10 +14,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
 import Island from "@/components/Island";
 import { generateCards } from "../actions";
+import { deleteIsland } from "@/app/decks/[deckId]/actions";
 
 interface DeckClientProps {
   deck: Deck & { cards: FlashCard[] };
@@ -31,7 +30,6 @@ interface GenerateCardsFormData {
 }
 
 export function DeckClient({ deck, cardsByCategory }: DeckClientProps) {
-  const router = useRouter();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [formData, setFormData] = useState<GenerateCardsFormData>({
@@ -59,12 +57,15 @@ export function DeckClient({ deck, cardsByCategory }: DeckClientProps) {
 
       console.log("Cards generated successfully!");
       setIsDialogOpen(false);
-      router.refresh();
     } catch (error) {
       console.error("Error generating cards:", error);
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const handleDeleteIsland = async (category: string) => {
+    await deleteIsland(deck.id, category);
   };
 
   return (
@@ -132,16 +133,14 @@ export function DeckClient({ deck, cardsByCategory }: DeckClientProps) {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {Object.entries(cardsByCategory).map(([category, cards]) => (
-          <Card key={category} className="overflow-hidden">
-            <CardHeader>
-              <CardTitle>{category}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Island cards={cards} />
-            </CardContent>
-          </Card>
+          <Island
+            key={category}
+            cards={cards}
+            category={category}
+            onDelete={handleDeleteIsland}
+          />
         ))}
       </div>
     </div>
