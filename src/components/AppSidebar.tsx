@@ -10,6 +10,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { UserButton } from "@clerk/nextjs";
+import { Separator } from "@/components/ui/separator";
 
 // Menu items.
 const items = [
@@ -43,6 +45,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Language Islands</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              {/* User profile section with separator and better styling */}
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
@@ -53,6 +56,10 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <Separator className="my-2" />
+              <SidebarMenuItem>
+                <UserButton showName />
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
