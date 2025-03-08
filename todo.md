@@ -10,6 +10,9 @@ Today:
     -rows
 
 - login
+- Add stuff in place to only allow the user to delete the deck if they are the owner
+- Do the whole tutorial, understand it, and make updates to the app based on it
+- Add custom styling to shadcn
 
 - Migrate to using supabase
 
