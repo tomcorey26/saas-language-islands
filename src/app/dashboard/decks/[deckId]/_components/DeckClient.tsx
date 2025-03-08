@@ -264,9 +264,10 @@ export function DeckClient({ deck, cardsByCategory }: DeckClientProps) {
 
       {/* Tabs */}
       <Tabs defaultValue="islands" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-md grid-cols-3">
           <TabsTrigger value="islands">Islands</TabsTrigger>
           <TabsTrigger value="stats">Statistics</TabsTrigger>
+          <TabsTrigger value="study">Study</TabsTrigger>
         </TabsList>
 
         <TabsContent value="islands" className="pt-6">
