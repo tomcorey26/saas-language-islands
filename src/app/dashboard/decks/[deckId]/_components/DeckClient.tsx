@@ -15,7 +15,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import Island from "@/components/Island";
 import { generateCards } from "../actions";
 import { deleteIsland } from "@/app/decks/[deckId]/actions";
 import {
@@ -24,8 +23,11 @@ import {
   Languages,
   Sparkles,
   Layers,
+  Trash2,
+  Volume2,
+  MoreVertical,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -35,6 +37,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
 
 interface DeckClientProps {
   deck: Deck & { cards: FlashCard[] };
@@ -56,6 +59,12 @@ export function DeckClient({ deck, cardsByCategory }: DeckClientProps) {
     prompt: "",
   });
   const { toast } = useToast();
+
+  // Get the first category for default tab selection
+  const categories = Object.keys(cardsByCategory);
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    categories.length > 0 ? categories[0] : ""
+  );
 
   // Calculate statistics
   const totalCards = Object.values(cardsByCategory).flat().length;
@@ -262,106 +271,137 @@ export function DeckClient({ deck, cardsByCategory }: DeckClientProps) {
         </div>
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="islands" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-3">
-          <TabsTrigger value="islands">Islands</TabsTrigger>
-          <TabsTrigger value="stats">Statistics</TabsTrigger>
-          <TabsTrigger value="study">Study</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="islands" className="pt-6">
-          {Object.keys(cardsByCategory).length === 0 ? (
-            <Card className="border-dashed border-2 bg-muted/50">
-              <CardContent className="flex flex-col items-center justify-center py-16">
-                <div className="rounded-full bg-primary/10 p-4 mb-4">
-                  <PlusCircle className="h-10 w-10 text-primary" />
-                </div>
-                <h3 className="text-xl font-medium text-center mb-2">
-                  No Islands Yet
-                </h3>
-                <p className="text-gray-500 text-center max-w-md mb-6">
-                  Start by creating your first island to organize your
-                  flashcards into categories
-                </p>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="bg-gradient-to-r from-primary to-primary/80">
-                      Create Your First Island
-                    </Button>
-                  </DialogTrigger>
-                </Dialog>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {Object.entries(cardsByCategory).map(([category, cards]) => (
-                <Island
-                  key={category}
-                  cards={cards}
-                  category={category}
-                  onDelete={handleDeleteIsland}
-                />
-              ))}
+      {/* Main Content */}
+      {Object.keys(cardsByCategory).length === 0 ? (
+        <Card className="border-dashed border-2 bg-muted/50">
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <div className="rounded-full bg-primary/10 p-4 mb-4">
+              <PlusCircle className="h-10 w-10 text-primary" />
             </div>
-          )}
-        </TabsContent>
+            <h3 className="text-xl font-medium text-center mb-2">
+              No Islands Yet
+            </h3>
+            <p className="text-gray-500 text-center max-w-md mb-6">
+              Start by creating your first island to organize your flashcards
+              into categories
+            </p>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-to-r from-primary to-primary/80">
+                  Create Your First Island
+                </Button>
+              </DialogTrigger>
+            </Dialog>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-6">
+          <Tabs
+            defaultValue={selectedCategory}
+            onValueChange={(value) => setSelectedCategory(value)}
+            className="w-full"
+          >
+            <TabsList className="flex w-full overflow-x-auto">
+              {Object.keys(cardsByCategory).map((category) => (
+                <TabsTrigger
+                  key={category}
+                  value={category}
+                  className="flex items-center gap-1.5"
+                >
+                  {category}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-        <TabsContent value="stats" className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-500">
-                  Total Islands
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center">
-                  <Layers className="h-6 w-6 text-primary mr-2" />
-                  <span className="text-3xl font-bold">{totalIslands}</span>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Tab Content for Each Category */}
+            {Object.entries(cardsByCategory).map(([category, cards]) => (
+              <TabsContent key={category} value={category} className="mt-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-2xl font-bold">{category}</h3>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="flex items-center gap-1.5"
+                    onClick={() => {
+                      const dialogRoot = document.createElement("div");
+                      document.body.appendChild(dialogRoot);
 
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-500">
-                  Total Cards
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center">
-                  <BookOpen className="h-6 w-6 text-primary mr-2" />
-                  <span className="text-3xl font-bold">{totalCards}</span>
-                </div>
-              </CardContent>
-            </Card>
+                      const confirmed = window.confirm(
+                        `Are you sure you want to delete the "${category}" island? This action cannot be undone.`
+                      );
 
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-500">
-                  Languages
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center">
-                  <Languages className="h-6 w-6 text-primary mr-2" />
-                  <span className="text-3xl font-bold">
-                    {deck.languages.length}
-                  </span>
+                      if (confirmed) {
+                        handleDeleteIsland(category);
+                        // Set selected category to the first available category after deletion
+                        if (
+                          selectedCategory === category &&
+                          categories.length > 1
+                        ) {
+                          const nextCategory =
+                            categories.find((c) => c !== category) || "";
+                          setSelectedCategory(nextCategory);
+                        }
+                      }
+
+                      document.body.removeChild(dialogRoot);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete Island
+                  </Button>
                 </div>
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {deck.languages.map((lang) => (
-                    <Badge key={lang} variant="outline" className="text-xs">
-                      {lang}
-                    </Badge>
+                <div className="space-y-2">
+                  {cards.map((card, index) => (
+                    <motion.div
+                      key={card.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <Card className="p-3">
+                        <div className="flex flex-col">
+                          <p className="text-sm text-gray-600">{card.phrase}</p>
+                          <p className="text-base font-bold">
+                            {card.translation}
+                          </p>
+                          <div className="flex justify-between mt-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 rounded-full bg-blue-500 text-white hover:bg-blue-600"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Play audio functionality
+                                if ("speechSynthesis" in window) {
+                                  const utterance =
+                                    new SpeechSynthesisUtterance(
+                                      card.translation
+                                    );
+                                  utterance.lang = "es-ES"; // Set language to Spanish
+                                  window.speechSynthesis.speak(utterance);
+                                }
+                              }}
+                            >
+                              <Volume2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </Card>
+                    </motion.div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
+              </TabsContent>
+            ))}
+          </Tabs>
+        </div>
+      )}
     </div>
   );
 }

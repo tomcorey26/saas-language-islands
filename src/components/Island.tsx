@@ -50,8 +50,8 @@ export default function Island({ cards, category, onDelete }: IslandProps) {
 
   return (
     <>
-      <Card key={category} className="overflow-hidden">
-        <CardHeader>
+      <Card key={category} className="relative max-h-[500px] flex flex-col">
+        <CardHeader className="sticky top-0 z-10 bg-card  space-y-0.5">
           <CardTitle className="flex justify-between">
             {category}
             <Button
@@ -64,7 +64,7 @@ export default function Island({ cards, category, onDelete }: IslandProps) {
             </Button>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="overflow-auto flex-1">
           <div className="flex flex-col space-y-2">
             {cards.map((card, index) => (
               <motion.div
