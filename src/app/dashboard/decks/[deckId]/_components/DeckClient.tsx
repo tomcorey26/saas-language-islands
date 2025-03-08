@@ -38,6 +38,16 @@ import {
 } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface DeckClientProps {
   deck: Deck & { cards: FlashCard[] };
@@ -65,6 +75,11 @@ export function DeckClient({ deck, cardsByCategory }: DeckClientProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>(
     categories.length > 0 ? categories[0] : ""
   );
+
+  // State for delete dialog
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<string>("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Calculate statistics
   const totalCards = Object.values(cardsByCategory).flat().length;
@@ -113,11 +128,19 @@ export function DeckClient({ deck, cardsByCategory }: DeckClientProps) {
 
   const handleDeleteIsland = async (category: string) => {
     try {
+      setIsDeleting(true);
       await deleteIsland(deck.id, category);
       toast({
         title: "Island Deleted",
         description: `Successfully deleted "${category}" island.`,
       });
+
+      // Set selected category to the first available category after deletion
+      if (selectedCategory === category && categories.length > 1) {
+        const nextCategory = categories.find((c) => c !== category) || "";
+        setSelectedCategory(nextCategory);
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_error: unknown) {
       toast({
@@ -125,6 +148,9 @@ export function DeckClient({ deck, cardsByCategory }: DeckClientProps) {
         description: "Failed to delete island. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
     }
   };
 
@@ -323,27 +349,8 @@ export function DeckClient({ deck, cardsByCategory }: DeckClientProps) {
                     size="sm"
                     className="flex items-center gap-1.5"
                     onClick={() => {
-                      const dialogRoot = document.createElement("div");
-                      document.body.appendChild(dialogRoot);
-
-                      const confirmed = window.confirm(
-                        `Are you sure you want to delete the "${category}" island? This action cannot be undone.`
-                      );
-
-                      if (confirmed) {
-                        handleDeleteIsland(category);
-                        // Set selected category to the first available category after deletion
-                        if (
-                          selectedCategory === category &&
-                          categories.length > 1
-                        ) {
-                          const nextCategory =
-                            categories.find((c) => c !== category) || "";
-                          setSelectedCategory(nextCategory);
-                        }
-                      }
-
-                      document.body.removeChild(dialogRoot);
+                      setCategoryToDelete(category);
+                      setIsDeleteDialogOpen(true);
                     }}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -402,6 +409,32 @@ export function DeckClient({ deck, cardsByCategory }: DeckClientProps) {
           </Tabs>
         </div>
       )}
+
+      {/* Delete Island Alert Dialog */}
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Island</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the &ldquo;{categoryToDelete}
+              &rdquo; island? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => handleDeleteIsland(categoryToDelete)}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
