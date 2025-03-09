@@ -1,9 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { FlashCard } from "@/zod/models/flashcard.model";
 import { FlashCardList } from "./FlashCardList";
 
@@ -20,145 +17,23 @@ export function CategoryTabs({
   setSelectedCategory,
   onDeleteIsland,
 }: CategoryTabsProps) {
-  // Reference to the TabsList element for scrolling
-  const tabsListRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-
-  // Function to check if scrolling is possible
-  const checkScrollability = () => {
-    if (tabsListRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = tabsListRef.current;
-      // Set canScrollLeft to true if scrollLeft is greater than 1 to account for small rounding errors
-      setCanScrollLeft(scrollLeft > 1);
-      // Set canScrollRight to true if there's more content to scroll to
-      setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth - 1);
-    }
-  };
-
-  // Function to scroll the tabs left or right
-  const scrollTabs = (direction: "left" | "right") => {
-    if (tabsListRef.current) {
-      const scrollAmount = 200; // Amount to scroll in pixels
-      const currentScroll = tabsListRef.current.scrollLeft;
-
-      // Calculate new scroll position
-      const newScrollLeft =
-        direction === "left"
-          ? Math.max(0, currentScroll - scrollAmount)
-          : currentScroll + scrollAmount;
-
-      // Scroll to the new position with smooth animation
-      tabsListRef.current.scrollTo({
-        left: newScrollLeft,
-        behavior: "smooth",
-      });
-
-      // Update scroll buttons after animation completes
-      setTimeout(checkScrollability, 300);
-    }
-  };
-
-  // Add event listeners and check scrollability when component mounts or categories change
-  useEffect(() => {
-    // Check initial scrollability
-    checkScrollability();
-
-    // Add scroll event listener
-    const tabsList = tabsListRef.current;
-    if (tabsList) {
-      tabsList.addEventListener("scroll", checkScrollability);
-      window.addEventListener("resize", checkScrollability);
-
-      // Create a MutationObserver to detect when tabs are added or removed
-      const observer = new MutationObserver(checkScrollability);
-      observer.observe(tabsList, { childList: true, subtree: true });
-
-      return () => {
-        tabsList.removeEventListener("scroll", checkScrollability);
-        window.removeEventListener("resize", checkScrollability);
-        observer.disconnect();
-      };
-    }
-
-    return () => {};
-  }, [cardsByCategory]);
-
   return (
     <Tabs
       defaultValue={selectedCategory}
       onValueChange={(value) => setSelectedCategory(value)}
-      className="w-full"
     >
-      <div className="relative flex items-center mb-4">
-        {/* Left scroll button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="flex-shrink-0 h-8 w-8 rounded-full bg-background shadow-sm z-10 mr-1"
-          onClick={() => scrollTabs("left")}
-          aria-label="Scroll tabs left"
-          disabled={!canScrollLeft}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-
-        {/* Scrollable tabs container */}
-        <div className="flex-grow overflow-hidden">
-          <TabsList
-            ref={tabsListRef}
-            className="flex w-full overflow-x-auto overflow-y-hidden py-2 px-1"
-            style={{
-              scrollbarWidth: "none" /* Firefox */,
-              msOverflowStyle: "none" /* IE and Edge */,
-            }}
-            onScroll={checkScrollability}
-          >
-            {/* Map through categories to create tabs */}
-            {Object.keys(cardsByCategory).map((category) => (
-              <TabsTrigger
-                key={category}
-                value={category}
-                className="flex-shrink-0 whitespace-nowrap items-center gap-1.5 px-4"
-              >
-                {category}
-              </TabsTrigger>
-            ))}
-            <TabsTrigger
-              value="test-1"
-              className="flex-shrink-0 whitespace-nowrap items-center gap-1.5 px-4"
-            >
-              Test Tab 1
-            </TabsTrigger>
-            <TabsTrigger
-              value="test-2"
-              className="flex-shrink-0 whitespace-nowrap items-center gap-1.5 px-4"
-            >
-              Test Tab 2
-            </TabsTrigger>
-            <TabsTrigger
-              value="test-3"
-              className="flex-shrink-0 whitespace-nowrap items-center gap-1.5 px-4"
-            >
-              Test Tab 3
-            </TabsTrigger>
-          </TabsList>
-        </div>
-
-        {/* Right scroll button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="flex-shrink-0 h-8 w-8 rounded-full bg-background shadow-sm z-10 ml-1"
-          onClick={() => scrollTabs("right")}
-          aria-label="Scroll tabs right"
-          disabled={!canScrollRight}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
-
-      {/* Tab Content for Each Category */}
+      <TabsList className="flex items-center justify-start flex-wrap h-auto space-y-1">
+        {Object.keys(cardsByCategory).map((category) => (
+          <TabsTrigger key={category} value={category}>
+            {category}
+          </TabsTrigger>
+        ))}
+        <TabsTrigger value="test-1">Very Long Category Name 1</TabsTrigger>
+        <TabsTrigger value="test-2">Another Long Category 2</TabsTrigger>
+        <TabsTrigger value="test-3">Super Long Category Name 3</TabsTrigger>
+        <TabsTrigger value="test-4">Extra Long Category Title 4</TabsTrigger>
+        <TabsTrigger value="test-5">Extremely Long Category Name 5</TabsTrigger>
+      </TabsList>
       {Object.entries(cardsByCategory).map(([category, cards]) => (
         <TabsContent key={category} value={category} className="mt-6">
           <FlashCardList
