@@ -28,11 +28,6 @@ export function CategoryTabs({
             {category}
           </TabsTrigger>
         ))}
-        <TabsTrigger value="test-1">Very Long Category Name 1</TabsTrigger>
-        <TabsTrigger value="test-2">Another Long Category 2</TabsTrigger>
-        <TabsTrigger value="test-3">Super Long Category Name 3</TabsTrigger>
-        <TabsTrigger value="test-4">Extra Long Category Title 4</TabsTrigger>
-        <TabsTrigger value="test-5">Extremely Long Category Name 5</TabsTrigger>
       </TabsList>
       {Object.entries(cardsByCategory).map(([category, cards]) => (
         <TabsContent key={category} value={category} className="mt-6">
