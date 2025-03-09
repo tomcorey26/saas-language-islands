@@ -3,16 +3,12 @@ Today:
 <!-- - Just have one subscription tier for now to start, Maybe
   put others behind a toggle -->
 
-- Different UIs,
-
-  - Tabs like in excel
-    -grid
-    -rows
-
 - login
 - Add stuff in place to only allow the user to delete the deck if they are the owner
 - Do the whole tutorial, understand it, and make updates to the app based on it
 - Add custom styling to shadcn
+- Add pre-generated decks with the most common words and phrases for each language, have a button that allows the user to just mindlessly pick that
+- Add that as one of the premium features
 
 - Migrate to using supabase
 

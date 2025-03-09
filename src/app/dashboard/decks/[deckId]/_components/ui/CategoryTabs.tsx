@@ -29,8 +29,10 @@ export function CategoryTabs({
   const checkScrollability = () => {
     if (tabsListRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = tabsListRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5);
+      // Set canScrollLeft to true if scrollLeft is greater than 1 to account for small rounding errors
+      setCanScrollLeft(scrollLeft > 1);
+      // Set canScrollRight to true if there's more content to scroll to
+      setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth - 1);
     }
   };
 
@@ -67,14 +69,19 @@ export function CategoryTabs({
     if (tabsList) {
       tabsList.addEventListener("scroll", checkScrollability);
       window.addEventListener("resize", checkScrollability);
-    }
 
-    return () => {
-      if (tabsList) {
+      // Create a MutationObserver to detect when tabs are added or removed
+      const observer = new MutationObserver(checkScrollability);
+      observer.observe(tabsList, { childList: true, subtree: true });
+
+      return () => {
         tabsList.removeEventListener("scroll", checkScrollability);
         window.removeEventListener("resize", checkScrollability);
-      }
-    };
+        observer.disconnect();
+      };
+    }
+
+    return () => {};
   }, [cardsByCategory]);
 
   return (
@@ -100,7 +107,11 @@ export function CategoryTabs({
         <div className="flex-grow overflow-hidden">
           <TabsList
             ref={tabsListRef}
-            className="flex w-full overflow-x-auto py-2 px-1 no-scrollbar"
+            className="flex w-full overflow-x-auto overflow-y-hidden py-2 px-1"
+            style={{
+              scrollbarWidth: "none" /* Firefox */,
+              msOverflowStyle: "none" /* IE and Edge */,
+            }}
             onScroll={checkScrollability}
           >
             {/* Map through categories to create tabs */}
