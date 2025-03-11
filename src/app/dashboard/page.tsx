@@ -1,10 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
-import { db } from "@/drizzle/db";
-import { DeckTable } from "@/drizzle/schema";
-import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { CreateDeckRequest } from "@/zod/contracts/deck.schema";
-import { createDeck } from "@/server/db/decks";
+import { createDeck, getDecks } from "@/server/db/decks";
 import { DashboardClient } from "./_components/DashboardClient";
 
 /*
@@ -38,13 +35,6 @@ import { DashboardClient } from "./_components/DashboardClient";
 // Can add individual islands to the deck with just the island
 // part of the form, creating the world requires multiple of these forms
 
-async function getDecks(userId: string) {
-  return db.query.DeckTable.findMany({
-    where: eq(DeckTable.clerkUserId, userId),
-    orderBy: (decks) => decks.createdAt,
-  });
-}
-
 async function createDeckAction(data: CreateDeckRequest) {
   "use server";
 
@@ -63,10 +53,9 @@ async function createDeckAction(data: CreateDeckRequest) {
 }
 
 export default async function DashboardPage() {
-  const { userId } = await auth();
-  if (!userId) {
-    throw new Error("Not authenticated");
-  }
+  const { userId, redirectToSignIn } = await auth();
+
+  if (userId == null) return redirectToSignIn();
 
   const decks = await getDecks(userId);
 

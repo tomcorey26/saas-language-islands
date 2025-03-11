@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { Deck } from "@/zod/contracts/deck.schema";
 import { FlashCard } from "@/zod/models/flashcard.model";
-import { generateCards } from "../actions";
-import { deleteIsland } from "@/app/decks/[deckId]/actions";
+import { deleteIsland, generateCards } from "../actions";
 import { useToast } from "@/hooks/use-toast";
 
 // Import the extracted components
