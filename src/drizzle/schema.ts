@@ -83,12 +83,10 @@ export const UserSubscriptionTable = pgTable(
     createdAt,
     updatedAt,
   },
-  (table) => ({
-    clerkUserIdIndex: index("user_subscriptions.clerk_user_id_index").on(
-      table.clerkUserId
+  (table) => [
+    index("user_subscriptions.clerk_user_id_index").on(table.clerkUserId),
+    index("user_subscriptions.stripe_customer_id_index").on(
+      table.stripeCustomerId
     ),
-    stripeCustomerIdIndex: index(
-      "user_subscriptions.stripe_customer_id_index"
-    ).on(table.stripeCustomerId),
-  })
+  ]
 );

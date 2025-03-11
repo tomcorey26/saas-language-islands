@@ -50,13 +50,10 @@ Today:
 - Link them to other islands
   Type: Question, Statment, Command
 - Unlimeted generations with premium
-- Only allow generation of 3 islands with free version
 - Add the ability to drill each island
 - Add ability to generate with ai
 
-- Make specifiically for spanish learning
 - Add ability for forums and practicing with other people like tandem
-- Also notes in phone
 
 ## Advanced
 
