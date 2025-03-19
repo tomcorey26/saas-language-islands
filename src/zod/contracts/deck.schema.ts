@@ -14,6 +14,7 @@ export const CreateDeckRequestSchema = createInsertSchema(DeckTable)
     languages: z.array(z.string()).refine((value) => value.length > 0, {
       message: "Please select at least one language",
     }),
+    emoji: z.string().default("🏝️"),
   });
 
 export type CreateDeckRequest = z.infer<typeof CreateDeckRequestSchema>;

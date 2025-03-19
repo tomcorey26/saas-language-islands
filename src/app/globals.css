@@ -116,3 +116,17 @@
     transform-style: preserve-3d;
   }
 }
+
+@keyframes slight-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-slight-bounce {
+  animation: slight-bounce 2s ease-in-out infinite;
+}

@@ -35,7 +35,7 @@ export const DeckTable = pgTable(
     clerkUserId: text("clerk_user_id").notNull(),
     name: text("name").notNull(),
     description: text("description").notNull(),
-    imageUrl: text("image_url").notNull(),
+    emoji: text("emoji").default("🏝️"),
     languages: text("languages").array().notNull(),
     createdAt,
     updatedAt,

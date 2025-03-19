@@ -13,7 +13,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Deck } from "@/zod/contracts/deck.schema";
-import Image from "next/image";
 import Link from "next/link";
 
 interface DeckItemProps {
@@ -29,14 +28,11 @@ export default function DeckItem({ deck, onEdit, onDelete }: DeckItemProps) {
     <>
       <Card className="relative group overflow-hidden">
         <Link href={`/dashboard/decks/${deck.id}`} className="block">
-          <div className="relative h-48 w-full">
-            <Image
-              src={deck.imageUrl || "/images/logo.webp"}
-              alt={deck.name}
-              fill
-              className="object-cover transition-transform group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-black/30 transition-opacity group-hover:opacity-40" />
+          <div className="relative h-48 w-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
+            <div className="text-8xl animate-slight-bounce">
+              {deck.emoji || "🏝️"}
+            </div>
+            <div className="absolute inset-0 bg-black/5 transition-opacity group-hover:opacity-0" />
           </div>
           <div className="p-4">
             <h3 className="text-lg font-semibold mb-1">{deck.name}</h3>

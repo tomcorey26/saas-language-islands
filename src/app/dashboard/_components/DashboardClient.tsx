@@ -94,7 +94,7 @@ export function DashboardClient({
             }}
           >
             <div className="flex flex-col items-center gap-2">
-              <Sparkles className="h-8 w-8" />
+              <div className="text-6xl mb-2">🏝️</div>
               <span className="text-lg font-medium">
                 Create Your First Deck
               </span>

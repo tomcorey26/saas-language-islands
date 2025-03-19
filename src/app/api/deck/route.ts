@@ -26,7 +26,6 @@ export async function POST(req: Request) {
       name,
       clerkUserId: userId,
       description: "",
-      imageUrl: "",
       languages: [],
     });
 

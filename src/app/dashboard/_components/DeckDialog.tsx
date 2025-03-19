@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { Smile, X } from "lucide-react";
 import {
   CreateDeckRequest,
   CreateDeckRequestSchema,
@@ -28,6 +28,17 @@ import { supportedLanguagesArray } from "@/data/supportedLanguages";
 import { formatLanguageName } from "@/lib/formatters";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import dynamic from "next/dynamic";
+
+// Lazy load the emoji picker
+const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
+  ssr: false,
+  loading: () => (
+    <div className="p-4 flex items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+    </div>
+  ),
+});
 
 interface DeckDialogProps {
   open: boolean;
@@ -46,6 +57,14 @@ export default function DeckDialog({
   onSave,
   deck,
 }: DeckDialogProps) {
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [pickerPosition, setPickerPosition] = useState<"bottom" | "top">(
+    "bottom"
+  );
+  const [emojiPickerLoaded, setEmojiPickerLoaded] = useState(false);
+  const emojiButtonRef = useRef<HTMLButtonElement>(null);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
+
   const {
     register,
     handleSubmit,
@@ -58,12 +77,13 @@ export default function DeckDialog({
     defaultValues: {
       name: "",
       description: "",
-      imageUrl: "",
+      emoji: "🏝️", // Default emoji
       languages: [],
     },
   });
 
   const selectedLanguages = watch("languages") || [];
+  const selectedEmoji = watch("emoji");
 
   const handleLanguageSelect = (language: string) => {
     const current = selectedLanguages;
@@ -81,19 +101,72 @@ export default function DeckDialog({
     );
   };
 
+  const handleEmojiSelect = (emoji: string) => {
+    setValue("emoji", emoji);
+    setEmojiPickerOpen(false);
+  };
+
+  // Preload the emoji picker when the dialog opens
+  useEffect(() => {
+    if (open && !emojiPickerLoaded) {
+      // Start loading the emoji picker in the background
+      import("emoji-picker-react").then(() => {
+        setEmojiPickerLoaded(true);
+      });
+    }
+  }, [open, emojiPickerLoaded]);
+
+  // Calculate position when opening the picker
+  const toggleEmojiPicker = () => {
+    if (!emojiPickerOpen) {
+      // Calculate if there's enough space below
+      if (emojiButtonRef.current) {
+        const buttonRect = emojiButtonRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - buttonRect.bottom;
+
+        // If less than 450px below (emoji picker height + some margin), position above
+        if (spaceBelow < 450) {
+          setPickerPosition("top");
+        } else {
+          setPickerPosition("bottom");
+        }
+      }
+    }
+    setEmojiPickerOpen(!emojiPickerOpen);
+  };
+
+  // Close emoji picker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(event.target as Node) &&
+        emojiButtonRef.current &&
+        !emojiButtonRef.current.contains(event.target as Node)
+      ) {
+        setEmojiPickerOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   useEffect(() => {
     if (deck) {
       reset({
         name: deck.name,
         description: deck.description || "",
-        imageUrl: deck.imageUrl,
+        emoji: deck.emoji || "🏝️",
         languages: deck.languages || [],
       });
     } else {
       reset({
         name: "",
         description: "",
-        imageUrl: "",
+        emoji: "🏝️",
         languages: [],
       });
     }
@@ -136,6 +209,48 @@ export default function DeckDialog({
                 {errors.description.message}
               </p>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Deck Emoji</Label>
+            <div className="flex items-center gap-4 relative">
+              <div className="flex items-center justify-center w-16 h-16 text-4xl bg-muted rounded-md">
+                {selectedEmoji || "🏝️"}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={toggleEmojiPicker}
+                ref={emojiButtonRef}
+              >
+                <Smile className="h-4 w-4" />
+                Choose Emoji
+              </Button>
+              <input type="hidden" {...register("emoji")} />
+
+              {emojiPickerOpen && (
+                <div
+                  className={`absolute ${
+                    pickerPosition === "bottom" ? "top-full" : "bottom-full"
+                  } left-0 ${
+                    pickerPosition === "bottom" ? "mt-2" : "mb-2"
+                  } z-50 bg-background border rounded-md shadow-md`}
+                  ref={emojiPickerRef}
+                  style={{ maxHeight: "400px" }}
+                >
+                  <EmojiPicker
+                    onEmojiClick={(data) => handleEmojiSelect(data.emoji)}
+                    lazyLoadEmojis={true}
+                    skinTonesDisabled={true}
+                    searchDisabled={false}
+                    previewConfig={{ showPreview: false }}
+                    width={300}
+                    height={350}
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
