@@ -9,7 +9,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -29,6 +28,14 @@ import { formatLanguageName } from "@/lib/formatters";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import dynamic from "next/dynamic";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 // Lazy load the emoji picker
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
@@ -65,14 +72,7 @@ export default function DeckDialog({
   const emojiButtonRef = useRef<HTMLButtonElement>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<FormValues>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -82,19 +82,9 @@ export default function DeckDialog({
     },
   });
 
-  const selectedLanguages = watch("languages") || [];
-  const selectedEmoji = watch("emoji");
-
-  const handleLanguageSelect = (language: string) => {
-    const current = selectedLanguages;
-    if (!current.includes(language)) {
-      setValue("languages", [...current, language], { shouldValidate: true });
-    }
-  };
-
   const handleLanguageRemove = (language: string) => {
-    const current = selectedLanguages;
-    setValue(
+    const current = form.getValues("languages") || [];
+    form.setValue(
       "languages",
       current.filter((l) => l !== language),
       { shouldValidate: true }
@@ -102,7 +92,7 @@ export default function DeckDialog({
   };
 
   const handleEmojiSelect = (emoji: string) => {
-    setValue("emoji", emoji);
+    form.setValue("emoji", emoji);
     setEmojiPickerOpen(false);
   };
 
@@ -156,21 +146,26 @@ export default function DeckDialog({
 
   useEffect(() => {
     if (deck) {
-      reset({
+      form.reset({
         name: deck.name,
         description: deck.description || "",
         emoji: deck.emoji || "🏝️",
         languages: deck.languages || [],
       });
     } else {
-      reset({
+      form.reset({
         name: "",
         description: "",
         emoji: "🏝️",
         languages: [],
       });
     }
-  }, [deck, reset]);
+  }, [deck, form]);
+
+  const onSubmit = (data: FormValues) => {
+    onSave(data);
+    form.reset();
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -178,137 +173,158 @@ export default function DeckDialog({
         <DialogHeader>
           <DialogTitle>{deck ? "Edit Deck" : "Create New Deck"}</DialogTitle>
         </DialogHeader>
-        <form
-          onSubmit={handleSubmit((data) => {
-            onSave(data);
-            reset();
-          })}
-          className="space-y-6"
-        >
-          <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              placeholder="Enter deck name"
-              {...register("name")}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter deck name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.name && (
-              <p className="text-sm text-destructive">{errors.name.message}</p>
-            )}
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              placeholder="Enter deck description"
-              {...register("description")}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Enter deck description" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.description && (
-              <p className="text-sm text-destructive">
-                {errors.description.message}
-              </p>
-            )}
-          </div>
 
-          <div className="space-y-2">
-            <Label>Deck Emoji</Label>
-            <div className="flex items-center gap-4 relative">
-              <div className="flex items-center justify-center w-16 h-16 text-4xl bg-muted rounded-md">
-                {selectedEmoji || "🏝️"}
-              </div>
+            <FormField
+              control={form.control}
+              name="emoji"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Deck Emoji</FormLabel>
+                  <div className="flex items-center gap-4 relative">
+                    <div className="flex items-center justify-center w-16 h-16 text-4xl bg-muted rounded-md">
+                      {field.value || "🏝️"}
+                    </div>
+                    <FormControl>
+                      <div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="flex items-center gap-2"
+                          onClick={toggleEmojiPicker}
+                          ref={emojiButtonRef}
+                        >
+                          <Smile className="h-4 w-4" />
+                          Choose Emoji
+                        </Button>
+                        <input type="hidden" {...field} />
+                      </div>
+                    </FormControl>
+
+                    {emojiPickerOpen && (
+                      <div
+                        className={`absolute ${
+                          pickerPosition === "bottom"
+                            ? "top-full"
+                            : "bottom-full"
+                        } left-0 ${
+                          pickerPosition === "bottom" ? "mt-2" : "mb-2"
+                        } z-50 bg-background border rounded-md shadow-md`}
+                        ref={emojiPickerRef}
+                        style={{ maxHeight: "400px" }}
+                      >
+                        <EmojiPicker
+                          onEmojiClick={(data) => handleEmojiSelect(data.emoji)}
+                          lazyLoadEmojis={true}
+                          skinTonesDisabled={true}
+                          searchDisabled={false}
+                          previewConfig={{ showPreview: false }}
+                          width={300}
+                          height={350}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="languages"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Languages</FormLabel>
+                  <div className="space-y-2">
+                    <FormControl>
+                      <Select
+                        onValueChange={(value) => {
+                          if (!field.value?.includes(value)) {
+                            field.onChange([...(field.value || []), value]);
+                          }
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Add a language" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {supportedLanguagesArray
+                            .filter((lang) => !field.value?.includes(lang.name))
+                            .map((lang) => (
+                              <SelectItem key={lang.name} value={lang.name}>
+                                {formatLanguageName(lang)}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {field.value?.map((lang) => (
+                        <Badge
+                          key={lang}
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
+                          {lang}
+                          <button
+                            type="button"
+                            onClick={() => handleLanguageRemove(lang)}
+                            className="ml-1 hover:bg-secondary/80 rounded-full"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"
-                className="flex items-center gap-2"
-                onClick={toggleEmojiPicker}
-                ref={emojiButtonRef}
+                onClick={() => onOpenChange(false)}
               >
-                <Smile className="h-4 w-4" />
-                Choose Emoji
+                Cancel
               </Button>
-              <input type="hidden" {...register("emoji")} />
-
-              {emojiPickerOpen && (
-                <div
-                  className={`absolute ${
-                    pickerPosition === "bottom" ? "top-full" : "bottom-full"
-                  } left-0 ${
-                    pickerPosition === "bottom" ? "mt-2" : "mb-2"
-                  } z-50 bg-background border rounded-md shadow-md`}
-                  ref={emojiPickerRef}
-                  style={{ maxHeight: "400px" }}
-                >
-                  <EmojiPicker
-                    onEmojiClick={(data) => handleEmojiSelect(data.emoji)}
-                    lazyLoadEmojis={true}
-                    skinTonesDisabled={true}
-                    searchDisabled={false}
-                    previewConfig={{ showPreview: false }}
-                    width={300}
-                    height={350}
-                  />
-                </div>
-              )}
+              <Button type="submit">
+                {deck ? "Save Changes" : "Create Deck"}
+              </Button>
             </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Languages</Label>
-              <Select onValueChange={handleLanguageSelect}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Add a language" />
-                </SelectTrigger>
-                <SelectContent>
-                  {supportedLanguagesArray
-                    .filter((lang) => !selectedLanguages.includes(lang.name))
-                    .map((lang) => (
-                      <SelectItem key={lang.name} value={lang.name}>
-                        {formatLanguageName(lang)}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {selectedLanguages.map((lang) => (
-                  <Badge
-                    key={lang}
-                    variant="secondary"
-                    className="flex items-center gap-1"
-                  >
-                    {lang}
-                    <button
-                      type="button"
-                      onClick={() => handleLanguageRemove(lang)}
-                      className="ml-1 hover:bg-secondary/80 rounded-full"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-              {errors.languages && (
-                <p className="text-sm text-destructive">
-                  {errors.languages.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit">
-              {deck ? "Save Changes" : "Create Deck"}
-            </Button>
-          </div>
-        </form>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
