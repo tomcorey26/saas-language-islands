@@ -49,7 +49,7 @@ export default async function DashboardPage() {
 
   if (userId == null) return redirectToSignIn();
 
-  const decks = await getDecks(userId);
+  const decks = await getDecks(userId, { limit: 10 });
 
   return <DashboardClient initialDecks={decks} />;
 }

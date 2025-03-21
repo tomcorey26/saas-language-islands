@@ -16,9 +16,14 @@ export async function getDeck(id: string) {
   return deck;
 }
 
-export async function getDecks(userId: string) {
+export async function getDecks(
+  userId: string,
+  { limit, offset }: { limit?: number; offset?: number } = {}
+) {
   return db.query.DeckTable.findMany({
     where: eq(DeckTable.clerkUserId, userId),
     orderBy: (decks, { desc }) => [desc(decks.createdAt)],
+    limit: limit,
+    offset: offset ?? 0,
   });
 }
