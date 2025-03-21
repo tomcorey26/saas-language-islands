@@ -1,7 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
-import { CreateDeckRequest } from "@/zod/contracts/deck.schema";
-import { createDeck, getDecks } from "@/server/db/decks";
+import { getDecks } from "@/server/db/decks";
 import { DashboardClient } from "./_components/DashboardClient";
 
 /*
@@ -35,22 +33,16 @@ import { DashboardClient } from "./_components/DashboardClient";
 // Can add individual islands to the deck with just the island
 // part of the form, creating the world requires multiple of these forms
 
-async function createDeckAction(data: CreateDeckRequest) {
-  "use server";
+// The tokens are cheap enough that we can afford to generate a lot of cards
+// and show the user a preview. They can then click to generate the rest.
+// We can also do it in multiple languages at once.
+// Maybe we should limit the size of the users prompt, or add guardrails
+// so that they can't just add a raw prompt.
+// generate the tts audio using chatgpt api, its way cheaper than using ElevenLabs
+// Secure the API's
+// https://www.linkedin.com/posts/realmatt_softwareengineering-cybersecurity-softwaredesign-activity-7308020318768402434-n4ub?utm_source=share&utm_medium=member_desktop&rcm=ACoAACikAHUBSa68bBUyW1uu2f2ORNqXgAlMQlY
 
-  const { userId } = await auth();
-  if (!userId) {
-    throw new Error("Not authenticated");
-  }
-
-  const deck = await createDeck({
-    ...data,
-    clerkUserId: userId,
-  });
-
-  revalidatePath("/dashboard");
-  return deck;
-}
+// Deck of flash cards about the cultrue
 
 export default async function DashboardPage() {
   const { userId, redirectToSignIn } = await auth();
@@ -59,7 +51,5 @@ export default async function DashboardPage() {
 
   const decks = await getDecks(userId);
 
-  return (
-    <DashboardClient initialDecks={decks} createDeckAction={createDeckAction} />
-  );
+  return <DashboardClient initialDecks={decks} />;
 }

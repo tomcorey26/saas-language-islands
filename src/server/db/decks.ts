@@ -19,6 +19,6 @@ export async function getDeck(id: string) {
 export async function getDecks(userId: string) {
   return db.query.DeckTable.findMany({
     where: eq(DeckTable.clerkUserId, userId),
-    orderBy: (decks) => decks.createdAt,
+    orderBy: (decks, { desc }) => [desc(decks.createdAt)],
   });
 }

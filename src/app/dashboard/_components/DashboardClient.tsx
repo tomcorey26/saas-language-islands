@@ -6,16 +6,14 @@ import { Button } from "@/components/ui/button";
 import DeckItem from "./DeckItem";
 import DeckDialog from "./DeckDialog";
 import { CreateDeckRequest, Deck } from "@/zod/contracts/deck.schema";
+import { createDeckAction } from "@/app/dashboard/actions";
+import { toast } from "@/hooks/use-toast";
 
 interface DashboardClientProps {
   initialDecks: Deck[];
-  createDeckAction: (data: CreateDeckRequest) => Promise<Deck>;
 }
 
-export function DashboardClient({
-  initialDecks,
-  createDeckAction,
-}: DashboardClientProps) {
+export function DashboardClient({ initialDecks }: DashboardClientProps) {
   const [decks, setDecks] = useState<Deck[]>(initialDecks);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingDeck, setEditingDeck] = useState<Deck | null>(null);
@@ -40,7 +38,11 @@ export function DashboardClient({
         setDecks([newDeck, ...decks]);
       } catch (error) {
         console.error("Error creating deck:", error);
-        // TODO: Show error toast
+        toast({
+          title: "Error creating deck",
+          description: "Please try again",
+          variant: "destructive",
+        });
       }
     }
     setIsDialogOpen(false);

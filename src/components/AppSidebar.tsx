@@ -58,6 +58,13 @@ export function AppSidebar() {
               ))}
               <Separator className="my-2" />
               <SidebarMenuItem>
+                {/* TODO TOKEN USAGE */}
+                <div className="flex items-center gap-2">
+                  <span>Tokens used: 100</span>
+                  <span>Tokens remaining: 1000</span>
+                </div>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
                 <UserButton showName />
               </SidebarMenuItem>
             </SidebarMenu>
