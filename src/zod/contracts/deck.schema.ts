@@ -11,6 +11,7 @@ export const CreateDeckRequestSchema = createInsertSchema(DeckTable)
     clerkUserId: true,
   })
   .extend({
+    name: z.string().min(1, { message: "Name is required" }),
     languages: z.array(z.string()).refine((value) => value.length > 0, {
       message: "Please select at least one language",
     }),
