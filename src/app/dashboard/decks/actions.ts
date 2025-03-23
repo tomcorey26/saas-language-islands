@@ -9,6 +9,7 @@ import {
   CreateDeckRequestSchema,
 } from "@/zod/contracts/deck.schema";
 import { auth } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function createDeck(data: CreateDeckRequest): Promise<
@@ -51,6 +52,8 @@ export async function deleteDeck(deckId: string) {
     id: deckId,
     clerkUserId: userId,
   });
+
+  revalidatePath("/dashboard/decks");
 
   return {
     error: !isSuccess,
