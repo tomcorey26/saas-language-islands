@@ -1,4 +1,4 @@
-import { BarChart, Home, Settings } from "lucide-react";
+import { BarChart, BookOpen, Home, Settings } from "lucide-react";
 
 import {
   Sidebar,
@@ -19,6 +19,11 @@ const items = [
     title: "Home",
     url: "/dashboard",
     icon: Home,
+  },
+  {
+    title: "Decks",
+    url: "/dashboard/decks",
+    icon: BookOpen,
   },
   {
     title: "Stats",

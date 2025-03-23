@@ -6,7 +6,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <AppSidebar />
       <SidebarTrigger />
-      <main className="min-h-screen bg-background grow container mx-auto p-6">
+      <main className="min-h-screen bg-background container p-6">
         {children}
       </main>
     </SidebarProvider>

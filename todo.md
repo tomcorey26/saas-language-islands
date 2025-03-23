@@ -3,6 +3,15 @@ Today:
 <!-- - Just have one subscription tier for now to start, Maybe
   put others behind a toggle -->
 
+- Click and study. Doulingo style flow that allows you to study the phrases in the deck using the games reccomended by polyglots
+- Or just regular study mode
+- Have default study decks that are the most popular phrases for each language
+
+- TODO: Fix issue with timeout for flashcard creation. Might have to pay for vercel
+- Follow the tutorial and apply to project
+- Refactor to do in a more nextjs server rendered way for the decks page. Maybe try vibe coding it for an example
+- Update versions
+
 - login
 - Add stuff in place to only allow the user to delete the deck if they are the owner
 - Do the whole tutorial, understand it, and make updates to the app based on it
