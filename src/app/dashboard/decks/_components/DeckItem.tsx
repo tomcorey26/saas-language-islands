@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
 import { Deck } from "@/zod/contracts/deck.schema";
 import Link from "next/link";
+import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { DeleteDeckDialogContent } from "@/app/dashboard/_components/DeleteDeckDialogContent";
 
 interface DeckItemProps {
   deck: Deck;
@@ -42,11 +44,15 @@ export default function DeckItem({ deck }: DeckItemProps) {
               <Edit className="h-4 w-4" />
             </Button>
           </Link>
-          <Link href={`/dashboard/decks?deleteDeckId=${deck.id}`}>
-            <Button variant="secondary" size="icon" className="h-8 w-8">
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </Link>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="secondary" size="icon" className="h-8 w-8">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <DeleteDeckDialogContent id={deck.id} />
+          </AlertDialog>
         </div>
       </Card>
     </>

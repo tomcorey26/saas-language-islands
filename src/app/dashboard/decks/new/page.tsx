@@ -256,7 +256,9 @@ export default function NewDeckPage() {
           />
 
           <div className="flex justify-end gap-2">
-            <Button type="submit">Create Deck</Button>
+            <Button disabled={form.formState.isSubmitting} type="submit">
+              {form.formState.isSubmitting ? "Creating..." : "Create Deck"}
+            </Button>
           </div>
         </form>
       </Form>

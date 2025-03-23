@@ -2,7 +2,6 @@ import { auth } from "@clerk/nextjs/server";
 import { getDecks } from "@/server/db/decks";
 import { Button } from "@/components/ui/button";
 import DeckItem from "@/app/dashboard/decks/_components/DeckItem";
-import { DashboardDialog } from "@/app/dashboard/_components/DashboardDialog";
 import Link from "next/link";
 import { DashboardPageLayout } from "@/app/dashboard/_components/DashboardPageLayout";
 import { Sparkles } from "lucide-react";
@@ -18,7 +17,6 @@ import { Sparkles } from "lucide-react";
 
 // Cards
 // Each card has the deck name and photo
-// Each card is a link to the deck
 // If no decks added have one with the dash outline, with a plus button in
 // the center of the card that says "Create Deck"
 
@@ -49,18 +47,12 @@ import { Sparkles } from "lucide-react";
 
 // Deck of flash cards about the cultrue
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ deleteDeckId?: string }>;
-}) {
+export default async function DashboardPage() {
   const { userId, redirectToSignIn } = await auth();
 
   if (userId == null) return redirectToSignIn();
 
   const decks = await getDecks(userId, { limit: 10 });
-
-  const { deleteDeckId } = await searchParams;
 
   return (
     <DashboardPageLayout
@@ -86,6 +78,7 @@ export default async function DashboardPage({
                 <span className="text-lg font-medium">
                   Create Your First Deck
                 </span>
+                <div className="flex items-center gap-2 text-2xl">+</div>
               </div>
             </Button>
           </Link>
@@ -93,8 +86,6 @@ export default async function DashboardPage({
           decks.map((deck) => <DeckItem key={deck.id} deck={deck} />)
         )}
       </div>
-
-      <DashboardDialog deleteDeckId={deleteDeckId} />
     </DashboardPageLayout>
   );
 }
