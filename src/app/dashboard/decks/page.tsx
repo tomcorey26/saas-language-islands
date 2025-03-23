@@ -76,8 +76,11 @@ export default async function DashboardPage({
     >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {decks.length === 0 ? (
-          <Link href="/dashboard/decks/create">
-            <Button variant="outline" className="h-[300px] border-dashed">
+          <Link href="/dashboard/decks/new">
+            <Button
+              variant="outline"
+              className="h-[300px] border-dashed w-full"
+            >
               <div className="flex flex-col items-center gap-2">
                 <div className="text-6xl mb-2">🏝️</div>
                 <span className="text-lg font-medium">
@@ -91,14 +94,7 @@ export default async function DashboardPage({
         )}
       </div>
 
-      <DashboardDialog
-        deleteDeckId={deleteDeckId}
-        onDelete={async () => {
-          "use server";
-          // TODO: Implement delete functionality
-          console.log("delete");
-        }}
-      />
+      <DashboardDialog deleteDeckId={deleteDeckId} />
     </DashboardPageLayout>
   );
 }

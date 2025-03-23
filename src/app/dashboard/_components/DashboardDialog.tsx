@@ -1,5 +1,6 @@
 "use client";
 
+import { deleteDeck } from "@/app/dashboard/decks/actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,16 +11,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 
 export function DashboardDialog({
   deleteDeckId,
-  onDelete,
 }: {
   deleteDeckId: string | undefined;
-  onDelete: () => void;
 }) {
   const router = useRouter();
+  const [isDeletePending, startDeleteTransition] = useTransition();
 
   return (
     <AlertDialog
@@ -40,7 +42,30 @@ export function DashboardDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
+          <AlertDialogAction
+            disabled={isDeletePending}
+            onClick={() => {
+              startDeleteTransition(async () => {
+                if (deleteDeckId == null) {
+                  throw new Error(
+                    "No deck ID provided - This should never happen"
+                  );
+                }
+
+                const result = await deleteDeck(deleteDeckId);
+
+                if (result.message) {
+                  toast({
+                    title: result.error ? "Error" : "Success",
+                    description: result.message,
+                    variant: result.error ? "destructive" : "default",
+                  });
+                }
+              });
+            }}
+          >
+            Delete
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

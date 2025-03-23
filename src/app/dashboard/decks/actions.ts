@@ -1,6 +1,9 @@
 "use server";
 
-import { createDeck as createDeckDb } from "@/server/db/decks";
+import {
+  createDeck as createDeckDb,
+  deleteDeck as deleteDeckDb,
+} from "@/server/db/decks";
 import {
   CreateDeckRequest,
   CreateDeckRequestSchema,
@@ -16,12 +19,9 @@ export async function createDeck(data: CreateDeckRequest): Promise<
   | undefined
 > {
   const { userId } = await auth();
-  if (!userId) {
-    throw new Error("Not authenticated");
-  }
-
   const parsedData = CreateDeckRequestSchema.safeParse(data);
-  if (!parsedData.success) {
+
+  if (!parsedData.success || userId == null) {
     return {
       error: true,
       message: "There was an error creating your deck",
@@ -34,4 +34,26 @@ export async function createDeck(data: CreateDeckRequest): Promise<
   });
 
   redirect(`/dashboard/decks/${deck.id}`);
+}
+
+export async function deleteDeck(deckId: string) {
+  const { userId } = await auth();
+  const errorMesssage = "There was an error deleting your deck";
+
+  if (userId == null) {
+    return {
+      error: true,
+      message: errorMesssage,
+    };
+  }
+
+  const isSuccess = await deleteDeckDb({
+    id: deckId,
+    clerkUserId: userId,
+  });
+
+  return {
+    error: !isSuccess,
+    message: isSuccess ? "Deck deleted successfully" : errorMesssage,
+  };
 }

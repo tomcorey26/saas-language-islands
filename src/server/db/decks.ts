@@ -1,6 +1,6 @@
 import { db } from "@/drizzle/db";
 import { DeckTable } from "@/drizzle/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export async function createDeck(data: typeof DeckTable.$inferInsert) {
   const [deck] = await db.insert(DeckTable).values(data).returning();
@@ -26,4 +26,17 @@ export async function getDecks(
     limit: limit,
     offset: offset ?? 0,
   });
+}
+
+export async function deleteDeck(data: { id: string; clerkUserId: string }) {
+  const { rowCount } = await db
+    .delete(DeckTable)
+    .where(
+      and(
+        eq(DeckTable.id, data.id),
+        eq(DeckTable.clerkUserId, data.clerkUserId)
+      )
+    );
+
+  return rowCount > 0;
 }
