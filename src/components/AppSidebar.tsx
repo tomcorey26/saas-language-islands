@@ -19,16 +19,20 @@ const items = [
     title: "Home",
     url: "/dashboard",
     icon: Home,
+    disabled: false,
   },
   {
     title: "Decks",
     url: "/dashboard/decks",
     icon: BookOpen,
+    disabled: false,
   },
   {
     title: "Stats",
-    url: "/dashboard/stats",
+    url: "#",
     icon: BarChart,
+    disabled: true,
+    comingSoon: true,
   },
   // {
   //   title: "Search",
@@ -37,8 +41,10 @@ const items = [
   // },
   {
     title: "Settings",
-    url: "/dashboard/settings",
+    url: "#",
     icon: Settings,
+    disabled: true,
+    comingSoon: true,
   },
 ];
 
@@ -53,10 +59,22 @@ export function AppSidebar() {
               {/* User profile section with separator and better styling */}
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                  <SidebarMenuButton asChild disabled={item.disabled}>
+                    <a
+                      href={item.url}
+                      className={
+                        item.disabled
+                          ? "opacity-50 cursor-not-allowed flex items-center"
+                          : "flex items-center"
+                      }
+                    >
                       <item.icon />
                       <span>{item.title}</span>
+                      {item.comingSoon && (
+                        <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-md">
+                          Coming Soon
+                        </span>
+                      )}
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
