@@ -8,9 +8,24 @@ export async function createDeck(data: typeof DeckTable.$inferInsert) {
   return deck;
 }
 
-export async function getDeck(id: string) {
+export async function updateDeck(
+  data: Partial<typeof DeckTable.$inferInsert>,
+  { id, clerkUserId }: { id: string; clerkUserId: string }
+) {
+  const { rowCount } = await db
+    .update(DeckTable)
+    .set(data)
+    .where(and(eq(DeckTable.id, id), eq(DeckTable.clerkUserId, clerkUserId)));
+
+  return rowCount > 0;
+}
+
+export async function getDeck(data: { id: string; clerkUserId: string }) {
   const deck = await db.query.DeckTable.findFirst({
-    where: eq(DeckTable.id, id),
+    where: and(
+      eq(DeckTable.id, data.id),
+      eq(DeckTable.clerkUserId, data.clerkUserId)
+    ),
   });
 
   return deck;

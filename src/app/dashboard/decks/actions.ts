@@ -3,6 +3,7 @@
 import {
   createDeck as createDeckDb,
   deleteDeck as deleteDeckDb,
+  updateDeck as updateDeckDb,
 } from "@/server/db/decks";
 import {
   CreateDeckRequest,
@@ -35,6 +36,30 @@ export async function createDeck(data: CreateDeckRequest): Promise<
   });
 
   redirect(`/dashboard/decks/${deck.id}`);
+}
+
+export async function updateDeck(deckId: string, data: CreateDeckRequest) {
+  const { userId } = await auth();
+  const parsedData = CreateDeckRequestSchema.safeParse(data);
+
+  if (!parsedData.success || userId == null) {
+    return {
+      error: true,
+      message: "There was an error updating your deck",
+    };
+  }
+
+  const isSuccess = await updateDeckDb(parsedData.data, {
+    id: deckId,
+    clerkUserId: userId,
+  });
+
+  return {
+    error: !isSuccess,
+    message: isSuccess
+      ? "Deck updated successfully"
+      : "There was an error updating your deck",
+  };
 }
 
 export async function deleteDeck(deckId: string) {
