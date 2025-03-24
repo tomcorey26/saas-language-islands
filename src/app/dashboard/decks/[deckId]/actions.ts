@@ -26,7 +26,7 @@ export async function generateCards(data: CreateIslandRequest) {
     const { deckId } = parsedData.data;
 
     // Verify deck ownership
-    const deck = await getDeck(deckId);
+    const deck = await getDeck({ id: deckId, clerkUserId: userId });
 
     if (!deck || deck.clerkUserId !== userId) {
       throw new Error("Unauthorized");
@@ -69,8 +69,8 @@ export async function deleteIsland(deckId: string, category: string) {
     }
 
     // Verify deck ownership
-    const deck = await getDeck(deckId);
-    if (!deck || deck.clerkUserId !== userId) {
+    const deck = await getDeck({ id: deckId, clerkUserId: userId });
+    if (!deck) {
       throw new Error("Unauthorized");
     }
 
