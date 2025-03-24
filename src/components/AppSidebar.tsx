@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 import { UserButton } from "@clerk/nextjs";
 import { Separator } from "@/components/ui/separator";
+import { TokenUsage } from "@/components/TokenUsage";
 
 // Menu items.
 const items = [
@@ -81,14 +82,14 @@ export function AppSidebar() {
               ))}
               <Separator className="my-2" />
               <SidebarMenuItem>
-                {/* TODO TOKEN USAGE */}
-                <div className="flex items-center gap-2">
-                  <span>Tokens used: 100</span>
-                  <span>Tokens remaining: 1000</span>
-                </div>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
                 <UserButton showName />
+              </SidebarMenuItem>
+              <Separator className="my-2" />
+              <SidebarMenuItem>
+                {/* Token usage visualization */}
+                <div className="flex justify-center py-2">
+                  <TokenUsage tokensUsed={100} totalTokens={1000} />
+                </div>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
