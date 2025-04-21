@@ -49,3 +49,5 @@ export const supportedLanguages = {
 export const supportedLanguagesArray = Object.values(supportedLanguages);
 
 export type SupportedLanguageData = (typeof supportedLanguagesArray)[number];
+
+export type SupportedLanguageCode = SupportedLanguageData["languageCode"];

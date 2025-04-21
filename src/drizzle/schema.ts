@@ -1,5 +1,9 @@
 import { cardDifficulties, CardDifficulty } from "@/data/cardDifficulties";
 import { subscriptionTiers, TierNames } from "@/data/subscriptionTiers";
+import {
+  SupportedLanguageCode,
+  supportedLanguages,
+} from "@/data/supportedLanguages";
 import { relations } from "drizzle-orm";
 import {
   pgTable,
@@ -25,6 +29,13 @@ const DifficultyEnum = pgEnum(
   Object.keys(cardDifficulties) as [CardDifficulty]
 );
 
+const LanguageEnum = pgEnum(
+  "language",
+  Object.values(supportedLanguages).map((lang) => lang.languageCode) as [
+    SupportedLanguageCode
+  ]
+);
+
 const TierEnum = pgEnum("tier", Object.keys(subscriptionTiers) as [TierNames]);
 
 // Then define tables
@@ -36,7 +47,7 @@ export const DeckTable = pgTable(
     name: text("name").notNull(),
     description: text("description").notNull(),
     emoji: text("emoji").default("🏝️").notNull(),
-    languages: text("languages").array().notNull(),
+    languages: LanguageEnum("languages").array().notNull(),
     createdAt,
     updatedAt,
   },
