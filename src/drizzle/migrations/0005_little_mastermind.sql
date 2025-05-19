@@ -1,0 +1,1 @@
+ALTER TABLE "decks" ADD COLUMN "language" "language" NOT NULL;

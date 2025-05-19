@@ -14,29 +14,32 @@ import {
   pgEnum,
 } from "drizzle-orm/pg-core";
 
-const createdAt = timestamp("created_at", { withTimezone: true })
+export const createdAt = timestamp("created_at", { withTimezone: true })
   .notNull()
   .defaultNow();
 
-const updatedAt = timestamp("updated_at", { withTimezone: true })
+export const updatedAt = timestamp("updated_at", { withTimezone: true })
   .notNull()
   .defaultNow()
   .$onUpdate(() => new Date());
 
 // Define enums first
-const DifficultyEnum = pgEnum(
+export const DifficultyEnum = pgEnum(
   "difficulty",
   Object.keys(cardDifficulties) as [CardDifficulty]
 );
 
-const LanguageEnum = pgEnum(
+export const LanguageEnum = pgEnum(
   "language",
   Object.values(supportedLanguages).map((lang) => lang.languageCode) as [
     SupportedLanguageCode
   ]
 );
 
-const TierEnum = pgEnum("tier", Object.keys(subscriptionTiers) as [TierNames]);
+export const TierEnum = pgEnum(
+  "tier",
+  Object.keys(subscriptionTiers) as [TierNames]
+);
 
 // Then define tables
 export const DeckTable = pgTable(
@@ -47,7 +50,7 @@ export const DeckTable = pgTable(
     name: text("name").notNull(),
     description: text("description").notNull(),
     emoji: text("emoji").default("🏝️").notNull(),
-    languages: LanguageEnum("languages").array().notNull(),
+    language: LanguageEnum("language").notNull(),
     createdAt,
     updatedAt,
   },
