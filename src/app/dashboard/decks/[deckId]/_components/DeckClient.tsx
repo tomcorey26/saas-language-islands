@@ -43,7 +43,7 @@ export function DeckClient({ deck, cardsByCategory }: DeckClientProps) {
         deckId: deck.id,
         count: formData.cardCount,
         prompt: formData.prompt,
-        languages: deck.languages,
+        language: deck.language,
       });
 
       if (result.error) {

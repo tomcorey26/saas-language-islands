@@ -66,7 +66,7 @@ export async function generateWorld(request: CreateWorldRequest) {
 }
 
 function generateFlashcardsIslandPrompt(request: CreateIslandRequest) {
-  const translationLanguage = request.languages[0];
+  const translationLanguage = request.language;
 
   return `You are a helpful assistant that generates flashcards that are useful for a conversation with a native speaker. 
   You will generate a sentence in english, for the phrase field, and the translation field will be the translation of the sentence in ${translationLanguage}.

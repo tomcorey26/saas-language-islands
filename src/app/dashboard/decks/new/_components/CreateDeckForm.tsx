@@ -11,11 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Smile, X } from "lucide-react";
+import { Smile } from "lucide-react";
 import { CreateDeckRequestSchema } from "@/zod/contracts/deck.schema";
 import { supportedLanguagesArray } from "@/data/supportedLanguages";
-import { formatLanguageName } from "@/lib/formatters";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
@@ -51,18 +49,9 @@ export function CreateDeckForm({
       name: initialValues.name,
       description: initialValues.description,
       emoji: initialValues.emoji,
-      languages: initialValues.languages,
+      language: initialValues.language,
     },
   });
-
-  const handleLanguageRemove = (language: string) => {
-    const current = form.getValues("languages") || [];
-    form.setValue(
-      "languages",
-      current.filter((l) => l !== language),
-      { shouldValidate: true }
-    );
-  };
 
   const handleEmojiSelect = (emoji: string) => {
     form.setValue("emoji", emoji);
@@ -214,53 +203,30 @@ export function CreateDeckForm({
 
           <FormField
             control={form.control}
-            name="languages"
+            name="language"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Languages</FormLabel>
+                <FormLabel>Language</FormLabel>
                 <div className="space-y-2">
                   <FormControl>
-                    <Select
-                      onValueChange={(value) => {
-                        if (!field.value?.includes(value)) {
-                          field.onChange([...(field.value || []), value]);
-                        }
-                      }}
-                    >
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger>
                         <SelectValue placeholder="Add a language" />
                       </SelectTrigger>
                       <SelectContent>
-                        {supportedLanguagesArray
-                          .filter((lang) => !field.value?.includes(lang.name))
-                          .map((lang) => (
-                            <SelectItem key={lang.name} value={lang.name}>
-                              {formatLanguageName(lang)}
-                            </SelectItem>
-                          ))}
+                        {supportedLanguagesArray.map((lang) => (
+                          <SelectItem
+                            key={lang.languageCode}
+                            value={lang.languageCode}
+                          >
+                            {lang.formatName()}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </FormControl>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {field.value?.map((lang) => (
-                      <Badge
-                        key={lang}
-                        variant="secondary"
-                        className="flex items-center gap-1"
-                      >
-                        {lang}
-                        <button
-                          type="button"
-                          onClick={() => handleLanguageRemove(lang)}
-                          className="ml-1 hover:bg-secondary/80 rounded-full"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
+                  <FormMessage />
                 </div>
-                <FormMessage />
               </FormItem>
             )}
           />

@@ -17,7 +17,7 @@ export default async function NewDeckPage({
     name: "",
     description: "",
     emoji: "",
-    languages: [],
+    language: "es",
   };
 
   const { deckId } = await searchParams;
@@ -33,7 +33,7 @@ export default async function NewDeckPage({
         name: deck.name,
         description: deck.description,
         emoji: deck.emoji,
-        languages: deck.languages,
+        language: deck.language,
       };
     } else {
       redirect("/dashboard/decks/new");

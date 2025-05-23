@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { DeckTable } from "@/drizzle/schema";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import {
+  SupportedLanguageCode,
+  supportedLanguages,
+} from "@/data/supportedLanguages";
 
 export const DeckModel = createSelectSchema(DeckTable);
 
@@ -12,9 +16,11 @@ export const CreateDeckRequestSchema = createInsertSchema(DeckTable)
   })
   .extend({
     name: z.string().min(1, { message: "Name is required" }),
-    languages: z.array(z.string()).refine((value) => value.length > 0, {
-      message: "Please select at least one language",
-    }),
+    language: z.enum(
+      Object.values(supportedLanguages).map((lang) => lang.languageCode) as [
+        SupportedLanguageCode
+      ]
+    ),
     emoji: z.string().default("🏝️"),
   });
 

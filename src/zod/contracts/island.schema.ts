@@ -5,7 +5,7 @@ export const CreateIslandRequestSchema = z.object({
   category: z.string(),
   count: z.number(),
   prompt: z.string(),
-  languages: z.array(z.string()),
+  language: z.string(),
 });
 
 export type CreateIslandRequest = z.infer<typeof CreateIslandRequestSchema>;

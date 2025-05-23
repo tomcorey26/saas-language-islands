@@ -27,14 +27,9 @@ export default function DeckItem({ deck }: DeckItemProps) {
               {deck.description}
             </p>
             <div className="flex flex-wrap gap-2 mt-2">
-              {deck.languages.map((lang) => (
-                <span
-                  key={lang}
-                  className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full"
-                >
-                  {lang}
-                </span>
-              ))}
+              <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+                {deck.language}
+              </span>
             </div>
           </div>
         </Link>

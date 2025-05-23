@@ -1,5 +1,23 @@
+interface BaseLanguage {
+  name: string;
+  flag: string;
+  languageCode: string;
+  colors: {
+    primary: string;
+    secondary: string;
+  };
+  formatName(): string;
+}
+
+const baseLanguage: Pick<BaseLanguage, "formatName"> = {
+  formatName(): string {
+    return (this as BaseLanguage).name + " " + (this as BaseLanguage).flag;
+  },
+};
+
 export const supportedLanguages = {
-  spanish: {
+  es: {
+    ...baseLanguage,
     name: "Spanish",
     flag: "🇪🇸",
     languageCode: "es",
@@ -8,7 +26,8 @@ export const supportedLanguages = {
       secondary: "bg-[#C60B1E] hover:bg-[#B00A1B] text-white",
     },
   },
-  french: {
+  fr: {
+    ...baseLanguage,
     name: "French",
     flag: "🇫🇷",
     languageCode: "fr",
@@ -17,7 +36,8 @@ export const supportedLanguages = {
       secondary: "bg-[#ED2939] hover:bg-[#D62533] text-white",
     },
   },
-  german: {
+  de: {
+    ...baseLanguage,
     name: "German",
     flag: "🇩🇪",
     languageCode: "de",
@@ -26,7 +46,8 @@ export const supportedLanguages = {
       secondary: "bg-[#DD0000] hover:bg-[#C70000] text-white",
     },
   },
-  italian: {
+  it: {
+    ...baseLanguage,
     name: "Italian",
     flag: "🇮🇹",
     languageCode: "it",
@@ -35,7 +56,8 @@ export const supportedLanguages = {
       secondary: "bg-[#ED2939] hover:bg-[#D62533] text-white",
     },
   },
-  portuguese: {
+  pt: {
+    ...baseLanguage,
     name: "Portuguese",
     flag: "🇵🇹",
     languageCode: "pt",

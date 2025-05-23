@@ -21,9 +21,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { BookOpen, Languages, Sparkles, Layers } from "lucide-react";
+import { BookOpen, Sparkles, Layers } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supportedLanguages } from "@/data/supportedLanguages";
 
 interface DeckHeroProps {
   deck: Deck & { cards: FlashCard[] };
@@ -84,11 +85,9 @@ export function DeckHero({
       <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-4 max-w-3xl">
           <div className="flex flex-wrap gap-2 mb-2">
-            {deck.languages.map((lang) => (
-              <Badge key={lang} variant="secondary" className="font-medium">
-                {lang}
-              </Badge>
-            ))}
+            <Badge variant="secondary" className="font-medium">
+              {supportedLanguages[deck.language].formatName()}
+            </Badge>
           </div>
           <h1 className="text-4xl font-extrabold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent drop-shadow-sm">
             {deck.name}
@@ -104,12 +103,6 @@ export function DeckHero({
             <div className="flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-primary/70" />
               <span className="font-medium">{totalCards} Cards</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Languages className="h-5 w-5 text-primary/70" />
-              <span className="font-medium">
-                {deck.languages.length} Languages
-              </span>
             </div>
           </div>
         </div>

@@ -13,7 +13,16 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FlashCard, FlashCardViews } from "@/app/dashboard/types";
+
+type FlashCard = {
+  id: string;
+  phrase: string;
+  translation: string;
+  category: string;
+  difficulty: string;
+};
+
+type FlashCardViews = "edit" | "practice";
 
 interface PronouncePracticeViewProps {
   flashCards: FlashCard[];
@@ -98,7 +107,7 @@ export const PracticeView: React.FC<PronouncePracticeViewProps> = ({
       <Card className="bg-gray-800 border-gray-700 text-indigo-400 w-1/2">
         <CardHeader className="flex items-end"></CardHeader>
         <CardContent className="text-center mb-4 flex flex-col gap-6">
-          <h2 className="text-xl">{flashCards[currentCardIndex].sentence}</h2>
+          <h2 className="text-xl">{flashCards[currentCardIndex].phrase}</h2>
           <h2 className="text-xl text-emerald-400 italic">
             {flashCards[currentCardIndex].translation}
           </h2>
