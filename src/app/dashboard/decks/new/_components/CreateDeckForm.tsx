@@ -127,7 +127,16 @@ export function CreateDeckForm({
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter deck name" {...field} />
+                  <div className="space-y-2">
+                    <Input
+                      placeholder="Enter deck name"
+                      {...field}
+                      maxLength={100}
+                    />
+                    <div className="text-sm text-muted-foreground text-right">
+                      {field.value.length}/100 characters
+                    </div>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -141,7 +150,16 @@ export function CreateDeckForm({
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Enter deck description" {...field} />
+                  <div className="space-y-2">
+                    <Textarea
+                      placeholder="Enter deck description"
+                      {...field}
+                      maxLength={500}
+                    />
+                    <div className="text-sm text-muted-foreground text-right">
+                      {field.value.length}/500 characters
+                    </div>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>

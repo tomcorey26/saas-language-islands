@@ -15,7 +15,14 @@ export const CreateDeckRequestSchema = createInsertSchema(DeckTable)
     clerkUserId: true,
   })
   .extend({
-    name: z.string().min(1, { message: "Name is required" }),
+    name: z
+      .string()
+      .min(1, { message: "Name is required" })
+      .max(100, { message: "Name must be less than 100 characters" }),
+    description: z
+      .string()
+      .min(1, { message: "Description is required" })
+      .max(500, { message: "Description must be less than 500 characters" }),
     language: z.enum(
       Object.values(supportedLanguages).map((lang) => lang.languageCode) as [
         SupportedLanguageCode
