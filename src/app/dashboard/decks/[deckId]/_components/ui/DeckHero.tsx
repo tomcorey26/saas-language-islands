@@ -106,6 +106,7 @@ export function DeckHero({
             </div>
           </div>
         </div>
+        {/* Move this */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>

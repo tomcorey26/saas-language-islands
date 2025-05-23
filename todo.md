@@ -1,4 +1,16 @@
-Today:
+Core Features
+
+- CRUD operations for decks and flashcards (In progress)
+- Generate a deck of flashcards for a language with AI
+- Listen to the flashcard audio, https://chatgpt.com/g/g-p-6830d38038b481919c372062694b024e-language-islands/c/6830d3a1-2608-8010-9ffd-655047444f72
+- Study the deck with a space repetition UI system that is fun and engaging
+
+5/23/2025
+What I learned:
+You have to export the enum types from the drizzle shema for them to work
+Db migrations are like git commits for the db
+It is a marathon not a spring, just pick 1 feature and finish it each day
+I should be keeping track of the services I am using and the costs
 
 <!-- - Just have one subscription tier for now to start, Maybe
   put others behind a toggle -->

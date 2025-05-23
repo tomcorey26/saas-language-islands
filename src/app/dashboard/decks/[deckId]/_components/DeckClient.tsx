@@ -50,6 +50,8 @@ export function DeckClient({ deck, cardsByCategory }: DeckClientProps) {
         throw new Error(result.error);
       }
 
+      setSelectedCategory(formData.islandName);
+
       toast({
         title: "Success!",
         description: `${formData.cardCount} cards generated for "${formData.islandName}" island.`,
