@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { Deck } from "@/zod/contracts/deck.schema";
 import { FlashCard } from "@/zod/models/flashcard.model";
-import { deleteIsland, generateCards } from "../actions";
+import { deleteIsland } from "../actions";
 import { useToast } from "@/hooks/use-toast";
 
 // Import the extracted components
-import { DeckHero, GenerateCardsFormData } from "./ui/DeckHero";
+import { DeckHero } from "./ui/DeckHero";
 import { EmptyState } from "./ui/EmptyState";
 import { CategoryTabs } from "./ui/CategoryTabs";
 import { DeleteDialog } from "./ui/DeleteDialog";
@@ -18,7 +18,6 @@ interface DeckClientProps {
 }
 
 export function DeckClient({ deck, cardsByCategory }: DeckClientProps) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
   // Get the first category for default tab selection
@@ -35,33 +34,6 @@ export function DeckClient({ deck, cardsByCategory }: DeckClientProps) {
   // Calculate statistics
   const totalCards = Object.values(cardsByCategory).flat().length;
   const totalIslands = Object.keys(cardsByCategory).length;
-
-  const handleGenerateCards = async (formData: GenerateCardsFormData) => {
-    try {
-      const result = await generateCards({
-        category: formData.islandName,
-        deckId: deck.id,
-        count: formData.cardCount,
-        prompt: formData.prompt,
-        language: deck.language,
-      });
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
-      setSelectedCategory(formData.islandName);
-
-      toast({
-        title: "Success!",
-        description: `${formData.cardCount} cards generated for "${formData.islandName}" island.`,
-        variant: "default",
-      });
-    } catch (error: unknown) {
-      console.error("Error generating cards:", error);
-      throw error;
-    }
-  };
 
   const handleDeleteIsland = async (category: string) => {
     try {
@@ -103,15 +75,11 @@ export function DeckClient({ deck, cardsByCategory }: DeckClientProps) {
         deck={deck}
         totalCards={totalCards}
         totalIslands={totalIslands}
-        onGenerateCards={handleGenerateCards}
       />
 
       {/* Main Content */}
       {Object.keys(cardsByCategory).length === 0 ? (
-        <EmptyState
-          isDialogOpen={isDialogOpen}
-          setIsDialogOpen={setIsDialogOpen}
-        />
+        <EmptyState deckId={deck.id} />
       ) : (
         <div className="space-y-6">
           <CategoryTabs

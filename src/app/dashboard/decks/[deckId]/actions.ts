@@ -11,16 +11,22 @@ import {
 import { generateFlashcardsIsland } from "@/services/openai";
 import { createCards, deleteCardsByCategory } from "@/server/db/cards";
 
-export async function generateCards(data: CreateIslandRequest) {
+export async function generateCards(data: CreateIslandRequest): Promise<
+  | {
+      error: boolean;
+      message: string;
+    }
+  | undefined
+> {
   try {
     const { userId } = await auth();
-    if (!userId) {
-      throw new Error("Not authenticated");
-    }
 
     const parsedData = CreateIslandRequestSchema.safeParse(data);
-    if (!parsedData.success) {
-      throw new Error("Invalid request data");
+    if (!parsedData.success || userId == null) {
+      return {
+        error: true,
+        message: "Invalid request data",
+      };
     }
 
     const { deckId } = parsedData.data;
@@ -28,12 +34,18 @@ export async function generateCards(data: CreateIslandRequest) {
     // Verify deck ownership
     const deck = await getDeck({ id: deckId, clerkUserId: userId });
 
-    if (!deck || deck.clerkUserId !== userId) {
-      throw new Error("Unauthorized");
+    if (!deck) {
+      return {
+        error: true,
+        message: "Unauthorized",
+      };
     }
 
     // Generate cards using OpenAI
-    const completion = await generateFlashcardsIsland(parsedData.data);
+    const completion = await generateFlashcardsIsland({
+      ...parsedData.data,
+      language: deck.language,
+    });
 
     if (!completion) {
       throw new Error("Failed to generate cards");
@@ -51,11 +63,15 @@ export async function generateCards(data: CreateIslandRequest) {
     await createCards(cards);
 
     revalidatePath(`/dashboard/decks/${deckId}`);
-    return { success: true };
+    return {
+      error: false,
+      message: "Cards generated successfully",
+    };
   } catch (error) {
     console.error("Error generating cards:", error);
     return {
-      error:
+      error: true,
+      message:
         error instanceof Error ? error.message : "Failed to generate cards",
     };
   }

@@ -2,15 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { PlusCircle } from "lucide-react";
+import Link from "next/link";
 
-interface EmptyStateProps {
-  isDialogOpen: boolean;
-  setIsDialogOpen: (open: boolean) => void;
-}
-
-export function EmptyState({ isDialogOpen, setIsDialogOpen }: EmptyStateProps) {
+export function EmptyState({ deckId }: { deckId: string }) {
   return (
     <Card className="border-dashed border-2 bg-muted/50">
       <CardContent className="flex flex-col items-center justify-center py-16">
@@ -22,13 +17,11 @@ export function EmptyState({ isDialogOpen, setIsDialogOpen }: EmptyStateProps) {
           Start by creating your first island to organize your flashcards into
           categories
         </p>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-primary to-primary/80">
-              Create Your First Island
-            </Button>
-          </DialogTrigger>
-        </Dialog>
+        <Link href={`/dashboard/decks/${deckId}?createIsland=true`}>
+          <Button className="bg-gradient-to-r from-primary to-primary/80">
+            Create Your First Island
+          </Button>
+        </Link>
       </CardContent>
     </Card>
   );

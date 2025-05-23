@@ -6,6 +6,7 @@ import {
 } from "@/zod/contracts/world.schema";
 import { CreateIslandRequest } from "@/zod/contracts/island.schema";
 import { z } from "zod";
+import { SupportedLanguageCode } from "@/data/supportedLanguages";
 const openAiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const generateIslandsPrompt = (request: CreateWorldRequest) => {
@@ -65,7 +66,13 @@ export async function generateWorld(request: CreateWorldRequest) {
   return world_response.parsed;
 }
 
-function generateFlashcardsIslandPrompt(request: CreateIslandRequest) {
+type CreateIslandRequestWithLanguage = CreateIslandRequest & {
+  language: SupportedLanguageCode;
+};
+
+function generateFlashcardsIslandPrompt(
+  request: CreateIslandRequestWithLanguage
+) {
   const translationLanguage = request.language;
 
   return `You are a helpful assistant that generates flashcards that are useful for a conversation with a native speaker. 
@@ -76,7 +83,9 @@ function generateFlashcardsIslandPrompt(request: CreateIslandRequest) {
   `;
 }
 
-export async function generateFlashcardsIsland(request: CreateIslandRequest) {
+export async function generateFlashcardsIsland(
+  request: CreateIslandRequestWithLanguage
+) {
   const completion = await openAiClient.beta.chat.completions.parse({
     model: "gpt-4o-mini",
     messages: [
