@@ -5,6 +5,7 @@ import { Deck } from "@/zod/contracts/deck.schema";
 import Link from "next/link";
 import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DeleteDeckDialogContent } from "@/app/dashboard/_components/DeleteDeckDialogContent";
+import { formatLangNameByCode } from "@/lib/formatters";
 
 interface DeckItemProps {
   deck: Deck;
@@ -28,7 +29,7 @@ export default function DeckItem({ deck }: DeckItemProps) {
             </p>
             <div className="flex flex-wrap gap-2 mt-2">
               <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-                {deck.language}
+                {formatLangNameByCode(deck.language)}
               </span>
             </div>
           </div>

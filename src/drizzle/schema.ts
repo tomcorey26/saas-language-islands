@@ -51,6 +51,7 @@ export const DeckTable = pgTable(
     description: text("description").notNull(),
     emoji: text("emoji").default("🏝️").notNull(),
     language: LanguageEnum("language").notNull(),
+    // TODO: support multiple languages
     createdAt,
     updatedAt,
   },
