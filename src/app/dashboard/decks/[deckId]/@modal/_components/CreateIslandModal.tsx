@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { useToast } from "@/hooks/use-toast";
 import { Sparkles } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export interface GenerateCardsFormData {
@@ -24,7 +24,11 @@ export interface GenerateCardsFormData {
   prompt: string;
 }
 
+// TODO use clientside router instead for checking the querystring
 export function CreateIslandModal({ deckId }: { deckId: string }) {
+  const searchParams = useSearchParams();
+  const isModalOpen = searchParams.get("createIsland") === "true";
+
   const [isGenerating, setIsGenerating] = useState(false);
   const [formData, setFormData] = useState<GenerateCardsFormData>({
     islandName: "",
@@ -63,7 +67,10 @@ export function CreateIslandModal({ deckId }: { deckId: string }) {
   };
 
   return (
-    <Dialog open={true} onOpenChange={(open) => (open ? null : closeModal())}>
+    <Dialog
+      open={isModalOpen}
+      onOpenChange={(open) => (open ? null : closeModal())}
+    >
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
