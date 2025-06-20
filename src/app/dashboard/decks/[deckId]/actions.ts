@@ -77,28 +77,39 @@ export async function generateCards(data: CreateIslandRequest): Promise<
   }
 }
 
-export async function deleteIsland(deckId: string, category: string) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      throw new Error("Not authenticated");
+export async function deleteIsland(
+  deckId: string,
+  category: string
+): Promise<
+  | {
+      error: boolean;
+      message: string;
     }
-
-    // Verify deck ownership
-    const deck = await getDeck({ id: deckId, clerkUserId: userId });
-    if (!deck) {
-      throw new Error("Unauthorized");
-    }
-
-    // Delete all cards in the category
-    await deleteCardsByCategory(deckId, category);
-
-    revalidatePath(`/decks/${deckId}`);
-    return { success: true };
-  } catch (error) {
-    console.error("Error deleting island:", error);
+  | undefined
+> {
+  const { userId } = await auth();
+  if (!userId) {
     return {
-      error: error instanceof Error ? error.message : "Failed to delete island",
+      error: true,
+      message: "Not authenticated",
     };
   }
+
+  // Verify deck ownership
+  const deck = await getDeck({ id: deckId, clerkUserId: userId });
+  if (!deck) {
+    return {
+      error: true,
+      message: "Unauthorized",
+    };
+  }
+
+  // Delete all cards in the category
+  await deleteCardsByCategory(deckId, category);
+
+  revalidatePath(`/decks/${deckId}`);
+  return {
+    error: false,
+    message: "Island deleted successfully",
+  };
 }

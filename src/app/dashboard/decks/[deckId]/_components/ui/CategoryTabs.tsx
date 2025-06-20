@@ -19,7 +19,7 @@ export function CategoryTabs({ cardsByCategory }: CategoryTabsProps) {
       defaultValue={selectedCategory}
       onValueChange={(value) => setSelectedCategory(value)}
     >
-      <TabsList className="flex items-center justify-start flex-wrap h-auto space-y-1">
+      <TabsList className="flex items-center justify-start flex-wrap h-auto">
         {Object.keys(cardsByCategory).map((category) => (
           <TabsTrigger key={category} value={category}>
             {category}

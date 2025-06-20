@@ -16,6 +16,8 @@ I learned about parallel routes and how they can be used to render pages as slot
 <!-- - Just have one subscription tier for now to start, Maybe
   put others behind a toggle -->
 
+- Swap to using gemini for the flashcard generation
+
 - Click and study. Doulingo style flow that allows you to study the phrases in the deck using the games reccomended by polyglots
 - Or just regular study mode
 - Have default study decks that are the most popular phrases for each language

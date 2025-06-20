@@ -27,44 +27,40 @@ export function DeleteIslandDialog() {
   const handleDeleteIsland = async () => {
     const deckId = params.deckId;
 
-    try {
-      // validate the island id is a valid uuid
-      if (!category) {
-        toast({
-          title: "Error",
-          description: "Invalid category.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // validate the deck id is a valid uuid
-      if (!deckId) {
-        toast({
-          title: "Error",
-          description: "Invalid deck id.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setIsDeleting(true);
-      await deleteIsland(deckId.toString(), category);
-      toast({
-        title: "Island Deleted",
-        description: `Successfully deleted "${category}" island.`,
-      });
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_error: unknown) {
+    // validate the island id is a valid uuid
+    if (!category) {
       toast({
         title: "Error",
-        description: "Failed to delete island. Please try again.",
+        description: "Invalid category.",
         variant: "destructive",
       });
-    } finally {
-      setIsDeleting(false);
+      return;
     }
+
+    // validate the deck id is a valid uuid
+    if (!deckId) {
+      toast({
+        title: "Error",
+        description: "Invalid deck id.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsDeleting(true);
+    const result = await deleteIsland(deckId.toString(), category);
+    if (result?.message) {
+      toast({
+        title: result.error ? "Error" : "Success",
+        description: result.message,
+        variant: result.error ? "destructive" : "default",
+      });
+    }
+
+    if (!result?.error) {
+      router.push(`/dashboard/decks/${params.deckId}`);
+    }
+    setIsDeleting(false);
   };
 
   return (
