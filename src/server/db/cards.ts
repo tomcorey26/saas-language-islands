@@ -15,3 +15,9 @@ export async function deleteCardsByCategory(deckId: string, category: string) {
     .delete(CardTable)
     .where(and(eq(CardTable.deckId, deckId), eq(CardTable.category, category)));
 }
+
+export async function deleteCardById(deckId: string, cardId: string) {
+  return await db
+    .delete(CardTable)
+    .where(and(eq(CardTable.id, cardId), eq(CardTable.deckId, deckId)));
+}

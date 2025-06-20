@@ -12,7 +12,7 @@ interface FlashCardListProps {
 
 export function FlashCardList({ category, cards }: FlashCardListProps) {
   const params = useParams();
-  const deckId = params.deckId;
+  const deckId = params.deckId as string;
 
   return (
     <>
@@ -31,7 +31,12 @@ export function FlashCardList({ category, cards }: FlashCardListProps) {
       </div>
       <div className="space-y-2">
         {cards.map((card, index) => (
-          <FlashCardItem key={card.id} card={card} index={index} />
+          <FlashCardItem
+            key={card.id}
+            card={card}
+            index={index}
+            deckId={deckId}
+          />
         ))}
       </div>
     </>

@@ -9,7 +9,11 @@ import {
   CreateIslandRequestSchema,
 } from "@/zod/contracts/island.schema";
 import { generateFlashcardsIsland } from "@/services/openai";
-import { createCards, deleteCardsByCategory } from "@/server/db/cards";
+import {
+  createCards,
+  deleteCardsByCategory,
+  deleteCardById,
+} from "@/server/db/cards";
 
 export async function generateCards(data: CreateIslandRequest): Promise<
   | {
@@ -111,5 +115,42 @@ export async function deleteIsland(
   return {
     error: false,
     message: "Island deleted successfully",
+  };
+}
+
+export async function deleteCard(
+  cardId: string,
+  deckId: string
+): Promise<
+  | {
+      error: boolean;
+      message: string;
+    }
+  | undefined
+> {
+  const { userId } = await auth();
+  if (!userId) {
+    return {
+      error: true,
+      message: "Not authenticated",
+    };
+  }
+
+  // Verify deck ownership
+  const deck = await getDeck({ id: deckId, clerkUserId: userId });
+  if (!deck) {
+    return {
+      error: true,
+      message: "Unauthorized",
+    };
+  }
+
+  // Delete the card
+  await deleteCardById(deckId, cardId);
+
+  revalidatePath(`/dashboard/decks/${deckId}`);
+  return {
+    error: false,
+    message: "Card deleted successfully",
   };
 }
