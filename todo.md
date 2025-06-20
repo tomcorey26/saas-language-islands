@@ -11,6 +11,7 @@ You have to export the enum types from the drizzle shema for them to work
 Db migrations are like git commits for the db
 It is a marathon not a spring, just pick 1 feature and finish it each day
 I should be keeping track of the services I am using and the costs
+I learned about parallel routes and how they can be used to render pages as slots, they need a default tsx to be renderd correctly
 
 <!-- - Just have one subscription tier for now to start, Maybe
   put others behind a toggle -->

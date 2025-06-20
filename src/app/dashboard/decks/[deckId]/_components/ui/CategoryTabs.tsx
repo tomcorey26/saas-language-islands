@@ -3,20 +3,17 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FlashCard } from "@/zod/models/flashcard.model";
 import { FlashCardList } from "./FlashCardList";
+import { useState } from "react";
 
 interface CategoryTabsProps {
   cardsByCategory: Record<string, FlashCard[]>;
-  selectedCategory: string;
-  setSelectedCategory: (category: string) => void;
-  onDeleteIsland: (category: string) => void;
 }
 
-export function CategoryTabs({
-  cardsByCategory,
-  selectedCategory,
-  setSelectedCategory,
-  onDeleteIsland,
-}: CategoryTabsProps) {
+export function CategoryTabs({ cardsByCategory }: CategoryTabsProps) {
+  const [selectedCategory, setSelectedCategory] = useState(
+    Object.keys(cardsByCategory)[0] || ""
+  );
+
   return (
     <Tabs
       defaultValue={selectedCategory}
@@ -31,11 +28,7 @@ export function CategoryTabs({
       </TabsList>
       {Object.entries(cardsByCategory).map(([category, cards]) => (
         <TabsContent key={category} value={category} className="mt-6">
-          <FlashCardList
-            category={category}
-            cards={cards}
-            onDeleteCategory={() => onDeleteIsland(category)}
-          />
+          <FlashCardList category={category} cards={cards} />
         </TabsContent>
       ))}
     </Tabs>

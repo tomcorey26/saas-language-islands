@@ -24,7 +24,6 @@ export interface GenerateCardsFormData {
   prompt: string;
 }
 
-// TODO use clientside router instead for checking the querystring
 export function CreateIslandModal({ deckId }: { deckId: string }) {
   const searchParams = useSearchParams();
   const isModalOpen = searchParams.get("createIsland") === "true";
