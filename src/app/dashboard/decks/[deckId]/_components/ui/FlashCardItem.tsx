@@ -24,24 +24,27 @@ import {
 import { deleteCard } from "../../actions";
 import { toast } from "@/hooks/use-toast";
 import { useTransition } from "react";
+import { speak } from "@/lib/textToSpeech";
+import { Deck } from "@/zod/models/deck.model";
 
 interface FlashCardItemProps {
   card: FlashCard;
   index: number;
   deckId: string;
+  deck: Deck;
 }
 
-export function FlashCardItem({ card, index, deckId }: FlashCardItemProps) {
+export function FlashCardItem({
+  card,
+  index,
+  deckId,
+  deck,
+}: FlashCardItemProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeletePending, startDeleteTransition] = useTransition();
 
-  // TOMDO: Make language dynamic
   const playAudio = () => {
-    if ("speechSynthesis" in window) {
-      const utterance = new SpeechSynthesisUtterance(card.translation);
-      utterance.lang = "es-ES"; // Set language to Spanish
-      window.speechSynthesis.speak(utterance);
-    }
+    speak(card.translation, deck.language);
   };
 
   const handleDelete = () => {

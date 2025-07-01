@@ -4,13 +4,15 @@ import { Trash2 } from "lucide-react";
 import { FlashCardItem } from "./FlashCardItem";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { Deck } from "@/zod/models/deck.model";
 
 interface FlashCardListProps {
   category: string;
   cards: FlashCard[];
+  deck: Deck;
 }
 
-export function FlashCardList({ category, cards }: FlashCardListProps) {
+export function FlashCardList({ category, cards, deck }: FlashCardListProps) {
   const params = useParams();
   const deckId = params.deckId as string;
 
@@ -36,6 +38,7 @@ export function FlashCardList({ category, cards }: FlashCardListProps) {
             card={card}
             index={index}
             deckId={deckId}
+            deck={deck}
           />
         ))}
       </div>

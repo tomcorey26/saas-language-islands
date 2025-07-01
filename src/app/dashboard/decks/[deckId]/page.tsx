@@ -63,7 +63,7 @@ export default async function DeckPage({
           <EmptyState deckId={deck.id} />
         ) : (
           <div className="space-y-6">
-            <CategoryTabs cardsByCategory={cardsByCategory} />
+            <CategoryTabs cardsByCategory={cardsByCategory} deck={deck} />
           </div>
         )}
       </div>
