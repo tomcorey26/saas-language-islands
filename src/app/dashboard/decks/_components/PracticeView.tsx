@@ -56,7 +56,7 @@ export const PracticeView: React.FC<PronouncePracticeViewProps> = ({
   }, [setView]);
 
   const handlePlayAudio = useCallback(() => {
-    speak(flashCards[currentCardIndex].translation, "es-ES");
+    speak(flashCards[currentCardIndex].translation, "es");
   }, [currentCardIndex, flashCards]);
 
   useEffect(() => {
