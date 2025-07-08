@@ -1,5 +1,5 @@
 {
-  "id": "c1f00ada-a7c3-46f8-88b3-8a77e392f6b5",
+  "id": "0f40e05b-011b-4e76-9e20-d7e7c9e0f434",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -129,15 +129,17 @@
           "primaryKey": false,
           "notNull": true
         },
-        "image_url": {
-          "name": "image_url",
+        "emoji": {
+          "name": "emoji",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'🏝️'"
         },
         "languages": {
           "name": "languages",
-          "type": "text[]",
+          "type": "language[]",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
@@ -285,7 +287,37 @@
       "isRLSEnabled": false
     }
   },
-  "enums": {},
+  "enums": {
+    "public.difficulty": {
+      "name": "difficulty",
+      "schema": "public",
+      "values": [
+        "again",
+        "difficult",
+        "good",
+        "easy"
+      ]
+    },
+    "public.language": {
+      "name": "language",
+      "schema": "public",
+      "values": [
+        "es",
+        "fr",
+        "de",
+        "it",
+        "pt"
+      ]
+    },
+    "public.tier": {
+      "name": "tier",
+      "schema": "public",
+      "values": [
+        "Hobby",
+        "Pro"
+      ]
+    }
+  },
   "schemas": {},
   "sequences": {},
   "roles": {},

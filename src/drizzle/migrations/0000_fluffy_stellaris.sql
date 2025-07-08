@@ -1,3 +1,6 @@
+CREATE TYPE "public"."difficulty" AS ENUM('again', 'difficult', 'good', 'easy');--> statement-breakpoint
+CREATE TYPE "public"."language" AS ENUM('es', 'fr', 'de', 'it', 'pt');--> statement-breakpoint
+CREATE TYPE "public"."tier" AS ENUM('Hobby', 'Pro');--> statement-breakpoint
 CREATE TABLE "cards" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"deck_id" uuid NOT NULL,
@@ -14,8 +17,8 @@ CREATE TABLE "decks" (
 	"clerk_user_id" text NOT NULL,
 	"name" text NOT NULL,
 	"description" text NOT NULL,
-	"image_url" text NOT NULL,
-	"languages" text[] NOT NULL,
+	"emoji" text DEFAULT '🏝️' NOT NULL,
+	"languages" "language"[] NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );

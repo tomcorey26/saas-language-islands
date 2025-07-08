@@ -34,7 +34,7 @@ export const subscriptionTiers = {
   Hobby: {
     name: "Hobby",
     priceInCents: 0,
-    maxNumberOfGenerationsPerMonth: 200,
+    maxNumberOfGenerationsPerMonth: 2000,
     // canAccessAdvancedSentencePacks: false,
     maxNumberOfLanguages: 1, // just one language
     canSaveFlashcards: false,
@@ -53,7 +53,7 @@ export const subscriptionTiers = {
   },
   Pro: {
     name: "Pro",
-    priceInCents: 2000,
+    priceInCents: 299,
     maxNumberOfGenerationsPerMonth: Infinity,
     maxNumberOfLanguages: Infinity,
     canSaveFlashcards: true,

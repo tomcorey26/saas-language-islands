@@ -1,5 +1,9 @@
 import { cardDifficulties, CardDifficulty } from "@/data/cardDifficulties";
 import { subscriptionTiers, TierNames } from "@/data/subscriptionTiers";
+import {
+  SupportedLanguageCode,
+  supportedLanguages,
+} from "@/data/supportedLanguages";
 import { relations } from "drizzle-orm";
 import {
   pgTable,
@@ -10,22 +14,32 @@ import {
   pgEnum,
 } from "drizzle-orm/pg-core";
 
-const createdAt = timestamp("created_at", { withTimezone: true })
+export const createdAt = timestamp("created_at", { withTimezone: true })
   .notNull()
   .defaultNow();
 
-const updatedAt = timestamp("updated_at", { withTimezone: true })
+export const updatedAt = timestamp("updated_at", { withTimezone: true })
   .notNull()
   .defaultNow()
   .$onUpdate(() => new Date());
 
 // Define enums first
-const DifficultyEnum = pgEnum(
+export const DifficultyEnum = pgEnum(
   "difficulty",
   Object.keys(cardDifficulties) as [CardDifficulty]
 );
 
-const TierEnum = pgEnum("tier", Object.keys(subscriptionTiers) as [TierNames]);
+export const LanguageEnum = pgEnum(
+  "language",
+  Object.values(supportedLanguages).map((lang) => lang.languageCode) as [
+    SupportedLanguageCode
+  ]
+);
+
+export const TierEnum = pgEnum(
+  "tier",
+  Object.keys(subscriptionTiers) as [TierNames]
+);
 
 // Then define tables
 export const DeckTable = pgTable(
@@ -35,8 +49,9 @@ export const DeckTable = pgTable(
     clerkUserId: text("clerk_user_id").notNull(),
     name: text("name").notNull(),
     description: text("description").notNull(),
-    imageUrl: text("image_url").notNull(),
-    languages: text("languages").array().notNull(),
+    emoji: text("emoji").default("🏝️").notNull(),
+    language: LanguageEnum("language").notNull(),
+    // TODO: support multiple languages
     createdAt,
     updatedAt,
   },
@@ -83,12 +98,10 @@ export const UserSubscriptionTable = pgTable(
     createdAt,
     updatedAt,
   },
-  (table) => ({
-    clerkUserIdIndex: index("user_subscriptions.clerk_user_id_index").on(
-      table.clerkUserId
+  (table) => [
+    index("user_subscriptions.clerk_user_id_index").on(table.clerkUserId),
+    index("user_subscriptions.stripe_customer_id_index").on(
+      table.stripeCustomerId
     ),
-    stripeCustomerIdIndex: index(
-      "user_subscriptions.stripe_customer_id_index"
-    ).on(table.stripeCustomerId),
-  })
+  ]
 );
