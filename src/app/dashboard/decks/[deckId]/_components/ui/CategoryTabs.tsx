@@ -11,6 +11,7 @@ interface CategoryTabsProps {
   deck: Deck;
 }
 
+// TOMOO: Add the ability to view the prompt you used to generate the island
 export function CategoryTabs({ cardsByCategory, deck }: CategoryTabsProps) {
   const [selectedCategory, setSelectedCategory] = useState(
     Object.keys(cardsByCategory)[0] || ""

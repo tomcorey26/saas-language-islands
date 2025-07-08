@@ -1,3 +1,9 @@
+## zod
+
+- `/client` - client specific schemas
+- `/contracts` - server contract schemas
+- `/models` - server models (1:1 with db)
+
 ## Useful links
 
 - Shadcdn: https://shadcdn.com/
@@ -23,8 +29,4 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-## zod
-
-- `/client` - client specific schemas
-- `/contracts` - server contract schemas
-- `/models` - server models (1:1 with db)
+# Choose translation language and target languages?

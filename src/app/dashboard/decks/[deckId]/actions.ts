@@ -13,6 +13,7 @@ import {
   createCards,
   deleteCardsByCategory,
   deleteCardById,
+  updateCard,
 } from "@/server/db/cards";
 
 export async function generateCards(data: CreateIslandRequest): Promise<
@@ -152,5 +153,55 @@ export async function deleteCard(
   return {
     error: false,
     message: "Card deleted successfully",
+  };
+}
+
+export async function updateCardAction(
+  cardId: string,
+  deckId: string,
+  phrase: string,
+  translation: string
+): Promise<
+  | {
+      error: boolean;
+      message: string;
+    }
+  | undefined
+> {
+  const { userId } = await auth();
+  if (!userId) {
+    return {
+      error: true,
+      message: "Not authenticated",
+    };
+  }
+
+  // Validate input
+  if (!phrase.trim() || !translation.trim()) {
+    return {
+      error: true,
+      message: "Phrase and translation cannot be empty",
+    };
+  }
+
+  // Verify deck ownership
+  const deck = await getDeck({ id: deckId, clerkUserId: userId });
+  if (!deck) {
+    return {
+      error: true,
+      message: "Unauthorized",
+    };
+  }
+
+  // Update the card
+  await updateCard(deckId, cardId, {
+    phrase: phrase.trim(),
+    translation: translation.trim(),
+  });
+
+  revalidatePath(`/dashboard/decks/${deckId}`);
+  return {
+    error: false,
+    message: "Card updated successfully",
   };
 }
