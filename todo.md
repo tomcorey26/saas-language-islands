@@ -94,3 +94,13 @@ I learned about parallel routes and how they can be used to render pages as slot
 - Drizzle
 - Stripe
 - Cursor
+
+# Prod deployment
+
+- set up stripe and stripe prod env
+- buy domain name
+- buy vercel pro, but make sure to set limits and shit
+- vercel .env config
+  - Prod neon env
+- create clerk prod instance
+- set up webhook and test it
