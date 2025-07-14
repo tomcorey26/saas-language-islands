@@ -20,7 +20,6 @@ import { Smile } from "lucide-react";
 import {
   CreateDeckRequest,
   CreateDeckRequestSchema,
-  Deck,
 } from "@/zod/contracts/deck.schema";
 import { supportedLanguagesArray } from "@/data/supportedLanguages";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,6 +33,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Deck } from "@/zod/models/deck.model";
 
 // Lazy load the emoji picker
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), {

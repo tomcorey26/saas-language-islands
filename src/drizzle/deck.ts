@@ -3,6 +3,7 @@ import {
   supportedLanguages,
 } from "@/data/supportedLanguages";
 import { CardTable } from "@/drizzle/card";
+import { IslandTable } from "@/drizzle/island";
 import { createdAt, id, updatedAt } from "@/drizzle/schemaHelpers";
 import { relations } from "drizzle-orm";
 import { pgTable, text, index, pgEnum } from "drizzle-orm/pg-core";
@@ -31,4 +32,5 @@ export const DeckTable = pgTable(
 
 export const deckRelations = relations(DeckTable, ({ many }) => ({
   cards: many(CardTable),
+  islands: many(IslandTable),
 }));

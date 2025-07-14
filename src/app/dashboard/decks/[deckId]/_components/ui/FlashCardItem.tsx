@@ -32,7 +32,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { deleteCard, updateCardAction } from "../../actions";
+import { deleteCardAction, updateCardAction } from "../../actions";
 import { toast } from "@/hooks/use-toast";
 import { useTransition } from "react";
 import { speak } from "@/lib/textToSpeech";
@@ -89,7 +89,7 @@ export function FlashCardItem({
 
   const handleDelete = () => {
     startDeleteTransition(async () => {
-      const result = await deleteCard(card.id, deckId);
+      const result = await deleteCardAction(card.id, deckId);
 
       if (result?.message) {
         toast({

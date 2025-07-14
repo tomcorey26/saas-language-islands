@@ -43,6 +43,13 @@
       "when": 1747690457351,
       "tag": "0005_little_mastermind",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1752534029228,
+      "tag": "0006_parallel_tarantula",
+      "breakpoints": true
     }
   ]
 }

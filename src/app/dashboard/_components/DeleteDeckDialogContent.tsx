@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteDeck } from "@/app/dashboard/decks/actions";
+import { deleteDeckAction } from "@/app/dashboard/decks/actions";
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -30,7 +30,7 @@ export function DeleteDeckDialogContent({ id }: { id: string }) {
           disabled={isDeletePending}
           onClick={() => {
             startDeleteTransition(async () => {
-              const result = await deleteDeck(id);
+              const result = await deleteDeckAction(id);
 
               await new Promise((resolve) => setTimeout(resolve, 1000));
 

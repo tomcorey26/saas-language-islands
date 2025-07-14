@@ -1,12 +1,12 @@
 "use client";
 
-import { Deck } from "@/zod/contracts/deck.schema";
 import { FlashCard } from "@/zod/models/flashcard.model";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Layers, Sparkles } from "lucide-react";
 import { supportedLanguages } from "@/data/supportedLanguages";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Deck } from "@/zod/models/deck.model";
 
 interface DeckHeroProps {
   deck: Deck & { cards: FlashCard[] };

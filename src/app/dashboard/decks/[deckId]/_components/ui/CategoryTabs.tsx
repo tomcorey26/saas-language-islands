@@ -1,20 +1,21 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FlashCard } from "@/zod/models/flashcard.model";
 import { FlashCardList } from "./FlashCardList";
 import { useState } from "react";
 import { Deck } from "@/zod/models/deck.model";
+import { Island } from "@/zod/models/island.model";
+import { FlashCard } from "@/zod/models/flashcard.model";
 
 interface CategoryTabsProps {
-  cardsByCategory: Record<string, FlashCard[]>;
+  islands: (Island & { cards: FlashCard[] })[];
   deck: Deck;
 }
 
 // TOMOO: Add the ability to view the prompt you used to generate the island
-export function CategoryTabs({ cardsByCategory, deck }: CategoryTabsProps) {
+export function CategoryTabs({ islands, deck }: CategoryTabsProps) {
   const [selectedCategory, setSelectedCategory] = useState(
-    Object.keys(cardsByCategory)[0] || ""
+    islands[0]?.name || ""
   );
 
   return (
@@ -23,15 +24,15 @@ export function CategoryTabs({ cardsByCategory, deck }: CategoryTabsProps) {
       onValueChange={(value) => setSelectedCategory(value)}
     >
       <TabsList className="flex items-center justify-start flex-wrap h-auto">
-        {Object.keys(cardsByCategory).map((category) => (
-          <TabsTrigger key={category} value={category}>
-            {category}
+        {islands.map((island) => (
+          <TabsTrigger key={island.id} value={island.name}>
+            {island.name}
           </TabsTrigger>
         ))}
       </TabsList>
-      {Object.entries(cardsByCategory).map(([category, cards]) => (
-        <TabsContent key={category} value={category} className="mt-6">
-          <FlashCardList category={category} cards={cards} deck={deck} />
+      {islands.map((island) => (
+        <TabsContent key={island.id} value={island.name} className="mt-6">
+          <FlashCardList island={island} cards={island.cards} deck={deck} />
         </TabsContent>
       ))}
     </Tabs>

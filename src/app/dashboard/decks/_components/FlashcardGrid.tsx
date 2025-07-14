@@ -36,7 +36,7 @@ export default function FlashcardGrid() {
         createdAt: new Date(),
         updatedAt: new Date(),
         deckId: "1",
-        category: "spanish",
+        islandId: "1",
       };
       setCards([newCard, ...cards]);
     }

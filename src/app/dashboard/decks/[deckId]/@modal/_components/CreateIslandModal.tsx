@@ -1,6 +1,6 @@
 "use client";
 
-import { generateCards } from "@/app/dashboard/decks/[deckId]/actions";
+import { generateIslandAction } from "@/app/dashboard/decks/[deckId]/actions";
 import { Button } from "@/components/ui/button";
 import {
   DialogContent,
@@ -14,26 +14,25 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import { useToast } from "@/hooks/use-toast";
+import { CreateIslandRequest } from "@/zod/contracts/island.schema";
 import { Sparkles } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-export interface GenerateCardsFormData {
-  islandName: string;
-  cardCount: number;
-  prompt: string;
-}
-
+// TOMDO: add limits to the prompt and the count, refactor to shadcn/ui form
+// Make it so after it generates it switches to the new island tab
 export function CreateIslandModal({ deckId }: { deckId: string }) {
   const searchParams = useSearchParams();
   const isModalOpen = searchParams.get("createIsland") === "true";
 
   const [isGenerating, setIsGenerating] = useState(false);
-  const [formData, setFormData] = useState<GenerateCardsFormData>({
-    islandName: "",
-    cardCount: 10,
-    prompt: "",
-  });
+  const [formData, setFormData] = useState<Omit<CreateIslandRequest, "deckId">>(
+    {
+      name: "",
+      count: 10,
+      prompt: "",
+    }
+  );
   const { toast } = useToast();
   const router = useRouter();
 
@@ -45,11 +44,11 @@ export function CreateIslandModal({ deckId }: { deckId: string }) {
     e.preventDefault();
     setIsGenerating(true);
 
-    const result = await generateCards({
-      category: formData.islandName,
-      deckId: deckId,
-      count: formData.cardCount,
+    const result = await generateIslandAction({
+      deckId,
+      count: formData.count,
       prompt: formData.prompt,
+      name: formData.name,
     });
 
     if (result?.message) {
@@ -81,16 +80,16 @@ export function CreateIslandModal({ deckId }: { deckId: string }) {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
           <div className="space-y-2">
-            <Label htmlFor="islandName" className="text-base">
+            <Label htmlFor="name" className="text-base">
               Island Name
             </Label>
             <Input
-              id="islandName"
-              value={formData.islandName}
+              id="name"
+              value={formData.name}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  islandName: e.target.value,
+                  name: e.target.value,
                 })
               }
               placeholder="e.g., Greetings, Business, Travel"
@@ -99,19 +98,19 @@ export function CreateIslandModal({ deckId }: { deckId: string }) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="cardCount" className="text-base">
+            <Label htmlFor="count" className="text-base">
               Number of Cards
             </Label>
             <Input
-              id="cardCount"
+              id="count"
               type="number"
               min={1}
               max={50}
-              value={formData.cardCount}
+              value={formData.count}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  cardCount: parseInt(e.target.value),
+                  count: parseInt(e.target.value),
                 })
               }
               className="h-11"

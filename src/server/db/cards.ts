@@ -21,10 +21,10 @@ export async function updateCard(
     .where(and(eq(CardTable.id, cardId), eq(CardTable.deckId, deckId)));
 }
 
-export async function deleteCardsByCategory(deckId: string, category: string) {
+export async function deleteCardsByIsland(deckId: string, islandId: string) {
   return await db
     .delete(CardTable)
-    .where(and(eq(CardTable.deckId, deckId), eq(CardTable.category, category)));
+    .where(and(eq(CardTable.deckId, deckId), eq(CardTable.islandId, islandId)));
 }
 
 export async function deleteCardById(deckId: string, cardId: string) {

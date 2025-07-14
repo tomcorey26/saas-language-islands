@@ -163,9 +163,12 @@ export default async function Dashboard() {
             <div>
               <p className="text-sm text-gray-500">Mastered</p>
               <p className="text-2xl font-semibold">
-                {((stats.totalMasteredCards / stats.totalCards) * 100).toFixed(
-                  2
-                )}
+                {stats.totalCards === 0
+                  ? 0
+                  : (
+                      (stats.totalMasteredCards / stats.totalCards) *
+                      100
+                    ).toFixed(2)}
                 %
               </p>
             </div>

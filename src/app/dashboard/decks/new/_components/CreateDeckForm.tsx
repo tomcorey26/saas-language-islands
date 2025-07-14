@@ -23,7 +23,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { createDeck, updateDeck } from "@/app/dashboard/decks/actions";
+import {
+  createDeckAction,
+  updateDeckAction,
+} from "@/app/dashboard/decks/actions";
 import EmojiPicker from "emoji-picker-react";
 import { DashboardPageLayout } from "@/app/dashboard/_components/DashboardPageLayout";
 import { toast } from "@/hooks/use-toast";
@@ -99,9 +102,9 @@ export function CreateDeckForm({
   const onSubmit = async (data: CreateDeckRequest) => {
     let result;
     if (id == null) {
-      result = await createDeck(data);
+      result = await createDeckAction(data);
     } else {
-      result = await updateDeck(id, data);
+      result = await updateDeckAction(id, data);
     }
 
     if (result?.message) {
