@@ -37,6 +37,7 @@ export default function FlashcardGrid() {
         updatedAt: new Date(),
         deckId: "1",
         islandId: "1",
+        position: cards.length,
       };
       setCards([newCard, ...cards]);
     }

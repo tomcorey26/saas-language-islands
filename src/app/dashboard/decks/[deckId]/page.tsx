@@ -22,7 +22,10 @@ export default async function DeckPage({
     notFound();
   }
 
-  const totalCards = deck.cards.length;
+  const totalCards = deck.islands.reduce(
+    (acc, island) => acc + island.cards.length,
+    0
+  );
   const totalIslands = deck.islands.length;
 
   return (

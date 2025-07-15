@@ -4,7 +4,14 @@ import { DeckTable } from "@/drizzle/deck";
 import { IslandTable } from "@/drizzle/island";
 import { createdAt, updatedAt } from "@/drizzle/schemaHelpers";
 import { relations } from "drizzle-orm";
-import { index, pgEnum, pgTable, text, uuid } from "drizzle-orm/pg-core";
+import {
+  index,
+  integer,
+  pgEnum,
+  pgTable,
+  text,
+  uuid,
+} from "drizzle-orm/pg-core";
 
 export const DifficultyEnum = pgEnum(
   "difficulty",
@@ -24,6 +31,7 @@ export const CardTable = pgTable(
     phrase: text("phrase").notNull(),
     translation: text("translation").notNull(),
     difficulty: DifficultyEnum("difficulty").notNull().default("again"),
+    position: integer("position").notNull(),
     createdAt,
     updatedAt,
   },

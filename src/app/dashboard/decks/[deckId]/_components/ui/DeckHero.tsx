@@ -1,6 +1,3 @@
-"use client";
-
-import { FlashCard } from "@/zod/models/flashcard.model";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Layers, Sparkles } from "lucide-react";
 import { supportedLanguages } from "@/data/supportedLanguages";
@@ -9,7 +6,7 @@ import Link from "next/link";
 import { Deck } from "@/zod/models/deck.model";
 
 interface DeckHeroProps {
-  deck: Deck & { cards: FlashCard[] };
+  deck: Deck;
   totalCards: number;
   totalIslands: number;
 }

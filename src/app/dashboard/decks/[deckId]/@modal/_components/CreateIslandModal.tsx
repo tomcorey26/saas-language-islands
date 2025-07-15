@@ -21,6 +21,7 @@ import { useState } from "react";
 
 // TOMDO: add limits to the prompt and the count, refactor to shadcn/ui form
 // Make it so after it generates it switches to the new island tab
+// Update cursor rules, to do tdd
 export function CreateIslandModal({ deckId }: { deckId: string }) {
   const searchParams = useSearchParams();
   const isModalOpen = searchParams.get("createIsland") === "true";

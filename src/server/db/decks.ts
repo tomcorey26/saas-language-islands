@@ -6,10 +6,11 @@ export async function getDeckWithCards(deckId: string) {
   const deck = await db.query.DeckTable.findFirst({
     where: eq(DeckTable.id, deckId),
     with: {
-      cards: true,
       islands: {
         with: {
-          cards: true,
+          cards: {
+            orderBy: (cards, { asc }) => [asc(cards.position)],
+          },
         },
       },
     },

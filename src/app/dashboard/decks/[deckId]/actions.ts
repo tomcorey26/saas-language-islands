@@ -66,12 +66,13 @@ export async function generateIslandAction(data: CreateIslandRequest): Promise<
     });
 
     // Save cards to database
-    const cards = completion.island.map((card) => ({
+    const cards = completion.island.map((card, index) => ({
       deckId,
       islandId: island.id,
       phrase: card.phrase,
       translation: card.translation,
       difficulty: cardDifficulties.again,
+      position: index,
     }));
 
     await createCardsDb(cards);

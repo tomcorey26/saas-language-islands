@@ -15,8 +15,6 @@ export async function getStats(clerkUserId: string) {
     return sum + deck.cards.filter((card) => card.difficulty === "easy").length;
   }, 0);
 
-  console.log(decks);
-
   return {
     totalCards,
     totalDecks: decks.length,
