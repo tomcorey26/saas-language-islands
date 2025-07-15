@@ -1,11 +1,12 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FlashCardList } from "./FlashCardList";
 import { useState } from "react";
 import { Deck } from "@/zod/models/deck.model";
 import { Island } from "@/zod/models/island.model";
 import { FlashCard } from "@/zod/models/flashcard.model";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface CategoryTabsProps {
   islands: (Island & { cards: FlashCard[] })[];
@@ -25,16 +26,66 @@ export function CategoryTabs({ islands, deck }: CategoryTabsProps) {
     >
       <TabsList className="flex items-center justify-start flex-wrap h-auto">
         {islands.map((island) => (
-          <TabsTrigger key={island.id} value={island.name}>
-            {island.name}
-          </TabsTrigger>
+          <motion.div
+            key={island.id}
+            whileHover={{
+              scale: 1.03,
+              transition: { duration: 0.1 },
+            }}
+            whileTap={{
+              scale: 0.97,
+              transition: { duration: 0.05 },
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 500,
+              damping: 25,
+            }}
+          >
+            <TabsTrigger value={island.name}>{island.name}</TabsTrigger>
+          </motion.div>
         ))}
       </TabsList>
-      {islands.map((island) => (
-        <TabsContent key={island.id} value={island.name} className="mt-6">
-          <FlashCardList island={island} cards={island.cards} deck={deck} />
-        </TabsContent>
-      ))}
+      <div className="mt-6 relative overflow-hidden">
+        <AnimatePresence mode="wait">
+          {islands.map(
+            (island) =>
+              island.name === selectedCategory && (
+                <motion.div
+                  key={island.id}
+                  initial={{
+                    x: 100,
+                    opacity: 0,
+                    scale: 0.95,
+                  }}
+                  animate={{
+                    x: 0,
+                    opacity: 1,
+                    scale: 1,
+                  }}
+                  exit={{
+                    x: -100,
+                    opacity: 0,
+                    scale: 0.95,
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 30,
+                    mass: 0.5,
+                  }}
+                  className="relative"
+                >
+                  <FlashCardList
+                    island={island}
+                    cards={island.cards}
+                    deck={deck}
+                  />
+                </motion.div>
+              )
+          )}
+        </AnimatePresence>
+      </div>
     </Tabs>
   );
 }

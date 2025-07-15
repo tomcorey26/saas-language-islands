@@ -72,6 +72,7 @@ export function CreateIslandModal({ deckId }: { deckId: string }) {
       });
     }
 
+    // TOMDO: make it so it switches to the new island tab after generating
     if (!result?.error) {
       closeModal();
     }
