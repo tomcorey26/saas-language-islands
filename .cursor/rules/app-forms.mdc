@@ -1,0 +1,8 @@
+---
+alwaysApply: false
+---
+
+When creating forms, use the following rules:
+
+- Use react-hook-form and zod for validation
+- Use shadcn/ui form components

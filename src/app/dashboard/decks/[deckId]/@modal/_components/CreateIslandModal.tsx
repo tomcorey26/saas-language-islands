@@ -10,16 +10,28 @@ import {
 } from "@/components/ui/dialog";
 import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 import { useToast } from "@/hooks/use-toast";
-import { CreateIslandRequest } from "@/zod/contracts/island.schema";
+import {
+  CreateIslandRequest,
+  CreateIslandRequestSchema,
+} from "@/zod/contracts/island.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Sparkles } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 
-// TOMDO: add limits to the prompt and the count, refactor to shadcn/ui form
+// TODO: add limits to the prompt and the count, refactor to shadcn/ui form
 // Make it so after it generates it switches to the new island tab
 // Update cursor rules, to do tdd
 export function CreateIslandModal({ deckId }: { deckId: string }) {
@@ -27,29 +39,30 @@ export function CreateIslandModal({ deckId }: { deckId: string }) {
   const isModalOpen = searchParams.get("createIsland") === "true";
 
   const [isGenerating, setIsGenerating] = useState(false);
-  const [formData, setFormData] = useState<Omit<CreateIslandRequest, "deckId">>(
-    {
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const form = useForm<CreateIslandRequest>({
+    resolver: zodResolver(CreateIslandRequestSchema),
+    defaultValues: {
       name: "",
       count: 10,
       prompt: "",
-    }
-  );
-  const { toast } = useToast();
-  const router = useRouter();
+    },
+  });
 
   function closeModal() {
     router.replace(`/dashboard/decks/${deckId}`);
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: CreateIslandRequest) => {
     setIsGenerating(true);
 
     const result = await generateIslandAction({
       deckId,
-      count: formData.count,
-      prompt: formData.prompt,
-      name: formData.name,
+      count: data.count,
+      prompt: data.prompt,
+      name: data.name,
     });
 
     if (result?.message) {
@@ -63,6 +76,8 @@ export function CreateIslandModal({ deckId }: { deckId: string }) {
     if (!result?.error) {
       closeModal();
     }
+
+    setIsGenerating(false);
   };
 
   return (
@@ -79,78 +94,93 @@ export function CreateIslandModal({ deckId }: { deckId: string }) {
             Create a new island with AI-generated flashcards
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="name" className="text-base">
-              Island Name
-            </Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  name: e.target.value,
-                })
-              }
-              placeholder="e.g., Greetings, Business, Travel"
-              className="h-11"
-              required
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6 py-4"
+          >
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base">Island Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g., Greetings, Business, Travel"
+                      className="h-11"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="count" className="text-base">
-              Number of Cards
-            </Label>
-            <Input
-              id="count"
-              type="number"
-              min={1}
-              max={50}
-              value={formData.count}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  count: parseInt(e.target.value),
-                })
-              }
-              className="h-11"
-              required
+
+            <FormField
+              control={form.control}
+              name="count"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base">Number of Cards</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={20}
+                      className="h-11"
+                      {...field}
+                      onChange={(e) => field.onChange(parseInt(e.target.value))}
+                    />
+                  </FormControl>
+                  <p className="text-xs text-gray-500">
+                    Generate up to 20 cards per island
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            <p className="text-xs text-gray-500">
-              Generate up to 50 cards per island
-            </p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="prompt" className="text-base">
-              Generation Prompt
-            </Label>
-            <Textarea
-              id="prompt"
-              value={formData.prompt}
-              onChange={(e) =>
-                setFormData({ ...formData, prompt: e.target.value })
-              }
-              placeholder="Describe what kind of cards you want to generate..."
-              className="min-h-[120px]"
-              required
+
+            <FormField
+              control={form.control}
+              name="prompt"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base">Generation Prompt</FormLabel>
+                  <FormControl>
+                    <div className="space-y-2">
+                      <Textarea
+                        placeholder="Describe what kind of cards you want to generate..."
+                        className="min-h-[120px]"
+                        {...field}
+                        maxLength={150}
+                      />
+                      <div className="text-sm text-muted-foreground text-right">
+                        {field.value.length}/150 characters
+                      </div>
+                    </div>
+                  </FormControl>
+                  <p className="text-xs text-gray-500">
+                    For example: &quot;Create beginner-friendly conversational
+                    phrases for ordering food in a restaurant&quot;
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            <p className="text-xs text-gray-500">
-              For example: &quot;Create beginner-friendly conversational phrases
-              for ordering food in a restaurant&quot;
-            </p>
-          </div>
-          <div className="flex justify-end pt-4">
-            <Button
-              type="submit"
-              disabled={isGenerating}
-              className="w-full sm:w-auto flex items-center gap-2"
-            >
-              {isGenerating ? "Generating..." : "Generate Cards"}
-              {!isGenerating && <Sparkles className="h-4 w-4" />}
-            </Button>
-          </div>
-        </form>
+
+            <div className="flex justify-end pt-4">
+              <Button
+                type="submit"
+                disabled={isGenerating}
+                className="w-full sm:w-auto flex items-center gap-2"
+              >
+                {isGenerating ? "Generating..." : "Generate Cards"}
+                {!isGenerating && <Sparkles className="h-4 w-4" />}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
