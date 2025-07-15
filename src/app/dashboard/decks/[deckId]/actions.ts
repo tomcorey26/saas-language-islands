@@ -37,7 +37,7 @@ export async function generateIslandAction(data: CreateIslandRequest): Promise<
       };
     }
 
-    const { deckId, prompt, name } = parsedData.data;
+    const { deckId, prompt } = parsedData.data;
 
     // Verify deck ownership
     const deck = await getDeck({ id: deckId, clerkUserId: userId });
@@ -62,7 +62,7 @@ export async function generateIslandAction(data: CreateIslandRequest): Promise<
     const island = await createIslandDb({
       deckId,
       prompt,
-      name,
+      name: completion.name,
     });
 
     // Save cards to database

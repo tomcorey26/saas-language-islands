@@ -42,27 +42,26 @@ export function CreateIslandModal({ deckId }: { deckId: string }) {
   const { toast } = useToast();
   const router = useRouter();
 
-  const form = useForm<CreateIslandRequest>({
-    resolver: zodResolver(CreateIslandRequestSchema),
+  const form = useForm<Omit<CreateIslandRequest, "deckId">>({
+    resolver: zodResolver(CreateIslandRequestSchema.omit({ deckId: true })),
     defaultValues: {
-      name: "",
-      count: 10,
+      count: 5,
       prompt: "",
     },
   });
 
   function closeModal() {
+    form.reset();
     router.replace(`/dashboard/decks/${deckId}`);
   }
 
-  const onSubmit = async (data: CreateIslandRequest) => {
+  const onSubmit = async (data: Omit<CreateIslandRequest, "deckId">) => {
     setIsGenerating(true);
 
     const result = await generateIslandAction({
       deckId,
       count: data.count,
       prompt: data.prompt,
-      name: data.name,
     });
 
     if (result?.message) {
@@ -80,6 +79,8 @@ export function CreateIslandModal({ deckId }: { deckId: string }) {
     setIsGenerating(false);
   };
 
+  console.log("Form state:", form.formState.errors);
+
   return (
     <Dialog
       open={isModalOpen}
@@ -88,10 +89,11 @@ export function CreateIslandModal({ deckId }: { deckId: string }) {
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
-            Generate New Cards
+            Generate New Island
           </DialogTitle>
           <DialogDescription>
-            Create a new island with AI-generated flashcards
+            Create a new island with AI-generated flashcards. The island name
+            will be automatically generated based on your prompt.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -99,24 +101,6 @@ export function CreateIslandModal({ deckId }: { deckId: string }) {
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-6 py-4"
           >
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base">Island Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="e.g., Greetings, Business, Travel"
-                      className="h-11"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               control={form.control}
               name="count"
@@ -130,7 +114,10 @@ export function CreateIslandModal({ deckId }: { deckId: string }) {
                       max={20}
                       className="h-11"
                       {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value))}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value);
+                        field.onChange(isNaN(value) ? 1 : value);
+                      }}
                     />
                   </FormControl>
                   <p className="text-xs text-gray-500">

@@ -80,6 +80,8 @@ function generateFlashcardsIslandPrompt(
   The flashcards should be relevant to the user's prompt: ${request.prompt}.
   The flashcards should be ${request.count} flashcards.
   Please make sure that the flashcards are relevant to the user's prompt and that they are useful for a conversation with a native speaker of ${translationLanguage}.
+  
+  Additionally, please generate a short, descriptive name (2-4 words) for this collection of flashcards based on the prompt and content. This name should be concise and capture the essence of what these flashcards cover.
   `;
 }
 
@@ -102,6 +104,7 @@ export async function generateFlashcardsIsland(
             translation: z.string(),
           })
         ),
+        name: z.string().min(1).max(50),
       }),
       "island_response"
     ),

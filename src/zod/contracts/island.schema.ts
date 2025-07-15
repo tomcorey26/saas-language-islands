@@ -3,8 +3,11 @@ import { FlashCardModel } from "../models/flashcard.model";
 import { createInsertSchema } from "drizzle-zod";
 import { IslandTable } from "@/drizzle/schema";
 
-export const CreateIslandRequestSchema = createInsertSchema(IslandTable).extend(
-  {
+export const CreateIslandRequestSchema = createInsertSchema(IslandTable)
+  .omit({
+    name: true,
+  })
+  .extend({
     count: z
       .number()
       .min(1, "Count must be at least 1")
@@ -13,8 +16,7 @@ export const CreateIslandRequestSchema = createInsertSchema(IslandTable).extend(
       .string()
       .min(1, "Prompt must be at least 1 character")
       .max(150, "Prompt must be at most 150 characters"),
-  }
-);
+  });
 
 export type CreateIslandRequest = z.infer<typeof CreateIslandRequestSchema>;
 
