@@ -11,6 +11,7 @@ import { FlashCard } from "@/zod/models/flashcard.model";
 import { updateCardAction } from "../../actions";
 import { cn } from "@/lib/utils";
 import { speak } from "@/lib/textToSpeech";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface StudyModeProps {
   cards: FlashCard[];
@@ -117,39 +118,50 @@ export function StudyMode({
           </div>
         </div>
 
-        <Card className="relative h-96 mb-8 cursor-pointer perspective-1000">
-          <div
-            className={`absolute inset-0 transition-transform duration-500 preserve-3d ${
-              isFlipped ? "rotate-y-180" : ""
-            }`}
-            onClick={() => setIsFlipped(!isFlipped)}
-          >
-            {/* Front */}
-            <div className="absolute inset-0 backface-hidden p-8 flex flex-col">
-              <div className="flex-1 flex items-center justify-center">
-                <p className="text-2xl font-medium">{currentCard.phrase}</p>
-              </div>
-            </div>
-
-            {/* Back */}
-            <div className="absolute inset-0 backface-hidden rotate-y-180 p-8 flex flex-col">
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-2xl mb-4">{currentCard.translation}</p>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      playAudio();
-                    }}
-                  >
-                    <Volume2 className="h-6 w-6" />
-                  </Button>
+        <Card className="relative h-96 mb-8 cursor-pointer overflow-hidden">
+          <AnimatePresence mode="wait">
+            {!isFlipped ? (
+              <motion.div
+                key="front"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="absolute inset-0 p-8 flex flex-col"
+                onClick={() => setIsFlipped(true)}
+              >
+                <div className="flex-1 flex items-center justify-center">
+                  <p className="text-2xl font-medium">{currentCard.phrase}</p>
                 </div>
-              </div>
-            </div>
-          </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="back"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="absolute inset-0 p-8 flex flex-col"
+                onClick={() => setIsFlipped(false)}
+              >
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-2xl mb-4">{currentCard.translation}</p>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        playAudio();
+                      }}
+                    >
+                      <Volume2 className="h-6 w-6" />
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </Card>
 
         <div className="flex justify-between items-center">
