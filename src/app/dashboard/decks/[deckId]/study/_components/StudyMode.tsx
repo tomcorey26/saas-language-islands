@@ -118,6 +118,29 @@ export function StudyMode({
           </div>
         </div>
 
+        <div className="flex justify-center mb-4">
+          <div className="flex items-center gap-6 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-muted rounded border text-xs font-mono">
+                Space
+              </kbd>
+              <span>Flip card</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-muted rounded border text-xs font-mono">
+                ←
+              </kbd>
+              <span>Previous</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-muted rounded border text-xs font-mono">
+                →
+              </kbd>
+              <span>Next</span>
+            </div>
+          </div>
+        </div>
+
         <Card className="relative h-96 mb-8 cursor-pointer overflow-hidden">
           <AnimatePresence mode="wait">
             {!isFlipped ? (
