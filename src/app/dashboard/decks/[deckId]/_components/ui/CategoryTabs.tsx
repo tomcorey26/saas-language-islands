@@ -1,20 +1,22 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FlashCard } from "@/zod/models/flashcard.model";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FlashCardList } from "./FlashCardList";
 import { useState } from "react";
 import { Deck } from "@/zod/models/deck.model";
+import { Island } from "@/zod/models/island.model";
+import { FlashCard } from "@/zod/models/flashcard.model";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface CategoryTabsProps {
-  cardsByCategory: Record<string, FlashCard[]>;
+  islands: (Island & { cards: FlashCard[] })[];
   deck: Deck;
 }
 
 // TOMOO: Add the ability to view the prompt you used to generate the island
-export function CategoryTabs({ cardsByCategory, deck }: CategoryTabsProps) {
+export function CategoryTabs({ islands, deck }: CategoryTabsProps) {
   const [selectedCategory, setSelectedCategory] = useState(
-    Object.keys(cardsByCategory)[0] || ""
+    islands[0]?.name || ""
   );
 
   return (
@@ -23,17 +25,67 @@ export function CategoryTabs({ cardsByCategory, deck }: CategoryTabsProps) {
       onValueChange={(value) => setSelectedCategory(value)}
     >
       <TabsList className="flex items-center justify-start flex-wrap h-auto">
-        {Object.keys(cardsByCategory).map((category) => (
-          <TabsTrigger key={category} value={category}>
-            {category}
-          </TabsTrigger>
+        {islands.map((island) => (
+          <motion.div
+            key={island.id}
+            whileHover={{
+              scale: 1.03,
+              transition: { duration: 0.1 },
+            }}
+            whileTap={{
+              scale: 0.97,
+              transition: { duration: 0.05 },
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 500,
+              damping: 25,
+            }}
+          >
+            <TabsTrigger value={island.name}>{island.name}</TabsTrigger>
+          </motion.div>
         ))}
       </TabsList>
-      {Object.entries(cardsByCategory).map(([category, cards]) => (
-        <TabsContent key={category} value={category} className="mt-6">
-          <FlashCardList category={category} cards={cards} deck={deck} />
-        </TabsContent>
-      ))}
+      <div className="mt-6 relative overflow-hidden">
+        <AnimatePresence mode="wait">
+          {islands.map(
+            (island) =>
+              island.name === selectedCategory && (
+                <motion.div
+                  key={island.id}
+                  initial={{
+                    x: 100,
+                    opacity: 0,
+                    scale: 0.95,
+                  }}
+                  animate={{
+                    x: 0,
+                    opacity: 1,
+                    scale: 1,
+                  }}
+                  exit={{
+                    x: -100,
+                    opacity: 0,
+                    scale: 0.95,
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 30,
+                    mass: 0.5,
+                  }}
+                  className="relative"
+                >
+                  <FlashCardList
+                    island={island}
+                    cards={island.cards}
+                    deck={deck}
+                  />
+                </motion.div>
+              )
+          )}
+        </AnimatePresence>
+      </div>
     </Tabs>
   );
 }

@@ -13,7 +13,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function createDeck(data: CreateDeckRequest): Promise<
+export async function createDeckAction(data: CreateDeckRequest): Promise<
   | {
       error: boolean;
       message: string;
@@ -38,7 +38,10 @@ export async function createDeck(data: CreateDeckRequest): Promise<
   redirect(`/dashboard/decks/${deck.id}`);
 }
 
-export async function updateDeck(deckId: string, data: CreateDeckRequest) {
+export async function updateDeckAction(
+  deckId: string,
+  data: CreateDeckRequest
+) {
   const { userId } = await auth();
   const parsedData = CreateDeckRequestSchema.safeParse(data);
 
@@ -62,7 +65,7 @@ export async function updateDeck(deckId: string, data: CreateDeckRequest) {
   };
 }
 
-export async function deleteDeck(deckId: string) {
+export async function deleteDeckAction(deckId: string) {
   const { userId } = await auth();
   const errorMesssage = "There was an error deleting your deck";
 

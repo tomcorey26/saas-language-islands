@@ -11,7 +11,11 @@
     "test": "npm run test:e2e",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:migrate:prod": "dotenv -e .env.prod drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:push:prod": "dotenv -e .env.prod drizzle-kit push",
     "db:studio": "drizzle-kit studio",
+    "db:studio:prod": "dotenv -e .env.prod drizzle-kit studio",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -39,6 +43,7 @@
     "drizzle-orm": "^0.42.0",
     "drizzle-zod": "^0.7.1",
     "emoji-picker-react": "^4.12.0",
+    "framer-motion": "^12.23.6",
     "lucide-react": "^0.471.2",
     "motion": "^12.0.11",
     "next": "^15.2.3",
@@ -60,6 +65,7 @@
     "@types/react-dom": "^19.0.3",
     "@types/react-google-recaptcha": "^2.1.9",
     "dotenv": "^16.4.7",
+    "dotenv-cli": "^8.0.0",
     "drizzle-kit": "^0.31.1",
     "eslint": "^9.19.0",
     "eslint-config-next": "15.1.4",

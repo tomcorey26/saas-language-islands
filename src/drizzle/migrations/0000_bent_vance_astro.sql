@@ -4,10 +4,11 @@ CREATE TYPE "public"."tier" AS ENUM('Hobby', 'Pro');--> statement-breakpoint
 CREATE TABLE "cards" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"deck_id" uuid NOT NULL,
+	"island_id" uuid NOT NULL,
 	"phrase" text NOT NULL,
 	"translation" text NOT NULL,
-	"category" text NOT NULL,
 	"difficulty" "difficulty" DEFAULT 'again' NOT NULL,
+	"position" integer NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
@@ -18,7 +19,16 @@ CREATE TABLE "decks" (
 	"name" text NOT NULL,
 	"description" text NOT NULL,
 	"emoji" text DEFAULT '🏝️' NOT NULL,
-	"languages" "language"[] NOT NULL,
+	"language" "language" NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "islands" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"name" text NOT NULL,
+	"prompt" text NOT NULL,
+	"deck_id" uuid NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
@@ -36,6 +46,8 @@ CREATE TABLE "user_subscriptions" (
 );
 --> statement-breakpoint
 ALTER TABLE "cards" ADD CONSTRAINT "cards_deck_id_decks_id_fk" FOREIGN KEY ("deck_id") REFERENCES "public"."decks"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "cards" ADD CONSTRAINT "cards_island_id_islands_id_fk" FOREIGN KEY ("island_id") REFERENCES "public"."islands"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "islands" ADD CONSTRAINT "islands_deck_id_decks_id_fk" FOREIGN KEY ("deck_id") REFERENCES "public"."decks"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "cards.deck_id_index" ON "cards" USING btree ("deck_id");--> statement-breakpoint
 CREATE INDEX "decks.clerk_user_id_index" ON "decks" USING btree ("clerk_user_id");--> statement-breakpoint
 CREATE INDEX "user_subscriptions.clerk_user_id_index" ON "user_subscriptions" USING btree ("clerk_user_id");--> statement-breakpoint

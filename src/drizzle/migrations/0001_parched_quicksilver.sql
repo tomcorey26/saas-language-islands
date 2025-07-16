@@ -1,1 +1,0 @@
-ALTER TABLE "decks" RENAME COLUMN "languages" TO "language";

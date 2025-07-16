@@ -1,9 +1,13 @@
 Core Features
 
-- CRUD operations for decks and flashcards (In progress)
-- Generate a deck of flashcards for a language with AI
-- Listen to the flashcard audio, https://chatgpt.com/g/g-p-6830d38038b481919c372062694b024e-language-islands/c/6830d3a1-2608-8010-9ffd-655047444f72
 - Study the deck with a space repetition UI system that is fun and engaging
+- CRUD operations for decks and flashcards (In progress) (Done)
+- Generate a deck of flashcards for a language with AI (Done)
+- Listen to the flashcard audio, https://chatgpt.com/g/g-p-6830d38038b481919c372062694b024e-language-islands/c/6830d3a1-2608-8010-9ffd-655047444f72
+- Update styling for shadcn
+- Add caching and suspense to relevant places
+
+- Gemini for generation and audio
 
 5/23/2025
 What I learned:
@@ -94,3 +98,13 @@ I learned about parallel routes and how they can be used to render pages as slot
 - Drizzle
 - Stripe
 - Cursor
+
+# Prod deployment
+
+- set up stripe and stripe prod env
+- buy domain name
+- buy vercel pro, but make sure to set limits and shit
+- vercel .env config
+  - Prod neon env
+- create clerk prod instance
+- set up webhook and test it

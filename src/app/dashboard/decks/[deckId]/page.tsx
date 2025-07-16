@@ -1,27 +1,14 @@
 import { auth } from "@clerk/nextjs/server";
-import { db } from "@/drizzle/db";
-import { DeckTable } from "@/drizzle/schema";
-import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { DeckHero } from "@/app/dashboard/decks/[deckId]/_components/ui/DeckHero";
 import { EmptyState } from "@/app/dashboard/decks/[deckId]/_components/ui/EmptyState";
 import { CategoryTabs } from "@/app/dashboard/decks/[deckId]/_components/ui/CategoryTabs";
-
-async function getDeckWithCards(deckId: string) {
-  const deck = await db.query.DeckTable.findFirst({
-    where: eq(DeckTable.id, deckId),
-    with: {
-      cards: true,
-    },
-  });
-
-  return deck;
-}
+import { getDeckWithCards } from "@/server/db/decks";
 
 export default async function DeckPage({
   params,
 }: {
-  params: { deckId: string };
+  params: Promise<{ deckId: string }>;
 }) {
   const { userId } = await auth();
   if (!userId) {
@@ -35,18 +22,11 @@ export default async function DeckPage({
     notFound();
   }
 
-  // Group cards by category
-  const cardsByCategory = deck.cards.reduce((acc, card) => {
-    if (!acc[card.category]) {
-      acc[card.category] = [];
-    }
-    acc[card.category].push(card);
-    return acc;
-  }, {} as Record<string, typeof deck.cards>);
-
-  // Calculate statistics
-  const totalCards = Object.values(cardsByCategory).flat().length;
-  const totalIslands = Object.keys(cardsByCategory).length;
+  const totalCards = deck.islands.reduce(
+    (acc, island) => acc + island.cards.length,
+    0
+  );
+  const totalIslands = deck.islands.length;
 
   return (
     <div className="container mx-auto py-8">
@@ -59,11 +39,11 @@ export default async function DeckPage({
         />
 
         {/* Main Content */}
-        {deck.cards.length === 0 ? (
+        {deck.islands.length === 0 ? (
           <EmptyState deckId={deck.id} />
         ) : (
           <div className="space-y-6">
-            <CategoryTabs cardsByCategory={cardsByCategory} deck={deck} />
+            <CategoryTabs islands={deck.islands} deck={deck} />
           </div>
         )}
       </div>

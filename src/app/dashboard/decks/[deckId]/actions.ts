@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { CardDifficulty } from "@/data/cardDifficulties";
+import { cardDifficulties } from "@/data/cardDifficulties";
 import { revalidatePath } from "next/cache";
 import { getDeck } from "@/server/db/decks";
 import {
@@ -10,13 +10,21 @@ import {
 } from "@/zod/contracts/island.schema";
 import { generateFlashcardsIsland } from "@/services/openai";
 import {
-  createCards,
-  deleteCardsByCategory,
-  deleteCardById,
-  updateCard,
+  createCards as createCardsDb,
+  deleteCardById as deleteCardByIdDb,
+  getCardWithDeck as getCardWithDeckDb,
+  updateCard as updateCardDb,
 } from "@/server/db/cards";
+import {
+  createIsland as createIslandDb,
+  deleteIsland as deleteIslandDb,
+} from "@/server/db/islands";
+import {
+  UpdateCardRequest,
+  UpdateCardRequestSchema,
+} from "@/zod/contracts/card.schema";
 
-export async function generateCards(data: CreateIslandRequest): Promise<
+export async function generateIslandAction(data: CreateIslandRequest): Promise<
   | {
       error: boolean;
       message: string;
@@ -34,7 +42,7 @@ export async function generateCards(data: CreateIslandRequest): Promise<
       };
     }
 
-    const { deckId } = parsedData.data;
+    const { deckId, prompt } = parsedData.data;
 
     // Verify deck ownership
     const deck = await getDeck({ id: deckId, clerkUserId: userId });
@@ -56,16 +64,23 @@ export async function generateCards(data: CreateIslandRequest): Promise<
       throw new Error("Failed to generate cards");
     }
 
-    // Save cards to database
-    const cards = completion.island.map((card) => ({
+    const island = await createIslandDb({
       deckId,
-      category: parsedData.data.category,
+      prompt,
+      name: completion.name,
+    });
+
+    // Save cards to database
+    const cards = completion.island.map((card, index) => ({
+      deckId,
+      islandId: island.id,
       phrase: card.phrase,
       translation: card.translation,
-      difficulty: "again" as CardDifficulty,
+      difficulty: cardDifficulties.again,
+      position: index,
     }));
 
-    await createCards(cards);
+    await createCardsDb(cards);
 
     revalidatePath(`/dashboard/decks/${deckId}`);
     return {
@@ -82,9 +97,9 @@ export async function generateCards(data: CreateIslandRequest): Promise<
   }
 }
 
-export async function deleteIsland(
-  deckId: string,
-  category: string
+export async function deleteIslandAction(
+  islandId: string,
+  deckId: string
 ): Promise<
   | {
       error: boolean;
@@ -99,7 +114,6 @@ export async function deleteIsland(
       message: "Not authenticated",
     };
   }
-
   // Verify deck ownership
   const deck = await getDeck({ id: deckId, clerkUserId: userId });
   if (!deck) {
@@ -110,16 +124,18 @@ export async function deleteIsland(
   }
 
   // Delete all cards in the category
-  await deleteCardsByCategory(deckId, category);
+  const isSuccess = await deleteIslandDb(islandId);
 
-  revalidatePath(`/decks/${deckId}`);
+  revalidatePath(`/dashboard/decks/${deckId}`);
   return {
-    error: false,
-    message: "Island deleted successfully",
+    error: !isSuccess,
+    message: isSuccess
+      ? "Island deleted successfully"
+      : "There was an error deleting the island",
   };
 }
 
-export async function deleteCard(
+export async function deleteCardAction(
   cardId: string,
   deckId: string
 ): Promise<
@@ -147,7 +163,7 @@ export async function deleteCard(
   }
 
   // Delete the card
-  await deleteCardById(deckId, cardId);
+  await deleteCardByIdDb(deckId, cardId);
 
   revalidatePath(`/dashboard/decks/${deckId}`);
   return {
@@ -158,9 +174,7 @@ export async function deleteCard(
 
 export async function updateCardAction(
   cardId: string,
-  deckId: string,
-  phrase: string,
-  translation: string
+  unsafeData: UpdateCardRequest
 ): Promise<
   | {
       error: boolean;
@@ -169,6 +183,7 @@ export async function updateCardAction(
   | undefined
 > {
   const { userId } = await auth();
+  const { success, data } = UpdateCardRequestSchema.safeParse(unsafeData);
   if (!userId) {
     return {
       error: true,
@@ -176,30 +191,47 @@ export async function updateCardAction(
     };
   }
 
-  // Validate input
-  if (!phrase.trim() || !translation.trim()) {
+  if (!success) {
     return {
       error: true,
-      message: "Phrase and translation cannot be empty",
+      message: "Invalid request data",
     };
   }
 
   // Verify deck ownership
-  const deck = await getDeck({ id: deckId, clerkUserId: userId });
-  if (!deck) {
+  const card = await getCardWithDeckDb(cardId);
+
+  if (!card) {
+    return {
+      error: true,
+      message: "Card not found",
+    };
+  }
+
+  if (card?.deck.clerkUserId !== userId) {
     return {
       error: true,
       message: "Unauthorized",
     };
   }
 
-  // Update the card
-  await updateCard(deckId, cardId, {
-    phrase: phrase.trim(),
-    translation: translation.trim(),
-  });
+  // Prepare updates object with trimmed values
+  const trimmedUpdates: typeof data = {};
+  if (data.phrase !== undefined) {
+    trimmedUpdates.phrase = data.phrase.trim();
+  }
+  if (data.translation !== undefined) {
+    trimmedUpdates.translation = data.translation.trim();
+  }
+  if (data.difficulty !== undefined) {
+    trimmedUpdates.difficulty = data.difficulty;
+  }
 
-  revalidatePath(`/dashboard/decks/${deckId}`);
+  // Update the card
+  await updateCardDb(cardId, data);
+
+  revalidatePath(`/dashboard/decks/${card.deck.id}`);
+  revalidatePath(`/dashboard/decks/${card.deck.id}/study`);
   return {
     error: false,
     message: "Card updated successfully",

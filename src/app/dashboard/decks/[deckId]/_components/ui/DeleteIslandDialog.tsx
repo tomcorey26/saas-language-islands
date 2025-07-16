@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteIsland } from "@/app/dashboard/decks/[deckId]/actions";
+import { deleteIslandAction } from "@/app/dashboard/decks/[deckId]/actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,7 +20,7 @@ export function DeleteIslandDialog() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const searchParams = useSearchParams();
-  const category = searchParams.get("deleteIsland");
+  const islandId = searchParams.get("deleteIsland");
   const params = useParams();
   const router = useRouter();
 
@@ -28,7 +28,7 @@ export function DeleteIslandDialog() {
     const deckId = params.deckId;
 
     // validate the island id is a valid uuid
-    if (!category) {
+    if (!islandId) {
       toast({
         title: "Error",
         description: "Invalid category.",
@@ -38,7 +38,7 @@ export function DeleteIslandDialog() {
     }
 
     // validate the deck id is a valid uuid
-    if (!deckId) {
+    if (!deckId || Array.isArray(deckId)) {
       toast({
         title: "Error",
         description: "Invalid deck id.",
@@ -48,7 +48,7 @@ export function DeleteIslandDialog() {
     }
 
     setIsDeleting(true);
-    const result = await deleteIsland(deckId.toString(), category);
+    const result = await deleteIslandAction(islandId, deckId);
     if (result?.message) {
       toast({
         title: result.error ? "Error" : "Success",
@@ -64,13 +64,13 @@ export function DeleteIslandDialog() {
   };
 
   return (
-    <AlertDialog open={!!category}>
+    <AlertDialog open={!!islandId}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Island</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete the &ldquo;{category}&rdquo; island?
-            This action cannot be undone.
+            Are you sure you want to delete this island? This action cannot be
+            undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

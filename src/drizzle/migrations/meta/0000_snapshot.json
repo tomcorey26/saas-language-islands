@@ -1,5 +1,5 @@
 {
-  "id": "0f40e05b-011b-4e76-9e20-d7e7c9e0f434",
+  "id": "54eb8b72-26cb-41b5-b9cb-3981cc88dda8",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -21,6 +21,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "island_id": {
+          "name": "island_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
         "phrase": {
           "name": "phrase",
           "type": "text",
@@ -33,12 +39,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "category": {
-          "name": "category",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "difficulty": {
           "name": "difficulty",
           "type": "difficulty",
@@ -46,6 +46,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'again'"
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
@@ -86,6 +92,19 @@
           "tableTo": "decks",
           "columnsFrom": [
             "deck_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "cards_island_id_islands_id_fk": {
+          "name": "cards_island_id_islands_id_fk",
+          "tableFrom": "cards",
+          "tableTo": "islands",
+          "columnsFrom": [
+            "island_id"
           ],
           "columnsTo": [
             "id"
@@ -136,9 +155,9 @@
           "notNull": true,
           "default": "'🏝️'"
         },
-        "languages": {
-          "name": "languages",
-          "type": "language[]",
+        "language": {
+          "name": "language",
+          "type": "language",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
@@ -176,6 +195,72 @@
         }
       },
       "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.islands": {
+      "name": "islands",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prompt": {
+          "name": "prompt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "deck_id": {
+          "name": "deck_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "islands_deck_id_decks_id_fk": {
+          "name": "islands_deck_id_decks_id_fk",
+          "tableFrom": "islands",
+          "tableTo": "decks",
+          "columnsFrom": [
+            "deck_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},

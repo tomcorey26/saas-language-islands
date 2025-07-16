@@ -1,11 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
-import { Deck } from "@/zod/contracts/deck.schema";
 import Link from "next/link";
 import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DeleteDeckDialogContent } from "@/app/dashboard/_components/DeleteDeckDialogContent";
 import { formatLangNameByCode } from "@/lib/formatters";
+import { Deck } from "@/zod/models/deck.model";
 
 interface DeckItemProps {
   deck: Deck;

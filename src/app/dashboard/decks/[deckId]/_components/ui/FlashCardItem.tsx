@@ -7,7 +7,6 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FlashCard } from "@/zod/models/flashcard.model";
-import { motion } from "framer-motion";
 import { Volume2, MoreVertical, Trash2, Edit3, Check, X } from "lucide-react";
 import {
   Popover,
@@ -32,7 +31,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { deleteCard, updateCardAction } from "../../actions";
+import { deleteCardAction, updateCardAction } from "../../actions";
 import { toast } from "@/hooks/use-toast";
 import { useTransition } from "react";
 import { speak } from "@/lib/textToSpeech";
@@ -55,7 +54,6 @@ type EditCardFormData = z.infer<typeof EditCardSchema>;
 
 interface FlashCardItemProps {
   card: FlashCard;
-  index: number;
   deckId: string;
   deck: Deck;
 }
@@ -64,12 +62,7 @@ interface FlashCardItemProps {
 // - Make it so you can auto translate the phrase
 // - Make edit mode siwtch more optimized. copy quizlet
 // Update to use shadcn form and add validation
-export function FlashCardItem({
-  card,
-  index,
-  deckId,
-  deck,
-}: FlashCardItemProps) {
+export function FlashCardItem({ card, deckId, deck }: FlashCardItemProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeletePending, startDeleteTransition] = useTransition();
   const [isEditMode, setIsEditMode] = useState(false);
@@ -89,7 +82,7 @@ export function FlashCardItem({
 
   const handleDelete = () => {
     startDeleteTransition(async () => {
-      const result = await deleteCard(card.id, deckId);
+      const result = await deleteCardAction(card.id, deckId);
 
       if (result?.message) {
         toast({
@@ -115,12 +108,10 @@ export function FlashCardItem({
 
   const onSubmit = async (data: EditCardFormData) => {
     startUpdateTransition(async () => {
-      const result = await updateCardAction(
-        card.id,
-        deckId,
-        data.phrase,
-        data.translation
-      );
+      const result = await updateCardAction(card.id, {
+        phrase: data.phrase,
+        translation: data.translation,
+      });
 
       if (result?.message) {
         toast({
@@ -155,12 +146,7 @@ export function FlashCardItem({
 
   return (
     <>
-      <motion.div
-        key={card.id}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.05 }}
-      >
+      <div key={card.id}>
         <Card className="p-3">
           <div className="flex flex-col">
             {isEditMode ? (
@@ -299,7 +285,7 @@ export function FlashCardItem({
             )}
           </div>
         </Card>
-      </motion.div>
+      </div>
 
       <AlertDialog
         open={isDeleteDialogOpen}

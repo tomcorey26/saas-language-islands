@@ -1,14 +1,10 @@
 import { z } from "zod";
 import { DeckTable } from "@/drizzle/schema";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { createInsertSchema } from "drizzle-zod";
 import {
   SupportedLanguageCode,
   supportedLanguages,
 } from "@/data/supportedLanguages";
-
-export const DeckModel = createSelectSchema(DeckTable);
-
-export type Deck = z.infer<typeof DeckModel>;
 
 export const CreateDeckRequestSchema = createInsertSchema(DeckTable)
   .omit({

@@ -5,22 +5,23 @@ import { FlashCardItem } from "./FlashCardItem";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Deck } from "@/zod/models/deck.model";
+import { Island } from "@/zod/models/island.model";
 
 interface FlashCardListProps {
-  category: string;
   cards: FlashCard[];
+  island: Island;
   deck: Deck;
 }
 
-export function FlashCardList({ category, cards, deck }: FlashCardListProps) {
+export function FlashCardList({ island, cards, deck }: FlashCardListProps) {
   const params = useParams();
   const deckId = params.deckId as string;
 
   return (
     <>
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-2xl font-bold">{category}</h3>
-        <Link href={`/dashboard/decks/${deckId}?deleteIsland=${category}`}>
+        <h3 className="text-2xl font-bold">{island.prompt}</h3>
+        <Link href={`/dashboard/decks/${deckId}?deleteIsland=${island.id}`}>
           <Button
             variant="destructive"
             size="sm"
@@ -32,11 +33,10 @@ export function FlashCardList({ category, cards, deck }: FlashCardListProps) {
         </Link>
       </div>
       <div className="space-y-2">
-        {cards.map((card, index) => (
+        {cards.map((card) => (
           <FlashCardItem
             key={card.id}
             card={card}
-            index={index}
             deckId={deckId}
             deck={deck}
           />
