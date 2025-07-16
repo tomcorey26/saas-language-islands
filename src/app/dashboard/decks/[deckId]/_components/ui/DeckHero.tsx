@@ -43,7 +43,7 @@ export function DeckHero({ deck, totalCards, totalIslands }: DeckHeroProps) {
           <Link href={`/dashboard/decks/${deck.id}/study`}>
             <Button
               variant="outline"
-              className="border-primary/30 hover:bg-primary/10 transition-all duration-300 flex items-center gap-2 px-5 py-6 rounded-lg text-base"
+              className="flex items-center gap-2 px-5 py-6 rounded-lg text-base"
               disabled={totalCards === 0}
             >
               <Play className="h-5 w-5" />

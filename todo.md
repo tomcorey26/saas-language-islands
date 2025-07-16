@@ -4,6 +4,8 @@ Core Features
 - CRUD operations for decks and flashcards (In progress) (Done)
 - Generate a deck of flashcards for a language with AI (Done)
 - Listen to the flashcard audio, https://chatgpt.com/g/g-p-6830d38038b481919c372062694b024e-language-islands/c/6830d3a1-2608-8010-9ffd-655047444f72
+- Update styling for shadcn
+- Add caching and suspense to relevant places
 
 - Gemini for generation and audio
 
