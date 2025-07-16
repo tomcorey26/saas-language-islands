@@ -6,7 +6,7 @@ import { StudyMode } from "./_components/StudyMode";
 export default async function StudyPage({
   params,
 }: {
-  params: { deckId: string };
+  params: Promise<{ deckId: string }>;
 }) {
   const { userId } = await auth();
   if (!userId) {

@@ -8,7 +8,7 @@ import { getDeckWithCards } from "@/server/db/decks";
 export default async function DeckPage({
   params,
 }: {
-  params: { deckId: string };
+  params: Promise<{ deckId: string }>;
 }) {
   const { userId } = await auth();
   if (!userId) {
