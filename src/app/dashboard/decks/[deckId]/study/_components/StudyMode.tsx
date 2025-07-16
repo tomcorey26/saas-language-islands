@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useState, useCallback, useTransition } from "react";
+import {
+  useEffect,
+  useState,
+  useCallback,
+  useOptimistic,
+  startTransition,
+} from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -29,25 +35,34 @@ export function StudyMode({
   const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [optimisticCards, updateOptimisticCards] = useOptimistic(
+    cards,
+    (state, newDifficulty: { cardId: string; difficulty: CardDifficulty }) => {
+      return state.map((card) =>
+        card.id === newDifficulty.cardId
+          ? { ...card, difficulty: newDifficulty.difficulty }
+          : card
+      );
+    }
+  );
 
-  const currentCard = cards[currentIndex];
+  const currentCard = optimisticCards[currentIndex];
 
   const handleUpdateCard = async (
     cardId: string,
     difficulty: CardDifficulty
   ) => {
+    // Move to next card immediately
+    if (currentIndex < cards.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+      setIsFlipped(false);
+    }
+
+    // TOMDO: how tf does startTransition work?
     startTransition(async () => {
-      try {
-        await updateCardAction(cardId, { difficulty });
-        // Move to next card
-        if (currentIndex < cards.length - 1) {
-          setCurrentIndex((prev) => prev + 1);
-          setIsFlipped(false);
-        }
-      } catch (error) {
-        console.error("Failed to update card:", error);
-      }
+      // Optimistically update the card
+      updateOptimisticCards({ cardId, difficulty });
+      await updateCardAction(cardId, { difficulty });
     });
   };
 
@@ -207,7 +222,6 @@ export function StudyMode({
                 "border-red-500 hover:bg-red-500/10 hover:text-black"
               )}
               onClick={() => handleUpdateCard(currentCard.id, "again")}
-              disabled={isPending}
             >
               Again
             </Button>
@@ -218,7 +232,6 @@ export function StudyMode({
                 "border-orange-500 hover:bg-orange-500/10 hover:text-black"
               )}
               onClick={() => handleUpdateCard(currentCard.id, "difficult")}
-              disabled={isPending}
             >
               Hard
             </Button>
@@ -229,7 +242,6 @@ export function StudyMode({
                 "border-green-500 hover:bg-green-500/10 hover:text-black"
               )}
               onClick={() => handleUpdateCard(currentCard.id, "good")}
-              disabled={isPending}
             >
               Good
             </Button>
@@ -240,7 +252,6 @@ export function StudyMode({
                 "border-blue-500 hover:bg-blue-500/10 hover:text-black"
               )}
               onClick={() => handleUpdateCard(currentCard.id, "easy")}
-              disabled={isPending}
             >
               Easy
             </Button>
