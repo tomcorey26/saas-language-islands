@@ -5,18 +5,26 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CardDifficulty } from "@/data/cardDifficulties";
+import { SupportedLanguageCode } from "@/data/supportedLanguages";
 import { ArrowLeft, ArrowRight, Volume2 } from "lucide-react";
 import { FlashCard } from "@/zod/models/flashcard.model";
 import { updateCardAction } from "../../actions";
 import { cn } from "@/lib/utils";
+import { speak } from "@/lib/textToSpeech";
 
 interface StudyModeProps {
   cards: FlashCard[];
   deckId: string;
   deckName: string;
+  deckLanguage: SupportedLanguageCode;
 }
 
-export function StudyMode({ cards, deckId, deckName }: StudyModeProps) {
+export function StudyMode({
+  cards,
+  deckId,
+  deckName,
+  deckLanguage,
+}: StudyModeProps) {
   const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -67,11 +75,9 @@ export function StudyMode({ cards, deckId, deckName }: StudyModeProps) {
 
   const playAudio = useCallback(() => {
     if (isFlipped && currentCard) {
-      const utterance = new SpeechSynthesisUtterance(currentCard.translation);
-      utterance.lang = "es-ES";
-      window.speechSynthesis.speak(utterance);
+      speak(currentCard.translation, deckLanguage);
     }
-  }, [isFlipped, currentCard]);
+  }, [isFlipped, currentCard, deckLanguage]);
 
   useEffect(() => {
     if (isFlipped) {

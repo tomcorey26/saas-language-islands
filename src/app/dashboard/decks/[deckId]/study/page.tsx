@@ -42,7 +42,12 @@ export default async function StudyPage({
 
   return (
     <div className="container mx-auto py-8">
-      <StudyMode cards={allCards} deckId={deckId} deckName={deck.name} />
+      <StudyMode
+        cards={allCards}
+        deckId={deckId}
+        deckName={deck.name}
+        deckLanguage={deck.language}
+      />
     </div>
   );
 }
