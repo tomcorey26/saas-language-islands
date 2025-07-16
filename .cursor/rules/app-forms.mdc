@@ -1,6 +1,5 @@
 ---
-alwaysApply: false
-description: "Rules for this project"
+alwaysApply: true
 ---
 
 When creating forms, use the following rules:
@@ -12,6 +11,11 @@ When validating action inputs, use the following rules
 
 - Use zod for validation
 
+DO:
+
+- Create server actions
+  - When creating a server action, validate the input with zod
+
 DO NOT:
 
-- Create api routes, use actions instead
+- Create nextjs api routes
