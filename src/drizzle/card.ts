@@ -9,8 +9,8 @@ import {
   integer,
   pgEnum,
   pgTable,
-  text,
   uuid,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 export const DifficultyEnum = pgEnum(
@@ -28,8 +28,8 @@ export const CardTable = pgTable(
     islandId: uuid("island_id")
       .notNull()
       .references(() => IslandTable.id, { onDelete: "cascade" }),
-    phrase: text("phrase").notNull(),
-    translation: text("translation").notNull(),
+    phrase: varchar("phrase", { length: 500 }).notNull(),
+    translation: varchar("translation", { length: 500 }).notNull(),
     difficulty: DifficultyEnum("difficulty").notNull().default("again"),
     position: integer("position").notNull(),
     createdAt,

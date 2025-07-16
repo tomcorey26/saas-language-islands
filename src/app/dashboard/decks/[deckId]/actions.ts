@@ -12,12 +12,17 @@ import { generateFlashcardsIsland } from "@/services/openai";
 import {
   createCards as createCardsDb,
   deleteCardById as deleteCardByIdDb,
+  getCardWithDeck as getCardWithDeckDb,
   updateCard as updateCardDb,
 } from "@/server/db/cards";
 import {
   createIsland as createIslandDb,
   deleteIsland as deleteIslandDb,
 } from "@/server/db/islands";
+import {
+  UpdateCardRequest,
+  UpdateCardRequestSchema,
+} from "@/zod/contracts/card.schema";
 
 export async function generateIslandAction(data: CreateIslandRequest): Promise<
   | {
@@ -169,9 +174,7 @@ export async function deleteCardAction(
 
 export async function updateCardAction(
   cardId: string,
-  deckId: string,
-  phrase: string,
-  translation: string
+  unsafeData: UpdateCardRequest
 ): Promise<
   | {
       error: boolean;
@@ -180,6 +183,7 @@ export async function updateCardAction(
   | undefined
 > {
   const { userId } = await auth();
+  const { success, data } = UpdateCardRequestSchema.safeParse(unsafeData);
   if (!userId) {
     return {
       error: true,
@@ -187,30 +191,47 @@ export async function updateCardAction(
     };
   }
 
-  // Validate input
-  if (!phrase.trim() || !translation.trim()) {
+  if (!success) {
     return {
       error: true,
-      message: "Phrase and translation cannot be empty",
+      message: "Invalid request data",
     };
   }
 
   // Verify deck ownership
-  const deck = await getDeck({ id: deckId, clerkUserId: userId });
-  if (!deck) {
+  const card = await getCardWithDeckDb(cardId);
+
+  if (!card) {
+    return {
+      error: true,
+      message: "Card not found",
+    };
+  }
+
+  if (card?.deck.clerkUserId !== userId) {
     return {
       error: true,
       message: "Unauthorized",
     };
   }
 
-  // Update the card
-  await updateCardDb(deckId, cardId, {
-    phrase: phrase.trim(),
-    translation: translation.trim(),
-  });
+  // Prepare updates object with trimmed values
+  const trimmedUpdates: typeof data = {};
+  if (data.phrase !== undefined) {
+    trimmedUpdates.phrase = data.phrase.trim();
+  }
+  if (data.translation !== undefined) {
+    trimmedUpdates.translation = data.translation.trim();
+  }
+  if (data.difficulty !== undefined) {
+    trimmedUpdates.difficulty = data.difficulty;
+  }
 
-  revalidatePath(`/dashboard/decks/${deckId}`);
+  // Update the card
+  await updateCardDb(cardId, data);
+
+  revalidatePath(`/dashboard/decks/${card.deck.id}`);
+  revalidatePath(`/dashboard/decks/${card.deck.id}/study`);
   return {
     error: false,
     message: "Card updated successfully",

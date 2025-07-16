@@ -33,11 +33,10 @@ export function FlashCardList({ island, cards, deck }: FlashCardListProps) {
         </Link>
       </div>
       <div className="space-y-2">
-        {cards.map((card, index) => (
+        {cards.map((card) => (
           <FlashCardItem
             key={card.id}
             card={card}
-            index={index}
             deckId={deckId}
             deck={deck}
           />

@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Layers, Sparkles } from "lucide-react";
+import { BookOpen, Layers, Sparkles, Play } from "lucide-react";
 import { supportedLanguages } from "@/data/supportedLanguages";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -39,12 +39,24 @@ export function DeckHero({ deck, totalCards, totalIslands }: DeckHeroProps) {
             </div>
           </div>
         </div>
-        <Link href={`/dashboard/decks/${deck.id}?createIsland=true`}>
-          <Button className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 px-5 py-6 rounded-lg text-base">
-            <Sparkles className="h-5 w-5" />
-            <span>Create New Island</span>
-          </Button>
-        </Link>
+        <div className="flex gap-3">
+          <Link href={`/dashboard/decks/${deck.id}/study`}>
+            <Button
+              variant="outline"
+              className="border-primary/30 hover:bg-primary/10 transition-all duration-300 flex items-center gap-2 px-5 py-6 rounded-lg text-base"
+              disabled={totalCards === 0}
+            >
+              <Play className="h-5 w-5" />
+              <span>Study</span>
+            </Button>
+          </Link>
+          <Link href={`/dashboard/decks/${deck.id}?createIsland=true`}>
+            <Button className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 px-5 py-6 rounded-lg text-base">
+              <Sparkles className="h-5 w-5" />
+              <span>Create New Island</span>
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   );

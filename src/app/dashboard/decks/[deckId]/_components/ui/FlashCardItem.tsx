@@ -108,12 +108,10 @@ export function FlashCardItem({ card, deckId, deck }: FlashCardItemProps) {
 
   const onSubmit = async (data: EditCardFormData) => {
     startUpdateTransition(async () => {
-      const result = await updateCardAction(
-        card.id,
-        deckId,
-        data.phrase,
-        data.translation
-      );
+      const result = await updateCardAction(card.id, {
+        phrase: data.phrase,
+        translation: data.translation,
+      });
 
       if (result?.message) {
         toast({

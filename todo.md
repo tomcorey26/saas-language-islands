@@ -1,9 +1,11 @@
 Core Features
 
-- CRUD operations for decks and flashcards (In progress)
-- Generate a deck of flashcards for a language with AI
-- Listen to the flashcard audio, https://chatgpt.com/g/g-p-6830d38038b481919c372062694b024e-language-islands/c/6830d3a1-2608-8010-9ffd-655047444f72
 - Study the deck with a space repetition UI system that is fun and engaging
+- CRUD operations for decks and flashcards (In progress) (Done)
+- Generate a deck of flashcards for a language with AI (Done)
+- Listen to the flashcard audio, https://chatgpt.com/g/g-p-6830d38038b481919c372062694b024e-language-islands/c/6830d3a1-2608-8010-9ffd-655047444f72
+
+- Gemini for generation and audio
 
 5/23/2025
 What I learned:
