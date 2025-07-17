@@ -32,14 +32,14 @@ export type TierNames = keyof typeof subscriptionTiers;
 
 export const subscriptionTiers = {
   Hobby: {
-    name: "Hobby",
+    name: "Free",
     priceInCents: 0,
-    maxNumberOfGenerationsPerMonth: 2000,
+    generationCount: 100,
     // canAccessAdvancedSentencePacks: false,
-    maxNumberOfLanguages: 1, // just one language
+    maxNumberOfLanguages: Infinity, // just one language
     canSaveFlashcards: false,
     canAccessCommunityFlashCards: false,
-    canAccessMemorizationPractice: true,
+    canAccessMemorizationPractice: false,
     canDownloadAudio: false,
     // canAccessAdvancedSpacedRepetition: false,
     // canAccessOfflineMode: false,
@@ -52,14 +52,14 @@ export const subscriptionTiers = {
     // canAccessPrioritySupport: false,
   },
   Pro: {
-    name: "Pro",
+    name: "1K tokens",
     priceInCents: 299,
-    maxNumberOfGenerationsPerMonth: Infinity,
+    generationCount: 1000,
     maxNumberOfLanguages: Infinity,
     canSaveFlashcards: true,
     canAccessCommunityFlashCards: false,
     canAccessMemorizationPractice: true,
-    canDownloadAudio: true,
+    canDownloadAudio: false,
     // canAccessAdvancedSentencePacks: false,
     // canAccessAdvancedSpacedRepetition: false,
     // canAccessOfflineMode: true,
@@ -75,7 +75,7 @@ export const subscriptionTiers = {
   // Polyglot: {
   //   name: "Polyglot",
   //   priceInCents: 4000,
-  //   maxNumberOfGenerationsPerMonth: Infinity,
+  //   generationCount: Infinity,
   //   maxNumberOfLanguages: Infinity,
   //   canSaveFlashcards: true,
   //   canAccessCommunityFlashCards: false,
@@ -96,7 +96,7 @@ export const subscriptionTiers = {
   // Premium: {
   //   name: "Premium",
   //   priceInCents: 999,
-  //   maxNumberOfGenerationsPerMonth: 5000,
+  //   generationCount: 5000,
   //   maxNumberOfLanguages: Infinity,
   //   canSaveFlashcards: true,
   //   canAccessCommunityFlashCards: true,

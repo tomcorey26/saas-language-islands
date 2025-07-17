@@ -1,4 +1,4 @@
-import { ClerkIcon } from "@/app/(marketing)/_icons/Clerk";
+// import { ClerkIcon } from "@/app/(marketing)/_icons/Clerk";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { SignUpButton } from "@clerk/nextjs";
 import { ArrowRightIcon, CheckIcon } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Home() {
   // text-balance makes the text break into even lines when the container is resized
@@ -44,7 +45,7 @@ export default function Home() {
           </SignUpButton>
         </div>
       </section>
-      <section className="bg-primary text-primary-foreground">
+      {/* <section className="bg-primary text-primary-foreground">
         <div className="container py-16 flex flex-col gap-16 px-8 md:px-16">
           <h2 className="text-3xl text-center text-balance">
             Trusted by the top modern companies
@@ -82,12 +83,53 @@ export default function Home() {
             </Link>
           </div>
         </div>
+      </section> */}
+      <section className="py-16 bg-background">
+        <div className="container px-8 md:px-16">
+          <h2 className="text-4xl text-center text-balance font-semibold mb-16">
+            What our learners are saying
+          </h2>
+          <div className="max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+              <div className="flex justify-center">
+                <div className="relative w-80 h-96 rounded-2xl overflow-hidden">
+                  <Image
+                    src="/images/testimonial-person.webp"
+                    alt="Tom Corey, Spanish language learner"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </div>
+              <div className="space-y-6">
+                <blockquote className="text-lg text-muted-foreground leading-relaxed">
+                  I had 2 months to prepare for my solo backpacking trip through
+                  Spain. I needed to learn practical Spanish fast - ordering
+                  food, asking for directions, booking hostels, and having real
+                  conversations with locals.
+                  <br />
+                  <br />
+                  These flashcards were perfect because I could focus on exactly
+                  what I&apos;d need while traveling. Way more effective than
+                  generic textbook phrases. My trip was incredible and I felt
+                  confident speaking Spanish!
+                </blockquote>
+                <div className="space-y-1">
+                  <div className="font-semibold text-foreground">Tom Corey</div>
+                  <div className="text-sm text-muted-foreground">
+                    Spanish student 🇪🇸 (B1)
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
       <section id="pricing" className="px-8 py-16 bg-accent/5">
         <h2 className="text-4xl text-center text-balance font-semibold mb-8">
           Save time and money from expensive tutors and courses
         </h2>
-        <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 max-w-screen-xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-screen-xl mx-auto">
           {subscriptionTiersInOrder.map((tier) => (
             <PricingCard {...tier} key={tier.name} />
           ))}
@@ -99,7 +141,7 @@ export default function Home() {
 
 function PricingCard({
   name,
-  maxNumberOfGenerationsPerMonth,
+  generationCount,
   priceInCents,
   maxNumberOfLanguages,
   canAccessCommunityFlashCards,
@@ -107,20 +149,19 @@ function PricingCard({
   canAccessMemorizationPractice,
   canDownloadAudio,
 }: (typeof subscriptionTiersInOrder)[number]) {
-  const isMostPopular = name === "Pro";
+  const isMostPopular = name === "1K tokens";
 
   const description =
-    maxNumberOfGenerationsPerMonth === Infinity
+    generationCount === Infinity
       ? "Unlimited flashcards generations"
-      : `${formatCompactNumber(maxNumberOfGenerationsPerMonth)} flashcards
-          generations a month`;
+      : `${formatCompactNumber(generationCount)} flashcard generations`;
 
   return (
     <Card>
       <CardHeader>
         <div className="text-accent font-semibold mb-8">{name}</div>
         <CardTitle className="text-xl font-bold">
-          ${priceInCents / 100} /mo
+          ${priceInCents / 100}
         </CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
@@ -142,7 +183,9 @@ function PricingCard({
                 maxNumberOfLanguages > 1 ? "s" : ""
               }`}
         </Feature>
-        {canAccessMemorizationPractice && <Feature>Speaking Drills</Feature>}
+        {canAccessMemorizationPractice && (
+          <Feature>Spaced Repetition Drills</Feature>
+        )}
         {canDownloadAudio && <Feature>Download audio</Feature>}
         {canSaveFlashcards && <Feature>Save and export flashcards</Feature>}
         {canAccessCommunityFlashCards && (
