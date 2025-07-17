@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { useState } from "react";
 
+// TODO: make this responsve without javascript
 export function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
 
