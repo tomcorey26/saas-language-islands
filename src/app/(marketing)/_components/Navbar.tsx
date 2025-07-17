@@ -12,15 +12,15 @@ export function NavBar() {
         <Link className="text-lg" href="/dashboard">
           Create Islands
         </Link>
-        <Link className="text-lg" href="#">
+        {/* <Link className="text-lg" href="#">
           Explore Islands
-        </Link>
+        </Link> */}
         <Link className="text-lg" href="/#pricing">
           Pricing
         </Link>
-        <Link className="text-lg" href="#">
+        {/* <Link className="text-lg" href="#">
           About
-        </Link>
+        </Link> */}
         <span className="text-lg">
           <SignedIn>
             <div className="flex items-center">
