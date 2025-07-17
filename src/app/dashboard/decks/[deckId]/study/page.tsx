@@ -25,7 +25,7 @@ export default async function StudyPage({
 
   if (allCards.length === 0) {
     return (
-      <div className="container mx-auto p-6 flex flex-col items-center justify-center h-[80vh] space-y-4">
+      <div className="w-full p-6 flex flex-col items-center justify-center h-[80vh] space-y-4">
         <h2 className="text-2xl font-bold">No cards to study</h2>
         <p className="text-lg text-muted-foreground">
           This deck doesn&apos;t have any flashcards yet.
@@ -41,13 +41,11 @@ export default async function StudyPage({
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <StudyMode
-        cards={allCards}
-        deckId={deckId}
-        deckName={deck.name}
-        deckLanguage={deck.language}
-      />
-    </div>
+    <StudyMode
+      cards={allCards}
+      deckId={deckId}
+      deckName={deck.name}
+      deckLanguage={deck.language}
+    />
   );
 }
