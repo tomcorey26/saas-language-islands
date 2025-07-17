@@ -117,7 +117,7 @@ export function StudyMode({
     <div className="flex flex-col items-center w-full">
       <div className="w-full max-w-4xl">
         {/* Mobile header - compact */}
-        <div className="flex md:hidden items-center justify-between mb-4 px-2 pr-16">
+        <div className="flex md:hidden items-center justify-between mb-4 px-2">
           <Button
             variant="ghost"
             size="sm"

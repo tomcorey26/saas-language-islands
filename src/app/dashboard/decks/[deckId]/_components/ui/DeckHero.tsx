@@ -39,7 +39,7 @@ export function DeckHero({ deck, totalCards, totalIslands }: DeckHeroProps) {
             </div>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-col md:flex-row">
           <Link href={`/dashboard/decks/${deck.id}/study`}>
             <Button
               variant="outline"
