@@ -87,7 +87,7 @@ export default function Home() {
         <h2 className="text-4xl text-center text-balance font-semibold mb-8">
           Save time and money from expensive tutors and courses
         </h2>
-        <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 max-w-screen-xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-screen-xl mx-auto">
           {subscriptionTiersInOrder.map((tier) => (
             <PricingCard {...tier} key={tier.name} />
           ))}
@@ -99,7 +99,7 @@ export default function Home() {
 
 function PricingCard({
   name,
-  maxNumberOfGenerationsPerMonth,
+  generationCount,
   priceInCents,
   maxNumberOfLanguages,
   canAccessCommunityFlashCards,
@@ -107,20 +107,19 @@ function PricingCard({
   canAccessMemorizationPractice,
   canDownloadAudio,
 }: (typeof subscriptionTiersInOrder)[number]) {
-  const isMostPopular = name === "Pro";
+  const isMostPopular = name === "1K tokens";
 
   const description =
-    maxNumberOfGenerationsPerMonth === Infinity
+    generationCount === Infinity
       ? "Unlimited flashcards generations"
-      : `${formatCompactNumber(maxNumberOfGenerationsPerMonth)} flashcards
-          generations a month`;
+      : `${formatCompactNumber(generationCount)} flashcard generations`;
 
   return (
     <Card>
       <CardHeader>
         <div className="text-accent font-semibold mb-8">{name}</div>
         <CardTitle className="text-xl font-bold">
-          ${priceInCents / 100} /mo
+          ${priceInCents / 100}
         </CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
@@ -142,7 +141,9 @@ function PricingCard({
                 maxNumberOfLanguages > 1 ? "s" : ""
               }`}
         </Feature>
-        {canAccessMemorizationPractice && <Feature>Speaking Drills</Feature>}
+        {canAccessMemorizationPractice && (
+          <Feature>Spaced Repetition Drills</Feature>
+        )}
         {canDownloadAudio && <Feature>Download audio</Feature>}
         {canSaveFlashcards && <Feature>Save and export flashcards</Feature>}
         {canAccessCommunityFlashCards && (
