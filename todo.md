@@ -1,13 +1,17 @@
 Core Features
 
+- Add caching and suspense to relevant places
+- Limit tokens user can use
+- Allow buying more tokens: https://www.youtube.com/results?search_query=easy+stripe+setup
+- Update styling for shadcn
+- Gemini for generation and audio
+
+DONE
+
 - Study the deck with a space repetition UI system that is fun and engaging
 - CRUD operations for decks and flashcards (In progress) (Done)
 - Generate a deck of flashcards for a language with AI (Done)
 - Listen to the flashcard audio, https://chatgpt.com/g/g-p-6830d38038b481919c372062694b024e-language-islands/c/6830d3a1-2608-8010-9ffd-655047444f72
-- Update styling for shadcn
-- Add caching and suspense to relevant places
-
-- Gemini for generation and audio
 
 5/23/2025
 What I learned:

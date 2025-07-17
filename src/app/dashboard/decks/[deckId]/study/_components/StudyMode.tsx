@@ -114,10 +114,10 @@ export function StudyMode({
   }
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="w-full max-w-2xl">
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-4">
+    <div className="flex flex-col items-center w-full">
+      <div className="w-full max-w-4xl">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <Button
               variant="outline"
               onClick={() => router.push(`/dashboard/decks/${deckId}`)}
@@ -134,7 +134,7 @@ export function StudyMode({
         </div>
 
         <div className="flex justify-center mb-4">
-          <div className="flex items-center gap-6 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <kbd className="px-2 py-1 bg-muted rounded border text-xs font-mono">
                 Space
@@ -202,19 +202,20 @@ export function StudyMode({
           </AnimatePresence>
         </Card>
 
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <Button
             variant="outline"
             onClick={() =>
               currentIndex > 0 && setCurrentIndex((prev) => prev - 1)
             }
             disabled={currentIndex === 0}
+            className="w-full sm:w-auto"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Previous
           </Button>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full sm:w-auto justify-center">
             <Button
               variant="outline"
               className={cn(
@@ -264,6 +265,7 @@ export function StudyMode({
               setCurrentIndex((prev) => prev + 1)
             }
             disabled={currentIndex === cards.length - 1}
+            className="w-full sm:w-auto"
           >
             Next
             <ArrowRight className="h-4 w-4 ml-2" />
