@@ -116,7 +116,23 @@ export function StudyMode({
   return (
     <div className="flex flex-col items-center w-full">
       <div className="w-full max-w-4xl">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-4">
+        {/* Mobile header - compact */}
+        <div className="flex md:hidden items-center justify-between mb-4 px-2 pr-16">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push(`/dashboard/decks/${deckId}`)}
+            className="text-xs px-2 py-1 h-8"
+          >
+            ← Exit
+          </Button>
+          <div className="text-xs text-muted-foreground font-medium">
+            {currentIndex + 1} / {cards.length}
+          </div>
+        </div>
+
+        {/* Desktop header */}
+        <div className="hidden md:flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <Button
               variant="outline"
@@ -133,7 +149,7 @@ export function StudyMode({
           </div>
         </div>
 
-        <div className="flex justify-center mb-4">
+        <div className="hidden md:flex justify-center mb-4">
           <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <kbd className="px-2 py-1 bg-muted rounded border text-xs font-mono">
@@ -156,7 +172,7 @@ export function StudyMode({
           </div>
         </div>
 
-        <Card className="relative h-96 mb-8 cursor-pointer overflow-hidden">
+        <Card className="relative h-96 mb-4 md:mb-8 cursor-pointer overflow-hidden">
           <AnimatePresence mode="wait">
             {!isFlipped ? (
               <motion.div
@@ -202,7 +218,89 @@ export function StudyMode({
           </AnimatePresence>
         </Card>
 
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+        {/* Mobile controls - compact and touch-friendly */}
+        <div className="flex md:hidden flex-col gap-3">
+          {/* Navigation buttons */}
+          <div className="flex justify-between items-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                currentIndex > 0 && setCurrentIndex((prev) => prev - 1)
+              }
+              disabled={currentIndex === 0}
+              className="px-3 py-2 h-9"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Prev
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                currentIndex < cards.length - 1 &&
+                setCurrentIndex((prev) => prev + 1)
+              }
+              disabled={currentIndex === cards.length - 1}
+              className="px-3 py-2 h-9"
+            >
+              Next
+              <ArrowRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
+
+          {/* Difficulty buttons */}
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn(
+                currentCard.difficulty === "again" && "bg-destructive",
+                "border-red-500 hover:bg-red-500/10 hover:text-black h-9"
+              )}
+              onClick={() => handleUpdateCard(currentCard.id, "again")}
+            >
+              Again
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn(
+                currentCard.difficulty === "difficult" && "bg-orange-500",
+                "border-orange-500 hover:bg-orange-500/10 hover:text-black h-9"
+              )}
+              onClick={() => handleUpdateCard(currentCard.id, "difficult")}
+            >
+              Hard
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn(
+                currentCard.difficulty === "good" && "bg-green-500",
+                "border-green-500 hover:bg-green-500/10 hover:text-black h-9"
+              )}
+              onClick={() => handleUpdateCard(currentCard.id, "good")}
+            >
+              Good
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn(
+                currentCard.difficulty === "easy" && "bg-blue-500",
+                "border-blue-500 hover:bg-blue-500/10 hover:text-black h-9"
+              )}
+              onClick={() => handleUpdateCard(currentCard.id, "easy")}
+            >
+              Easy
+            </Button>
+          </div>
+        </div>
+
+        {/* Desktop controls - original layout */}
+        <div className="hidden md:flex flex-col sm:flex-row justify-between items-center gap-4">
           <Button
             variant="outline"
             onClick={() =>
