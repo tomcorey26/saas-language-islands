@@ -29,7 +29,7 @@ export default function Home() {
       <section className="min-h-screen bg-[radial-gradient(hsl(180,72%,65%,40%),hsl(190,62%,73%,40%),hsl(var(--background))_60%)] flex items-center justify-center text-center text-balance flex-col gap-8 px-4">
         {/* Tracking makes the spacing closer between letters because in large font sizes it makes it easier to read */}
         <h1 className="text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight m-4">
-          Welcome to Language Islands
+          Welcome to Islands of Language
         </h1>
         <p className="text-lg lg:text-3xl max-w-screen-xl">
           Generate flashcards to master real conversations faster than ever and

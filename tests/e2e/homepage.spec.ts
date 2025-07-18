@@ -10,7 +10,7 @@ test.describe("Homepage", () => {
     // Check if the main heading is visible
     // Replace 'Your SaaS App' with the actual text of your main heading if different
     await expect(
-      page.locator("h1").filter({ hasText: "Welcome to Language Islands" })
+      page.locator("h1").filter({ hasText: "Welcome to Islands of Language" })
     ).toBeVisible();
 
     // Example: Check if a specific element exists (e.g., a sign-in button)

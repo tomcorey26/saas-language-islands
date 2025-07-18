@@ -54,7 +54,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Language Islands</SidebarGroupLabel>
+          <SidebarGroupLabel>Islands of Language</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {/* User profile section with separator and better styling */}
