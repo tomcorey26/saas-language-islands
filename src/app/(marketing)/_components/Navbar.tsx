@@ -15,18 +15,18 @@ export function NavBar() {
   return (
     <header className="flex py-6 shadow-xl fixed top-0 w-full z-10 bg-background/95">
       <nav className="flex items-center justify-between container font-semibold">
-        <Link href="/" className="flex-shrink-0">
-          <BrandLogo />
-        </Link>
-
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-10">
-          <Link className="text-lg" href="/dashboard">
-            Create Islands
+        {/* Left side - Logo and Pricing */}
+        <div className="flex items-center gap-6">
+          <Link href="/" className="flex-shrink-0">
+            <BrandLogo />
           </Link>
-          <Link className="text-lg" href="/#pricing">
+          <Link className="text-lg hidden md:block" href="/#pricing">
             Pricing
           </Link>
+        </div>
+
+        {/* Desktop Navigation - Right side */}
+        <div className="hidden md:flex items-center gap-6">
           <span className="text-lg">
             <SignedIn>
               <div className="flex items-center">
@@ -37,6 +37,14 @@ export function NavBar() {
               <SignInButton>Login</SignInButton>
             </SignedOut>
           </span>
+          <Link className="text-lg" href="/dashboard">
+            <Button
+              variant="outline"
+              className="animate-pulse-scale bg-gradient-to-r from-blue-800 to-teal-500 border-0 text-white hover:from-blue-900 hover:to-teal-600 shadow-lg"
+            >
+              Get Started
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile Navigation */}
@@ -48,13 +56,6 @@ export function NavBar() {
           </SheetTrigger>
           <SheetContent side="right" className="w-[250px]">
             <div className="flex flex-col gap-6 mt-8">
-              <Link
-                className="text-lg font-semibold"
-                href="/dashboard"
-                onClick={() => setIsOpen(false)}
-              >
-                Create Islands
-              </Link>
               <Link
                 className="text-lg font-semibold"
                 href="/#pricing"
@@ -72,6 +73,15 @@ export function NavBar() {
                   <SignInButton>Login</SignInButton>
                 </SignedOut>
               </div>
+              <Link
+                className="text-lg font-semibold"
+                href="/dashboard"
+                onClick={() => setIsOpen(false)}
+              >
+                <Button className="w-full animate-pulse-scale bg-gradient-to-r from-blue-800 to-teal-500 border-0 text-white hover:from-blue-900 hover:to-teal-600 shadow-lg">
+                  Get Started
+                </Button>
+              </Link>
             </div>
           </SheetContent>
         </Sheet>

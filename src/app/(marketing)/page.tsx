@@ -45,7 +45,7 @@ export default function Home() {
             </Button>
           </Link>
           <SignUpButton>
-            <Button className="text-lg p-6 rounded-xl flex gap-2">
+            <Button className="text-lg p-6 rounded-xl flex gap-2 bg-gradient-to-r from-blue-800 to-teal-500 border-0 text-white hover:from-blue-900 hover:to-teal-600 shadow-lg">
               Get started for free <ArrowRightIcon className="size-5" />
             </Button>
           </SignUpButton>
@@ -198,8 +198,12 @@ function PricingCard({
       <CardContent>
         <SignUpButton>
           <Button
-            className="text-lg w-full rounded-lg"
-            variant={isMostPopular ? "accent" : "default"}
+            className={`text-lg w-full rounded-lg ${
+              isMostPopular
+                ? "bg-gradient-to-r from-blue-800 to-teal-500 border-0 text-white hover:from-blue-900 hover:to-teal-600 shadow-lg"
+                : ""
+            }`}
+            variant={isMostPopular ? "default" : "default"}
           >
             Get started
           </Button>
