@@ -22,6 +22,8 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 
+// TODO: add example of flashcards generated
+
 export default function Home() {
   // text-balance makes the text break into even lines when the container is resized
   return (
