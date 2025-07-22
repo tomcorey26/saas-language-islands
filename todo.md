@@ -1,4 +1,5 @@
-Core Features
+1. Follow stripe tutorial from webdev simplified
+   Core Features
 
 - Add caching and suspense to relevant places
 - Limit tokens user can use
