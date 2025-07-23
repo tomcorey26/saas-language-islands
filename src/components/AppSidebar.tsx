@@ -1,4 +1,4 @@
-import { BarChart, BookOpen, Home, Settings } from "lucide-react";
+import { BarChart, BookOpen, Home, Settings, CreditCard } from "lucide-react";
 
 import {
   Sidebar,
@@ -13,6 +13,8 @@ import {
 import { UserButton } from "@clerk/nextjs";
 import { Separator } from "@/components/ui/separator";
 import { TokenUsage } from "@/components/TokenUsage";
+import { Button } from "@/components/ui/button";
+import { env } from "@/data/env/client";
 
 // Menu items.
 const items = [
@@ -89,6 +91,17 @@ export function AppSidebar() {
                 {/* Token usage visualization */}
                 <div className="flex justify-center py-2">
                   <TokenUsage tokensUsed={100} totalTokens={1000} />
+                </div>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                {/* Buy Credits button */}
+                <div className="px-2 py-1">
+                  <a href={env.NEXT_PUBLIC_STRIPE_LINK}>
+                    <Button variant="cta" className="w-full" size="sm">
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      Buy Credits
+                    </Button>
+                  </a>
                 </div>
               </SidebarMenuItem>
             </SidebarMenu>

@@ -59,12 +59,13 @@ export default async function DashboardPage() {
       pageTitle="Decks"
       actions={
         <Link href="/dashboard/decks/new">
-          <Button className="flex items-center gap-2" variant="secondary">
+          <Button className="flex items-center gap-2">
             <Sparkles className="h-4 w-4" />
             Create Deck
           </Button>
         </Link>
       }
+      backButtonHref="/dashboard"
     >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {decks.length === 0 ? (

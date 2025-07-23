@@ -2,7 +2,7 @@
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FlashCardList } from "./FlashCardList";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Deck } from "@/zod/models/deck.model";
 import { Island } from "@/zod/models/island.model";
 import { FlashCard } from "@/zod/models/flashcard.model";
@@ -18,6 +18,11 @@ export function CategoryTabs({ islands, deck }: CategoryTabsProps) {
   const [selectedCategory, setSelectedCategory] = useState(
     islands[0]?.name || ""
   );
+  const [isInitialMount, setIsInitialMount] = useState(true);
+
+  useEffect(() => {
+    setIsInitialMount(false);
+  }, []);
 
   return (
     <Tabs
@@ -46,35 +51,22 @@ export function CategoryTabs({ islands, deck }: CategoryTabsProps) {
           </motion.div>
         ))}
       </TabsList>
-      <div className="mt-6 relative overflow-hidden">
+      <div className="mt-6 relative">
         <AnimatePresence mode="wait">
           {islands.map(
             (island) =>
               island.name === selectedCategory && (
                 <motion.div
                   key={island.id}
-                  initial={{
-                    x: 100,
-                    opacity: 0,
-                    scale: 0.95,
-                  }}
-                  animate={{
-                    x: 0,
-                    opacity: 1,
-                    scale: 1,
-                  }}
-                  exit={{
-                    x: -100,
-                    opacity: 0,
-                    scale: 0.95,
-                  }}
+                  initial={isInitialMount ? false : { x: 300, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: -300, opacity: 0 }}
                   transition={{
                     type: "spring",
                     stiffness: 400,
                     damping: 30,
                     mass: 0.5,
                   }}
-                  className="relative"
                 >
                   <FlashCardList
                     island={island}

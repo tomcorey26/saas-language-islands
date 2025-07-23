@@ -38,12 +38,7 @@ export function NavBar() {
             </SignedOut>
           </span>
           <Link className="text-lg" href="/dashboard">
-            <Button
-              variant="outline"
-              className="animate-pulse-scale bg-gradient-to-r from-blue-800 to-teal-500 border-0 text-white hover:from-blue-900 hover:to-teal-600 shadow-lg"
-            >
-              Get Started
-            </Button>
+            <Button variant="cta">Get Started</Button>
           </Link>
         </div>
 

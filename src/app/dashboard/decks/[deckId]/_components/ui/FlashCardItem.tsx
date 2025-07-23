@@ -246,10 +246,7 @@ export function FlashCardItem({ card, deckId, deck }: FlashCardItemProps) {
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 rounded-full bg-blue-500 text-white hover:bg-blue-600"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      playAudio();
-                    }}
+                    onClick={playAudio}
                   >
                     <Volume2 className="h-4 w-4" />
                   </Button>

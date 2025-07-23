@@ -1,14 +1,15 @@
-import { createEnv } from '@t3-oss/env-nextjs';
-import { z } from 'zod';
+import { createEnv } from "@t3-oss/env-nextjs";
+import { z } from "zod";
 
 export const env = createEnv({
   emptyStringAsUndefined: true,
   server: {
     DATABASE_URL: z.string().url(),
     OPENAI_API_KEY: z.string().min(1),
-    CLERK_SECRET_KEY: z.string(),
-    CLERK_WEBHOOK_SECRET: z.string(),
-    RECAPTCHA_SECRET_KEY: z.string(),
+    CLERK_SECRET_KEY: z.string().min(1),
+    CLERK_WEBHOOK_SECRET: z.string().min(1),
+    RECAPTCHA_SECRET_KEY: z.string().min(1),
+    STRIPE_SECRET_KEY: z.string().min(1),
   },
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
@@ -16,5 +17,6 @@ export const env = createEnv({
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
     CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET,
     RECAPTCHA_SECRET_KEY: process.env.RECAPTCHA_SECRET_KEY,
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
   },
 });

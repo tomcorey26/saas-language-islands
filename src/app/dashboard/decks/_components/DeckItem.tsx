@@ -34,7 +34,7 @@ export default function DeckItem({ deck }: DeckItemProps) {
             </div>
           </div>
         </Link>
-        <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-2 right-2 flex gap-2">
           <Link href={`/dashboard/decks/new?deckId=${deck.id}`}>
             <Button variant="secondary" size="icon" className="h-8 w-8">
               <Edit className="h-4 w-4" />

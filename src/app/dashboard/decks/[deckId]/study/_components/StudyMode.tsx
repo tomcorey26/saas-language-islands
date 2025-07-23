@@ -35,6 +35,7 @@ export function StudyMode({
   const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [optimisticCards, updateOptimisticCards] = useOptimistic(
     cards,
     (state, newDifficulty: { cardId: string; difficulty: CardDifficulty }) => {
@@ -52,18 +53,25 @@ export function StudyMode({
     cardId: string,
     difficulty: CardDifficulty
   ) => {
-    // Move to next card immediately
-    if (currentIndex < cards.length - 1) {
-      setCurrentIndex((prev) => prev + 1);
-      setIsFlipped(false);
-    }
+    // Prevent double-clicking during transition
+    if (isTransitioning) return;
 
-    // TOMDO: how tf does startTransition work?
+    setIsTransitioning(true);
+
+    // Optimistically update the card first to show immediate feedback
     startTransition(async () => {
-      // Optimistically update the card
       updateOptimisticCards({ cardId, difficulty });
       await updateCardAction(cardId, { difficulty });
     });
+
+    // Show the selection for a brief moment before advancing
+    setTimeout(() => {
+      if (currentIndex < cards.length - 1) {
+        setCurrentIndex((prev) => prev + 1);
+        setIsFlipped(false);
+      }
+      setIsTransitioning(false);
+    }, 400);
   };
 
   const handleKeyDown = useCallback(
@@ -174,47 +182,72 @@ export function StudyMode({
 
         <Card className="relative h-96 mb-4 md:mb-8 cursor-pointer overflow-hidden">
           <AnimatePresence mode="wait">
-            {!isFlipped ? (
-              <motion.div
-                key="front"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="absolute inset-0 p-8 flex flex-col"
-                onClick={() => setIsFlipped(true)}
-              >
-                <div className="flex-1 flex items-center justify-center">
-                  <p className="text-2xl font-medium">{currentCard.phrase}</p>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="back"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="absolute inset-0 p-8 flex flex-col"
-                onClick={() => setIsFlipped(false)}
-              >
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="text-center">
-                    <p className="text-2xl mb-4">{currentCard.translation}</p>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        playAudio();
-                      }}
-                    >
-                      <Volume2 className="h-6 w-6" />
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
+            <motion.div
+              key={`card-${currentIndex}`}
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="absolute inset-0"
+            >
+              <AnimatePresence mode="wait">
+                {!isFlipped ? (
+                  <motion.div
+                    key="front"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.15, ease: "easeInOut" }}
+                    className="absolute inset-0 p-8 flex flex-col"
+                    onClick={() => setIsFlipped(true)}
+                  >
+                    <div className="absolute top-4 right-4">
+                      <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                        Phrase
+                      </span>
+                    </div>
+                    <div className="flex-1 flex items-center justify-center">
+                      <p className="text-2xl font-medium">
+                        {currentCard.phrase}
+                      </p>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="back"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.15, ease: "easeInOut" }}
+                    className="absolute inset-0 p-8 flex flex-col"
+                    onClick={() => setIsFlipped(false)}
+                  >
+                    <div className="absolute top-4 right-4">
+                      <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                        Translation
+                      </span>
+                    </div>
+                    <div className="flex-1 flex items-center justify-center">
+                      <div className="text-center">
+                        <p className="text-2xl mb-4">
+                          {currentCard.translation}
+                        </p>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            playAudio();
+                          }}
+                        >
+                          <Volume2 className="h-6 w-6" />
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
           </AnimatePresence>
         </Card>
 
@@ -225,9 +258,12 @@ export function StudyMode({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() =>
-                currentIndex > 0 && setCurrentIndex((prev) => prev - 1)
-              }
+              onClick={() => {
+                if (currentIndex > 0) {
+                  setCurrentIndex((prev) => prev - 1);
+                  setIsFlipped(false);
+                }
+              }}
               disabled={currentIndex === 0}
               className="px-3 py-2 h-9"
             >
@@ -238,10 +274,12 @@ export function StudyMode({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() =>
-                currentIndex < cards.length - 1 &&
-                setCurrentIndex((prev) => prev + 1)
-              }
+              onClick={() => {
+                if (currentIndex < cards.length - 1) {
+                  setCurrentIndex((prev) => prev + 1);
+                  setIsFlipped(false);
+                }
+              }}
               disabled={currentIndex === cards.length - 1}
               className="px-3 py-2 h-9"
             >
@@ -252,50 +290,82 @@ export function StudyMode({
 
           {/* Difficulty buttons */}
           <div className="grid grid-cols-2 gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className={cn(
-                currentCard.difficulty === "again" && "bg-destructive",
-                "border-red-500 hover:bg-red-500/10 hover:text-black h-9"
-              )}
-              onClick={() => handleUpdateCard(currentCard.id, "again")}
-            >
-              Again
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className={cn(
-                currentCard.difficulty === "difficult" && "bg-orange-500",
-                "border-orange-500 hover:bg-orange-500/10 hover:text-black h-9"
-              )}
-              onClick={() => handleUpdateCard(currentCard.id, "difficult")}
-            >
-              Hard
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className={cn(
-                currentCard.difficulty === "good" && "bg-green-500",
-                "border-green-500 hover:bg-green-500/10 hover:text-black h-9"
-              )}
-              onClick={() => handleUpdateCard(currentCard.id, "good")}
-            >
-              Good
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className={cn(
-                currentCard.difficulty === "easy" && "bg-blue-500",
-                "border-blue-500 hover:bg-blue-500/10 hover:text-black h-9"
-              )}
-              onClick={() => handleUpdateCard(currentCard.id, "easy")}
-            >
-              Easy
-            </Button>
+            <div className="flex flex-col gap-1">
+              <div className="text-xs text-muted-foreground text-center">
+                &lt;1m
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isTransitioning}
+                className={cn(
+                  "border-red-500 h-9",
+                  currentCard.difficulty === "again"
+                    ? "bg-destructive text-destructive-foreground hover:bg-destructive hover:text-destructive-foreground"
+                    : "hover:bg-red-500/10 hover:text-black"
+                )}
+                onClick={() => handleUpdateCard(currentCard.id, "again")}
+              >
+                Again
+              </Button>
+            </div>
+            <div className="flex flex-col gap-1">
+              <div className="text-xs text-muted-foreground text-center">
+                &lt;6m
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isTransitioning}
+                className={cn(
+                  "border-orange-500 h-9",
+                  currentCard.difficulty === "difficult"
+                    ? "bg-orange-500 text-white hover:bg-orange-500 hover:text-white"
+                    : "hover:bg-orange-500/10 hover:text-black"
+                )}
+                onClick={() => handleUpdateCard(currentCard.id, "difficult")}
+              >
+                Hard
+              </Button>
+            </div>
+            <div className="flex flex-col gap-1">
+              <div className="text-xs text-muted-foreground text-center">
+                &lt;10m
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isTransitioning}
+                className={cn(
+                  "border-green-500 h-9",
+                  currentCard.difficulty === "good"
+                    ? "bg-green-500 text-white hover:bg-green-500 hover:text-white"
+                    : "hover:bg-green-500/10 hover:text-black"
+                )}
+                onClick={() => handleUpdateCard(currentCard.id, "good")}
+              >
+                Good
+              </Button>
+            </div>
+            <div className="flex flex-col gap-1">
+              <div className="text-xs text-muted-foreground text-center">
+                3d
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isTransitioning}
+                className={cn(
+                  "border-blue-500 h-9",
+                  currentCard.difficulty === "easy"
+                    ? "bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
+                    : "hover:bg-blue-500/10 hover:text-black"
+                )}
+                onClick={() => handleUpdateCard(currentCard.id, "easy")}
+              >
+                Easy
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -303,9 +373,12 @@ export function StudyMode({
         <div className="hidden md:flex flex-col sm:flex-row justify-between items-center gap-4">
           <Button
             variant="outline"
-            onClick={() =>
-              currentIndex > 0 && setCurrentIndex((prev) => prev - 1)
-            }
+            onClick={() => {
+              if (currentIndex > 0) {
+                setCurrentIndex((prev) => prev - 1);
+                setIsFlipped(false);
+              }
+            }}
             disabled={currentIndex === 0}
             className="w-full sm:w-auto"
           >
@@ -314,54 +387,88 @@ export function StudyMode({
           </Button>
 
           <div className="flex gap-2 w-full sm:w-auto justify-center">
-            <Button
-              variant="outline"
-              className={cn(
-                currentCard.difficulty === "again" && "bg-destructive",
-                "border-red-500 hover:bg-red-500/10 hover:text-black"
-              )}
-              onClick={() => handleUpdateCard(currentCard.id, "again")}
-            >
-              Again
-            </Button>
-            <Button
-              variant="outline"
-              className={cn(
-                currentCard.difficulty === "difficult" && "bg-orange-500",
-                "border-orange-500 hover:bg-orange-500/10 hover:text-black"
-              )}
-              onClick={() => handleUpdateCard(currentCard.id, "difficult")}
-            >
-              Hard
-            </Button>
-            <Button
-              variant="outline"
-              className={cn(
-                currentCard.difficulty === "good" && "bg-green-500",
-                "border-green-500 hover:bg-green-500/10 hover:text-black"
-              )}
-              onClick={() => handleUpdateCard(currentCard.id, "good")}
-            >
-              Good
-            </Button>
-            <Button
-              variant="outline"
-              className={cn(
-                currentCard.difficulty === "easy" && "bg-blue-500",
-                "border-blue-500 hover:bg-blue-500/10 hover:text-black"
-              )}
-              onClick={() => handleUpdateCard(currentCard.id, "easy")}
-            >
-              Easy
-            </Button>
+            <div className="flex flex-col gap-1 items-center">
+              <div className="text-xs text-muted-foreground text-center">
+                &lt;1m
+              </div>
+              <Button
+                variant="outline"
+                disabled={isTransitioning}
+                className={cn(
+                  "border-red-500",
+                  currentCard.difficulty === "again"
+                    ? "bg-destructive text-destructive-foreground hover:bg-destructive hover:text-destructive-foreground"
+                    : "hover:bg-red-500/10 hover:text-black"
+                )}
+                onClick={() => handleUpdateCard(currentCard.id, "again")}
+              >
+                Again
+              </Button>
+            </div>
+            <div className="flex flex-col gap-1 items-center">
+              <div className="text-xs text-muted-foreground text-center">
+                &lt;6m
+              </div>
+              <Button
+                variant="outline"
+                disabled={isTransitioning}
+                className={cn(
+                  "border-orange-500",
+                  currentCard.difficulty === "difficult"
+                    ? "bg-orange-500 text-white hover:bg-orange-500 hover:text-white"
+                    : "hover:bg-orange-500/10 hover:text-black"
+                )}
+                onClick={() => handleUpdateCard(currentCard.id, "difficult")}
+              >
+                Hard
+              </Button>
+            </div>
+            <div className="flex flex-col gap-1 items-center">
+              <div className="text-xs text-muted-foreground text-center">
+                &lt;10m
+              </div>
+              <Button
+                variant="outline"
+                disabled={isTransitioning}
+                className={cn(
+                  "border-green-500",
+                  currentCard.difficulty === "good"
+                    ? "bg-green-500 text-white hover:bg-green-500 hover:text-white"
+                    : "hover:bg-green-500/10 hover:text-black"
+                )}
+                onClick={() => handleUpdateCard(currentCard.id, "good")}
+              >
+                Good
+              </Button>
+            </div>
+            <div className="flex flex-col gap-1 items-center">
+              <div className="text-xs text-muted-foreground text-center">
+                3d
+              </div>
+              <Button
+                variant="outline"
+                disabled={isTransitioning}
+                className={cn(
+                  "border-blue-500",
+                  currentCard.difficulty === "easy"
+                    ? "bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
+                    : "hover:bg-blue-500/10 hover:text-black"
+                )}
+                onClick={() => handleUpdateCard(currentCard.id, "easy")}
+              >
+                Easy
+              </Button>
+            </div>
           </div>
 
           <Button
             variant="outline"
-            onClick={() =>
-              currentIndex < cards.length - 1 &&
-              setCurrentIndex((prev) => prev + 1)
-            }
+            onClick={() => {
+              if (currentIndex < cards.length - 1) {
+                setCurrentIndex((prev) => prev + 1);
+                setIsFlipped(false);
+              }
+            }}
             disabled={currentIndex === cards.length - 1}
             className="w-full sm:w-auto"
           >
