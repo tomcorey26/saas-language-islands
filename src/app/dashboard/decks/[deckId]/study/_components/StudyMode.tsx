@@ -35,6 +35,7 @@ export function StudyMode({
   const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [optimisticCards, updateOptimisticCards] = useOptimistic(
     cards,
     (state, newDifficulty: { cardId: string; difficulty: CardDifficulty }) => {
@@ -52,18 +53,25 @@ export function StudyMode({
     cardId: string,
     difficulty: CardDifficulty
   ) => {
-    // Move to next card immediately
-    if (currentIndex < cards.length - 1) {
-      setCurrentIndex((prev) => prev + 1);
-      setIsFlipped(false);
-    }
+    // Prevent double-clicking during transition
+    if (isTransitioning) return;
 
-    // TOMDO: how tf does startTransition work?
+    setIsTransitioning(true);
+
+    // Optimistically update the card first to show immediate feedback
     startTransition(async () => {
-      // Optimistically update the card
       updateOptimisticCards({ cardId, difficulty });
       await updateCardAction(cardId, { difficulty });
     });
+
+    // Show the selection for a brief moment before advancing
+    setTimeout(() => {
+      if (currentIndex < cards.length - 1) {
+        setCurrentIndex((prev) => prev + 1);
+        setIsFlipped(false);
+      }
+      setIsTransitioning(false);
+    }, 400);
   };
 
   const handleKeyDown = useCallback(
@@ -289,9 +297,12 @@ export function StudyMode({
               <Button
                 variant="outline"
                 size="sm"
+                disabled={isTransitioning}
                 className={cn(
-                  currentCard.difficulty === "again" && "bg-destructive",
-                  "border-red-500 hover:bg-red-500/10 hover:text-black h-9"
+                  "border-red-500 h-9",
+                  currentCard.difficulty === "again"
+                    ? "bg-destructive text-destructive-foreground hover:bg-destructive hover:text-destructive-foreground"
+                    : "hover:bg-red-500/10 hover:text-black"
                 )}
                 onClick={() => handleUpdateCard(currentCard.id, "again")}
               >
@@ -305,9 +316,12 @@ export function StudyMode({
               <Button
                 variant="outline"
                 size="sm"
+                disabled={isTransitioning}
                 className={cn(
-                  currentCard.difficulty === "difficult" && "bg-orange-500",
-                  "border-orange-500 hover:bg-orange-500/10 hover:text-black h-9"
+                  "border-orange-500 h-9",
+                  currentCard.difficulty === "difficult"
+                    ? "bg-orange-500 text-white hover:bg-orange-500 hover:text-white"
+                    : "hover:bg-orange-500/10 hover:text-black"
                 )}
                 onClick={() => handleUpdateCard(currentCard.id, "difficult")}
               >
@@ -321,9 +335,12 @@ export function StudyMode({
               <Button
                 variant="outline"
                 size="sm"
+                disabled={isTransitioning}
                 className={cn(
-                  currentCard.difficulty === "good" && "bg-green-500",
-                  "border-green-500 hover:bg-green-500/10 hover:text-black h-9"
+                  "border-green-500 h-9",
+                  currentCard.difficulty === "good"
+                    ? "bg-green-500 text-white hover:bg-green-500 hover:text-white"
+                    : "hover:bg-green-500/10 hover:text-black"
                 )}
                 onClick={() => handleUpdateCard(currentCard.id, "good")}
               >
@@ -337,9 +354,12 @@ export function StudyMode({
               <Button
                 variant="outline"
                 size="sm"
+                disabled={isTransitioning}
                 className={cn(
-                  currentCard.difficulty === "easy" && "bg-blue-500",
-                  "border-blue-500 hover:bg-blue-500/10 hover:text-black h-9"
+                  "border-blue-500 h-9",
+                  currentCard.difficulty === "easy"
+                    ? "bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
+                    : "hover:bg-blue-500/10 hover:text-black"
                 )}
                 onClick={() => handleUpdateCard(currentCard.id, "easy")}
               >
@@ -373,9 +393,12 @@ export function StudyMode({
               </div>
               <Button
                 variant="outline"
+                disabled={isTransitioning}
                 className={cn(
-                  currentCard.difficulty === "again" && "bg-destructive",
-                  "border-red-500 hover:bg-red-500/10 hover:text-black"
+                  "border-red-500",
+                  currentCard.difficulty === "again"
+                    ? "bg-destructive text-destructive-foreground hover:bg-destructive hover:text-destructive-foreground"
+                    : "hover:bg-red-500/10 hover:text-black"
                 )}
                 onClick={() => handleUpdateCard(currentCard.id, "again")}
               >
@@ -388,9 +411,12 @@ export function StudyMode({
               </div>
               <Button
                 variant="outline"
+                disabled={isTransitioning}
                 className={cn(
-                  currentCard.difficulty === "difficult" && "bg-orange-500",
-                  "border-orange-500 hover:bg-orange-500/10 hover:text-black"
+                  "border-orange-500",
+                  currentCard.difficulty === "difficult"
+                    ? "bg-orange-500 text-white hover:bg-orange-500 hover:text-white"
+                    : "hover:bg-orange-500/10 hover:text-black"
                 )}
                 onClick={() => handleUpdateCard(currentCard.id, "difficult")}
               >
@@ -403,9 +429,12 @@ export function StudyMode({
               </div>
               <Button
                 variant="outline"
+                disabled={isTransitioning}
                 className={cn(
-                  currentCard.difficulty === "good" && "bg-green-500",
-                  "border-green-500 hover:bg-green-500/10 hover:text-black"
+                  "border-green-500",
+                  currentCard.difficulty === "good"
+                    ? "bg-green-500 text-white hover:bg-green-500 hover:text-white"
+                    : "hover:bg-green-500/10 hover:text-black"
                 )}
                 onClick={() => handleUpdateCard(currentCard.id, "good")}
               >
@@ -418,9 +447,12 @@ export function StudyMode({
               </div>
               <Button
                 variant="outline"
+                disabled={isTransitioning}
                 className={cn(
-                  currentCard.difficulty === "easy" && "bg-blue-500",
-                  "border-blue-500 hover:bg-blue-500/10 hover:text-black"
+                  "border-blue-500",
+                  currentCard.difficulty === "easy"
+                    ? "bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
+                    : "hover:bg-blue-500/10 hover:text-black"
                 )}
                 onClick={() => handleUpdateCard(currentCard.id, "easy")}
               >
