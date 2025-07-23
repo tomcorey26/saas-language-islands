@@ -174,47 +174,72 @@ export function StudyMode({
 
         <Card className="relative h-96 mb-4 md:mb-8 cursor-pointer overflow-hidden">
           <AnimatePresence mode="wait">
-            {!isFlipped ? (
-              <motion.div
-                key="front"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="absolute inset-0 p-8 flex flex-col"
-                onClick={() => setIsFlipped(true)}
-              >
-                <div className="flex-1 flex items-center justify-center">
-                  <p className="text-2xl font-medium">{currentCard.phrase}</p>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="back"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="absolute inset-0 p-8 flex flex-col"
-                onClick={() => setIsFlipped(false)}
-              >
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="text-center">
-                    <p className="text-2xl mb-4">{currentCard.translation}</p>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        playAudio();
-                      }}
-                    >
-                      <Volume2 className="h-6 w-6" />
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
+            <motion.div
+              key={`card-${currentIndex}`}
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="absolute inset-0"
+            >
+              <AnimatePresence mode="wait">
+                {!isFlipped ? (
+                  <motion.div
+                    key="front"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.15, ease: "easeInOut" }}
+                    className="absolute inset-0 p-8 flex flex-col"
+                    onClick={() => setIsFlipped(true)}
+                  >
+                    <div className="absolute top-4 right-4">
+                      <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                        Phrase
+                      </span>
+                    </div>
+                    <div className="flex-1 flex items-center justify-center">
+                      <p className="text-2xl font-medium">
+                        {currentCard.phrase}
+                      </p>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="back"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.15, ease: "easeInOut" }}
+                    className="absolute inset-0 p-8 flex flex-col"
+                    onClick={() => setIsFlipped(false)}
+                  >
+                    <div className="absolute top-4 right-4">
+                      <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                        Translation
+                      </span>
+                    </div>
+                    <div className="flex-1 flex items-center justify-center">
+                      <div className="text-center">
+                        <p className="text-2xl mb-4">
+                          {currentCard.translation}
+                        </p>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            playAudio();
+                          }}
+                        >
+                          <Volume2 className="h-6 w-6" />
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
           </AnimatePresence>
         </Card>
 
@@ -225,9 +250,12 @@ export function StudyMode({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() =>
-                currentIndex > 0 && setCurrentIndex((prev) => prev - 1)
-              }
+              onClick={() => {
+                if (currentIndex > 0) {
+                  setCurrentIndex((prev) => prev - 1);
+                  setIsFlipped(false);
+                }
+              }}
               disabled={currentIndex === 0}
               className="px-3 py-2 h-9"
             >
@@ -238,10 +266,12 @@ export function StudyMode({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() =>
-                currentIndex < cards.length - 1 &&
-                setCurrentIndex((prev) => prev + 1)
-              }
+              onClick={() => {
+                if (currentIndex < cards.length - 1) {
+                  setCurrentIndex((prev) => prev + 1);
+                  setIsFlipped(false);
+                }
+              }}
               disabled={currentIndex === cards.length - 1}
               className="px-3 py-2 h-9"
             >
@@ -323,9 +353,12 @@ export function StudyMode({
         <div className="hidden md:flex flex-col sm:flex-row justify-between items-center gap-4">
           <Button
             variant="outline"
-            onClick={() =>
-              currentIndex > 0 && setCurrentIndex((prev) => prev - 1)
-            }
+            onClick={() => {
+              if (currentIndex > 0) {
+                setCurrentIndex((prev) => prev - 1);
+                setIsFlipped(false);
+              }
+            }}
             disabled={currentIndex === 0}
             className="w-full sm:w-auto"
           >
@@ -398,10 +431,12 @@ export function StudyMode({
 
           <Button
             variant="outline"
-            onClick={() =>
-              currentIndex < cards.length - 1 &&
-              setCurrentIndex((prev) => prev + 1)
-            }
+            onClick={() => {
+              if (currentIndex < cards.length - 1) {
+                setCurrentIndex((prev) => prev + 1);
+                setIsFlipped(false);
+              }
+            }}
             disabled={currentIndex === cards.length - 1}
             className="w-full sm:w-auto"
           >
