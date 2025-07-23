@@ -2,7 +2,7 @@
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FlashCardList } from "./FlashCardList";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Deck } from "@/zod/models/deck.model";
 import { Island } from "@/zod/models/island.model";
 import { FlashCard } from "@/zod/models/flashcard.model";
@@ -18,6 +18,11 @@ export function CategoryTabs({ islands, deck }: CategoryTabsProps) {
   const [selectedCategory, setSelectedCategory] = useState(
     islands[0]?.name || ""
   );
+  const [isInitialMount, setIsInitialMount] = useState(true);
+
+  useEffect(() => {
+    setIsInitialMount(false);
+  }, []);
 
   return (
     <Tabs
@@ -53,7 +58,7 @@ export function CategoryTabs({ islands, deck }: CategoryTabsProps) {
               island.name === selectedCategory && (
                 <motion.div
                   key={island.id}
-                  initial={{ x: 300, opacity: 0 }}
+                  initial={isInitialMount ? false : { x: 300, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   exit={{ x: -300, opacity: 0 }}
                   transition={{
