@@ -16,7 +16,7 @@ export function DashboardPageLayout({
 }) {
   return (
     <>
-      <div className="flex flex-wrap justify-between items-center mb-8 sticky top-0 bg-background z-10 gap-4">
+      <div className="flex flex-wrap justify-between items-center mb-8 sticky top-0 bg-background z-50 gap-4">
         <div className="flex items-center gap-4">
           {backButtonHref && (
             <Link href={backButtonHref}>
