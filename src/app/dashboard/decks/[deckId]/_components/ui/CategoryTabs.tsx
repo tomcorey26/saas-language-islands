@@ -46,35 +46,22 @@ export function CategoryTabs({ islands, deck }: CategoryTabsProps) {
           </motion.div>
         ))}
       </TabsList>
-      <div className="mt-6 relative overflow-hidden">
+      <div className="mt-6 relative">
         <AnimatePresence mode="wait">
           {islands.map(
             (island) =>
               island.name === selectedCategory && (
                 <motion.div
                   key={island.id}
-                  initial={{
-                    x: 100,
-                    opacity: 0,
-                    scale: 0.95,
-                  }}
-                  animate={{
-                    x: 0,
-                    opacity: 1,
-                    scale: 1,
-                  }}
-                  exit={{
-                    x: -100,
-                    opacity: 0,
-                    scale: 0.95,
-                  }}
+                  initial={{ x: 300, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: -300, opacity: 0 }}
                   transition={{
                     type: "spring",
                     stiffness: 400,
                     damping: 30,
                     mass: 0.5,
                   }}
-                  className="relative"
                 >
                   <FlashCardList
                     island={island}

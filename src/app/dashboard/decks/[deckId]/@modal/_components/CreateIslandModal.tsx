@@ -80,8 +80,6 @@ export function CreateIslandModal({ deckId }: { deckId: string }) {
     setIsGenerating(false);
   };
 
-  console.log("Form state:", form.formState.errors);
-
   return (
     <Dialog
       open={isModalOpen}
