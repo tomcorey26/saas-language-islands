@@ -252,50 +252,70 @@ export function StudyMode({
 
           {/* Difficulty buttons */}
           <div className="grid grid-cols-2 gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className={cn(
-                currentCard.difficulty === "again" && "bg-destructive",
-                "border-red-500 hover:bg-red-500/10 hover:text-black h-9"
-              )}
-              onClick={() => handleUpdateCard(currentCard.id, "again")}
-            >
-              Again
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className={cn(
-                currentCard.difficulty === "difficult" && "bg-orange-500",
-                "border-orange-500 hover:bg-orange-500/10 hover:text-black h-9"
-              )}
-              onClick={() => handleUpdateCard(currentCard.id, "difficult")}
-            >
-              Hard
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className={cn(
-                currentCard.difficulty === "good" && "bg-green-500",
-                "border-green-500 hover:bg-green-500/10 hover:text-black h-9"
-              )}
-              onClick={() => handleUpdateCard(currentCard.id, "good")}
-            >
-              Good
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className={cn(
-                currentCard.difficulty === "easy" && "bg-blue-500",
-                "border-blue-500 hover:bg-blue-500/10 hover:text-black h-9"
-              )}
-              onClick={() => handleUpdateCard(currentCard.id, "easy")}
-            >
-              Easy
-            </Button>
+            <div className="flex flex-col gap-1">
+              <div className="text-xs text-muted-foreground text-center">
+                &lt;1m
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className={cn(
+                  currentCard.difficulty === "again" && "bg-destructive",
+                  "border-red-500 hover:bg-red-500/10 hover:text-black h-9"
+                )}
+                onClick={() => handleUpdateCard(currentCard.id, "again")}
+              >
+                Again
+              </Button>
+            </div>
+            <div className="flex flex-col gap-1">
+              <div className="text-xs text-muted-foreground text-center">
+                &lt;6m
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className={cn(
+                  currentCard.difficulty === "difficult" && "bg-orange-500",
+                  "border-orange-500 hover:bg-orange-500/10 hover:text-black h-9"
+                )}
+                onClick={() => handleUpdateCard(currentCard.id, "difficult")}
+              >
+                Hard
+              </Button>
+            </div>
+            <div className="flex flex-col gap-1">
+              <div className="text-xs text-muted-foreground text-center">
+                &lt;10m
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className={cn(
+                  currentCard.difficulty === "good" && "bg-green-500",
+                  "border-green-500 hover:bg-green-500/10 hover:text-black h-9"
+                )}
+                onClick={() => handleUpdateCard(currentCard.id, "good")}
+              >
+                Good
+              </Button>
+            </div>
+            <div className="flex flex-col gap-1">
+              <div className="text-xs text-muted-foreground text-center">
+                3d
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className={cn(
+                  currentCard.difficulty === "easy" && "bg-blue-500",
+                  "border-blue-500 hover:bg-blue-500/10 hover:text-black h-9"
+                )}
+                onClick={() => handleUpdateCard(currentCard.id, "easy")}
+              >
+                Easy
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -314,46 +334,66 @@ export function StudyMode({
           </Button>
 
           <div className="flex gap-2 w-full sm:w-auto justify-center">
-            <Button
-              variant="outline"
-              className={cn(
-                currentCard.difficulty === "again" && "bg-destructive",
-                "border-red-500 hover:bg-red-500/10 hover:text-black"
-              )}
-              onClick={() => handleUpdateCard(currentCard.id, "again")}
-            >
-              Again
-            </Button>
-            <Button
-              variant="outline"
-              className={cn(
-                currentCard.difficulty === "difficult" && "bg-orange-500",
-                "border-orange-500 hover:bg-orange-500/10 hover:text-black"
-              )}
-              onClick={() => handleUpdateCard(currentCard.id, "difficult")}
-            >
-              Hard
-            </Button>
-            <Button
-              variant="outline"
-              className={cn(
-                currentCard.difficulty === "good" && "bg-green-500",
-                "border-green-500 hover:bg-green-500/10 hover:text-black"
-              )}
-              onClick={() => handleUpdateCard(currentCard.id, "good")}
-            >
-              Good
-            </Button>
-            <Button
-              variant="outline"
-              className={cn(
-                currentCard.difficulty === "easy" && "bg-blue-500",
-                "border-blue-500 hover:bg-blue-500/10 hover:text-black"
-              )}
-              onClick={() => handleUpdateCard(currentCard.id, "easy")}
-            >
-              Easy
-            </Button>
+            <div className="flex flex-col gap-1 items-center">
+              <div className="text-xs text-muted-foreground text-center">
+                &lt;1m
+              </div>
+              <Button
+                variant="outline"
+                className={cn(
+                  currentCard.difficulty === "again" && "bg-destructive",
+                  "border-red-500 hover:bg-red-500/10 hover:text-black"
+                )}
+                onClick={() => handleUpdateCard(currentCard.id, "again")}
+              >
+                Again
+              </Button>
+            </div>
+            <div className="flex flex-col gap-1 items-center">
+              <div className="text-xs text-muted-foreground text-center">
+                &lt;6m
+              </div>
+              <Button
+                variant="outline"
+                className={cn(
+                  currentCard.difficulty === "difficult" && "bg-orange-500",
+                  "border-orange-500 hover:bg-orange-500/10 hover:text-black"
+                )}
+                onClick={() => handleUpdateCard(currentCard.id, "difficult")}
+              >
+                Hard
+              </Button>
+            </div>
+            <div className="flex flex-col gap-1 items-center">
+              <div className="text-xs text-muted-foreground text-center">
+                &lt;10m
+              </div>
+              <Button
+                variant="outline"
+                className={cn(
+                  currentCard.difficulty === "good" && "bg-green-500",
+                  "border-green-500 hover:bg-green-500/10 hover:text-black"
+                )}
+                onClick={() => handleUpdateCard(currentCard.id, "good")}
+              >
+                Good
+              </Button>
+            </div>
+            <div className="flex flex-col gap-1 items-center">
+              <div className="text-xs text-muted-foreground text-center">
+                3d
+              </div>
+              <Button
+                variant="outline"
+                className={cn(
+                  currentCard.difficulty === "easy" && "bg-blue-500",
+                  "border-blue-500 hover:bg-blue-500/10 hover:text-black"
+                )}
+                onClick={() => handleUpdateCard(currentCard.id, "easy")}
+              >
+                Easy
+              </Button>
+            </div>
           </div>
 
           <Button
