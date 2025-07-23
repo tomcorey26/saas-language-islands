@@ -97,10 +97,7 @@ export function AppSidebar() {
                 {/* Buy Credits button */}
                 <div className="px-2 py-1">
                   <a href={env.NEXT_PUBLIC_STRIPE_LINK}>
-                    <Button
-                      className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
-                      size="sm"
-                    >
+                    <Button variant="cta" className="w-full" size="sm">
                       <CreditCard className="mr-2 h-4 w-4" />
                       Buy Credits
                     </Button>
