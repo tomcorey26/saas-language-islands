@@ -30,3 +30,11 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
 # Choose translation language and target languages?
+
+Migration guide:
+
+1. Generate migration
+2. Run migration
+3. Run seed
+4. What do i do if data has chagned for enum
+5. run in prod
