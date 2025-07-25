@@ -14,7 +14,6 @@ import { UserButton } from "@clerk/nextjs";
 import { Separator } from "@/components/ui/separator";
 import { TokenUsage } from "@/components/TokenUsage";
 import { Button } from "@/components/ui/button";
-import { env } from "@/data/env/client";
 
 // Menu items.
 const items = [

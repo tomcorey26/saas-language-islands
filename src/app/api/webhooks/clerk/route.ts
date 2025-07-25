@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       // Create user subscription
       await createUserSubscription({
         clerkUserId: event.data.id,
-        tier: "Hobby",
+        tier: "Free",
       });
       break;
     }
