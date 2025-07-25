@@ -1,10 +1,10 @@
-import { subscriptionTiers, TierNames } from "@/data/subscriptionTiers";
+import { paymentTiers, TierNames } from "@/data/paymentTiers";
 import { createdAt, id, updatedAt } from "@/drizzle/schemaHelpers";
-import { pgTable, text, index, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, index, pgEnum, integer } from "drizzle-orm/pg-core";
 
 export const TierEnum = pgEnum(
   "tier",
-  Object.keys(subscriptionTiers) as [TierNames]
+  Object.keys(paymentTiers) as [TierNames]
 );
 
 export const UserSubscriptionTable = pgTable(
@@ -12,9 +12,8 @@ export const UserSubscriptionTable = pgTable(
   {
     id,
     clerkUserId: text("clerk_user_id").notNull().unique(),
-    stripeSubscriptionItemId: text("stripe_subscription_item_id"),
-    stripeSubscriptionId: text("stripe_subscription_id"),
     stripeCustomerId: text("stripe_customer_id"),
+    tokensBalance: integer("tokens_balance").default(0),
     tier: TierEnum("tier").notNull(),
     createdAt,
     updatedAt,
