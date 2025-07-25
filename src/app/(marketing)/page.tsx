@@ -1,24 +1,8 @@
 // import { ClerkIcon } from "@/app/(marketing)/_icons/Clerk";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { subscriptionTiersInOrder } from "@/data/subscriptionTiers";
-import { formatCompactNumber } from "@/lib/formatters";
-import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SignUpButton } from "@clerk/nextjs";
-import {
-  ArrowRightIcon,
-  CheckIcon,
-  BrainIcon,
-  MicIcon,
-  SparklesIcon,
-} from "lucide-react";
+import { ArrowRightIcon, BrainIcon, MicIcon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -51,6 +35,37 @@ export default function Home() {
               Get started for free <ArrowRightIcon className="size-5" />
             </Button>
           </SignUpButton>
+        </div>
+      </section>
+      <section className="py-16 bg-accent/10">
+        <div className="container px-8 md:px-16">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-4xl text-balance font-semibold mb-6">
+              What are Language Islands?
+            </h2>
+            <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">
+              Language Islands are focused conversation scenarios that help you
+              master real-world situations. Watch this quick explanation to see
+              how this revolutionary approach transforms language learning.
+            </p>
+            <div className="relative w-full max-w-3xl mx-auto">
+              <div className="relative pb-[56.25%] h-0 rounded-xl overflow-hidden shadow-2xl">
+                <iframe
+                  className="absolute top-0 left-0 w-full h-full"
+                  src="https://www.youtube.com/embed/_g1s25Zmp3w"
+                  title="What are Language Islands?"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mt-8 max-w-2xl mx-auto">
+              Instead of memorizing random vocabulary, Language Islands help you
+              learn complete conversation flows for specific situations—like
+              ordering at a restaurant, asking for directions, or booking a
+              hotel.
+            </p>
+          </div>
         </div>
       </section>
       <section className="py-16 bg-background">
@@ -156,7 +171,8 @@ export default function Home() {
             </Link>
           </div>
         </div>
-      </section> */}
+      </section> 
+      
       <section id="pricing" className="px-8 py-16 bg-accent/5">
         <h2 className="text-4xl text-center text-balance font-semibold mb-8">
           Save time and money from expensive tutors and courses
@@ -167,85 +183,86 @@ export default function Home() {
           ))}
         </div>
       </section>
+      */}
     </>
   );
 }
 
-function PricingCard({
-  name,
-  generationCount,
-  priceInCents,
-  maxNumberOfLanguages,
-  canAccessCommunityFlashCards,
-  canSaveFlashcards,
-  canAccessMemorizationPractice,
-  canDownloadAudio,
-}: (typeof subscriptionTiersInOrder)[number]) {
-  const isMostPopular = name === "1K tokens";
+// function PricingCard({
+//   name,
+//   creditCount: generationCount,
+//   priceInCents,
+//   maxNumberOfLanguages,
+//   canAccessCommunityFlashCards,
+//   canSaveFlashcards,
+//   canAccessMemorizationPractice,
+//   canDownloadAudio,
+// }: (typeof subscriptionTiersInOrder)[number]) {
+//   const isMostPopular = name === "1K tokens";
 
-  const description =
-    generationCount === Infinity
-      ? "Unlimited flashcards generations"
-      : `${formatCompactNumber(generationCount)} flashcard generations`;
+//   const description =
+//     generationCount === Infinity
+//       ? "Unlimited flashcards generations"
+//       : `${formatCompactNumber(generationCount)} flashcard generations`;
 
-  return (
-    <Card>
-      <CardHeader>
-        <div className="text-accent font-semibold mb-8">{name}</div>
-        <CardTitle className="text-xl font-bold">
-          ${priceInCents / 100}
-        </CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <SignUpButton>
-          <Button
-            className={`text-lg w-full rounded-lg ${
-              isMostPopular
-                ? "bg-gradient-to-r from-blue-800 to-teal-500 border-0 text-white hover:from-blue-900 hover:to-teal-600 shadow-lg"
-                : ""
-            }`}
-            variant={isMostPopular ? "default" : "default"}
-          >
-            Get started
-          </Button>
-        </SignUpButton>
-      </CardContent>
-      <CardFooter className="flex flex-col gap-4 items-start">
-        <Feature className="font-bold">
-          {maxNumberOfLanguages === Infinity
-            ? "Unlimited languages"
-            : `${maxNumberOfLanguages} language${
-                maxNumberOfLanguages > 1 ? "s" : ""
-              }`}
-        </Feature>
-        {canAccessMemorizationPractice && (
-          <Feature>Spaced Repetition Drills</Feature>
-        )}
-        {canDownloadAudio && <Feature>Download audio</Feature>}
-        {canSaveFlashcards && <Feature>Save and export flashcards</Feature>}
-        {canAccessCommunityFlashCards && (
-          <Feature>Community flashcards</Feature>
-        )}
-      </CardFooter>
-    </Card>
-  );
-}
+//   return (
+//     <Card>
+//       <CardHeader>
+//         <div className="text-accent font-semibold mb-8">{name}</div>
+//         <CardTitle className="text-xl font-bold">
+//           ${priceInCents / 100}
+//         </CardTitle>
+//         <CardDescription>{description}</CardDescription>
+//       </CardHeader>
+//       <CardContent>
+//         <SignUpButton>
+//           <Button
+//             className={`text-lg w-full rounded-lg ${
+//               isMostPopular
+//                 ? "bg-gradient-to-r from-blue-800 to-teal-500 border-0 text-white hover:from-blue-900 hover:to-teal-600 shadow-lg"
+//                 : ""
+//             }`}
+//             variant={isMostPopular ? "default" : "default"}
+//           >
+//             Get started
+//           </Button>
+//         </SignUpButton>
+//       </CardContent>
+//       <CardFooter className="flex flex-col gap-4 items-start">
+//         <Feature className="font-bold">
+//           {maxNumberOfLanguages === Infinity
+//             ? "Unlimited languages"
+//             : `${maxNumberOfLanguages} language${
+//                 maxNumberOfLanguages > 1 ? "s" : ""
+//               }`}
+//         </Feature>
+//         {canAccessMemorizationPractice && (
+//           <Feature>Spaced Repetition Drills</Feature>
+//         )}
+//         {canDownloadAudio && <Feature>Download audio</Feature>}
+//         {canSaveFlashcards && <Feature>Save and export flashcards</Feature>}
+//         {canAccessCommunityFlashCards && (
+//           <Feature>Community flashcards</Feature>
+//         )}
+//       </CardFooter>
+//     </Card>
+//   );
+// }
 
-function Feature({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={cn("flex items-center gap-2", className)}>
-      <CheckIcon className="size-4 stroke-accent bg-accent/25 p-0.5 rounded-full" />
-      <span>{children}</span>
-    </div>
-  );
-}
+// function Feature({
+//   children,
+//   className,
+// }: {
+//   children: React.ReactNode;
+//   className?: string;
+// }) {
+//   return (
+//     <div className={cn("flex items-center gap-2", className)}>
+//       <CheckIcon className="size-4 stroke-accent bg-accent/25 p-0.5 rounded-full" />
+//       <span>{children}</span>
+//     </div>
+//   );
+// }
 
 function FeatureCard({
   icon,
