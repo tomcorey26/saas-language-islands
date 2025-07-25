@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { paymentTiers } from "@/data/subscriptionTiers";
+import { paymentTiers } from "@/data/paymentTiers";
 import { Sparkles } from "lucide-react";
 
 // Simple emoji icons for each tier

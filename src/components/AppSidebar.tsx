@@ -96,7 +96,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 {/* Buy Credits button */}
                 <div className="px-2 py-1">
-                  <a href={env.NEXT_PUBLIC_STRIPE_LINK}>
+                  <a href="/dashboard/purchase">
                     <Button variant="cta" className="w-full" size="sm">
                       <CreditCard className="mr-2 h-4 w-4" />
                       Buy Credits
