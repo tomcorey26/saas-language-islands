@@ -13,7 +13,7 @@ export default function NotFound() {
           </p>
         </div>
         <div className="flex justify-center">
-          <Link href="/">
+          <Link href="/dashboard">
             <Button size="lg" className="font-semibold">
               Return to Safe Harbor
             </Button>
