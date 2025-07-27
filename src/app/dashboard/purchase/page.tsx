@@ -1,30 +1,23 @@
 import { CreditPurchaseCards } from "@/components/CreditPurchaseCards";
+import { DashboardPageLayout } from "@/app/dashboard/_components/DashboardPageLayout";
 
 export default function PurchasePage() {
-  // const handlePurchase = (tierName: string) => {
-  //   // TODO: Integrate with your payment processor (Stripe, etc.)
-  //   console.log(`Purchasing ${tierName} tier`);
-
-  //   // For now, just show an alert
-  //   alert(`Redirecting to payment for ${tierName} package...`);
-  // };
-
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-12">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-foreground mb-4">
-            Choose Your Credit Package
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+    <DashboardPageLayout
+      pageTitle="Choose Your Credit Package"
+      backButtonHref="/dashboard"
+    >
+      <div className="flex flex-col gap-6 w-full">
+        {/* Description */}
+        <div>
+          <p className="text-xl text-muted-foreground">
             Purchase credits to generate more flashcard sets. The more you buy,
             the better value you get!
           </p>
         </div>
 
         {/* Refund Policy Notice */}
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-8 max-w-4xl mx-auto">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <svg
@@ -61,6 +54,6 @@ export default function PurchasePage() {
           </p>
         </div>
       </div>
-    </div>
+    </DashboardPageLayout>
   );
 }
