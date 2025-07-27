@@ -38,3 +38,7 @@ Migration guide:
 3. Run seed
 4. What do i do if data has chagned for enum
 5. run in prod
+
+## How to create a user in db
+
+- just migrate the prod db to dev db, bc the webhooks are pointing at prod

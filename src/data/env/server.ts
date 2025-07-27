@@ -10,6 +10,7 @@ export const env = createEnv({
     CLERK_WEBHOOK_SECRET: z.string().min(1),
     RECAPTCHA_SECRET_KEY: z.string().min(1),
     STRIPE_SECRET_KEY: z.string().min(1),
+    STRIPE_WEBHOOK_SECRET: z.string().min(1),
   },
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
@@ -18,5 +19,6 @@ export const env = createEnv({
     CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET,
     RECAPTCHA_SECRET_KEY: process.env.RECAPTCHA_SECRET_KEY,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
   },
 });

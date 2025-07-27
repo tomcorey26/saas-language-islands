@@ -1,3 +1,5 @@
+// Follow byte grad video
+
 1. Follow stripe tutorial from webdev simplified
    Core Features
 
