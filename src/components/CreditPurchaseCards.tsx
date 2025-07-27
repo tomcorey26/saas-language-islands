@@ -6,9 +6,9 @@ import { Sparkles } from "lucide-react";
 
 // Simple emoji icons for each tier
 const IslandIcon = ({ tier }: { tier: string; className?: string }) => {
-  if (tier === "Starter") return "🌴";
-  if (tier === "Pro") return "🏝️";
-  if (tier === "Premium") return "👑";
+  if (tier === "Starter") return "🌱";
+  if (tier === "Pro") return "🌴";
+  if (tier === "Premium") return "🏝️";
   return null;
 };
 
