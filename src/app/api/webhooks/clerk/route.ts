@@ -2,7 +2,7 @@ import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { env } from "@/data/env/server";
-import { createUserSubscription } from "@/server/db/subscription";
+import { createUser } from "@/server/db/users";
 import { deleteUser } from "@/server/db/users";
 
 export async function POST(req: Request) {
@@ -38,10 +38,9 @@ export async function POST(req: Request) {
 
   switch (event.type) {
     case "user.created": {
-      // Create user subscription
-      await createUserSubscription({
+      // Create user
+      await createUser({
         clerkUserId: event.data.id,
-        tier: "Free",
       });
       break;
     }

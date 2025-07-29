@@ -1,4 +1,5 @@
 // Follow byte grad video
+// set up webhook
 
 1. Follow stripe tutorial from webdev simplified
    Core Features

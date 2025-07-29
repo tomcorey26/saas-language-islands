@@ -1,7 +1,7 @@
-import { UserSubscriptionTable } from "@/drizzle/userSubscription";
+import { UserTable } from "@/drizzle/user";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const UserSubscriptionModel = createSelectSchema(UserSubscriptionTable);
+export const UserModel = createSelectSchema(UserTable);
 
-export type UserSubscription = z.infer<typeof UserSubscriptionModel>;
+export type User = z.infer<typeof UserModel>;

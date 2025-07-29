@@ -1,5 +1,5 @@
+import { createdAt, id, updatedAt } from "@/drizzle/schemaHelpers";
 import { pgTable, text, index, integer } from "drizzle-orm/pg-core";
-import { id, createdAt, updatedAt } from "@/drizzle/schemaHelpers";
 
 export const UserTable = pgTable(
   "users",

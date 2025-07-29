@@ -1,11 +1,11 @@
 import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-import { getUserSubscription } from "@/server/db/subscription";
+import { getUser } from "@/server/db/users";
 import { getUserPurchases } from "@/server/db/purchases";
 import { TokenUsage } from "@/components/TokenUsage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DashboardPageLayout } from "@/app/dashboard/_components/DashboardPageLayout";
+import { redirect } from "next/navigation";
 
 export default async function AccountPage() {
   const { userId } = await auth();
@@ -14,8 +14,8 @@ export default async function AccountPage() {
     redirect("/sign-in");
   }
 
-  const [userSubscription, purchases] = await Promise.all([
-    getUserSubscription(userId),
+  const [dbUser, purchases] = await Promise.all([
+    getUser(userId),
     getUserPurchases(userId),
   ]);
 
@@ -39,9 +39,7 @@ export default async function AccountPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="flex justify-center p-8">
-              <TokenUsage
-                availableTokens={userSubscription?.tokensBalance || 0}
-              />
+              <TokenUsage availableTokens={dbUser?.tokensBalance || 0} />
             </CardContent>
           </Card>
 
@@ -53,7 +51,7 @@ export default async function AccountPage() {
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Current Balance</span>
                 <span className="text-2xl font-bold">
-                  {userSubscription?.tokensBalance?.toLocaleString() || 0}
+                  {dbUser?.tokensBalance?.toLocaleString() || 0}
                 </span>
               </div>
               <div className="flex justify-between items-center">
