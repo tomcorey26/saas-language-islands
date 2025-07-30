@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CreditCard } from "lucide-react";
-import * as React from "react";
 
 interface TokenUsageProps {
   availableTokens: number;
@@ -47,7 +46,7 @@ export function TokenUsage({ availableTokens, className }: TokenUsageProps) {
 
             {/* Buy Credits button */}
             <div className="px-2 py-1">
-              <a href="/dashboard/purchase">
+              <a href="/dashboard/buy">
                 <Button variant="cta" className="w-full" size="sm">
                   <CreditCard className="mr-2 h-4 w-4" />
                   Buy Credits

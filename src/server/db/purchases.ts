@@ -9,6 +9,14 @@ export function getUserPurchases(userId: string) {
   });
 }
 
+export function getPurchaseBySessionId(sessionId: string) {
+  return db.query.PurchasesTable.findFirst({
+    where: eq(PurchasesTable.stripeSessionId, sessionId),
+  });
+}
+
 export function createPurchase(data: typeof PurchasesTable.$inferInsert) {
-  return db.insert(PurchasesTable).values(data);
+  return db.insert(PurchasesTable).values(data).onConflictDoNothing({
+    target: PurchasesTable.stripeSessionId,
+  });
 }

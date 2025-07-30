@@ -55,7 +55,11 @@ const items = [
   },
 ];
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  userTokens: number;
+}
+
+export function AppSidebar({ userTokens }: AppSidebarProps) {
   return (
     <Sidebar>
       <SidebarContent>
@@ -93,7 +97,7 @@ export function AppSidebar() {
               <Separator className="my-2" />
               <SidebarMenuItem>
                 {/* Token usage visualization */}
-                <TokenUsage availableTokens={900} />
+                <TokenUsage availableTokens={userTokens} />
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>

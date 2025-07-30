@@ -7,7 +7,7 @@ export const UserTable = pgTable(
     id,
     clerkUserId: text("clerk_user_id").notNull().unique(),
     stripeCustomerId: text("stripe_customer_id"),
-    tokensBalance: integer("tokens_balance").default(0),
+    tokensBalance: integer("tokens_balance").notNull().default(100),
     createdAt,
     updatedAt,
   },

@@ -1,8 +1,12 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { paymentTiers } from "@/data/paymentTiers";
+import { PaidTierNames, paymentTiers } from "@/data/paymentTiers";
 import { Sparkles } from "lucide-react";
+import { createCheckoutSession } from "@/server/actions/stripe";
+import { useState } from "react";
 
 // Simple emoji icons for each tier
 const IslandIcon = ({ tier }: { tier: string; className?: string }) => {
@@ -13,6 +17,8 @@ const IslandIcon = ({ tier }: { tier: string; className?: string }) => {
 };
 
 export function CreditPurchaseCards() {
+  const [loadingTier, setLoadingTier] = useState<string | null>(null);
+
   // Filter out the free tier for purchase display
   const purchasableTiers = Object.entries(paymentTiers).filter(
     ([, tier]) => tier.priceInCents > 0
@@ -74,6 +80,24 @@ export function CreditPurchaseCards() {
       shadow: "shadow-lg",
       border: "border-gray-200 dark:border-gray-800",
     };
+  };
+
+  const handlePurchase = async (tierKey: string) => {
+    setLoadingTier(tierKey);
+
+    try {
+      const result = await createCheckoutSession(tierKey as PaidTierNames);
+
+      if (result?.error) {
+        // Handle error - you might want to show a toast here
+        console.error("Failed to create checkout session");
+      }
+      // If successful, the action will redirect to Stripe checkout
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
+    } finally {
+      setLoadingTier(null);
+    }
   };
 
   return (
@@ -139,16 +163,26 @@ export function CreditPurchaseCards() {
 
                 {/* Enhanced Purchase Button */}
                 <Button
+                  onClick={() => handlePurchase(tierKey)}
+                  disabled={loadingTier === tierKey}
                   className={`
                     w-full py-3 px-6 text-white font-semibold text-lg
                     bg-gradient-to-r ${getGradientColors(index)} 
                     hover:shadow-lg hover:shadow-primary/25
                     transition-shadow duration-300
                     border-0 relative overflow-hidden
+                    disabled:opacity-70 disabled:cursor-not-allowed
                   `}
                 >
                   <span className="relative z-10">
-                    Buy for {formatPrice(tier.priceInCents)}
+                    {loadingTier === tierKey ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Processing...
+                      </div>
+                    ) : (
+                      `Buy for ${formatPrice(tier.priceInCents)}`
+                    )}
                   </span>
                   <div className="absolute inset-0 bg-white opacity-0 hover:opacity-10 transition-opacity duration-300" />
                 </Button>

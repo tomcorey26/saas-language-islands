@@ -19,6 +19,10 @@ export default async function AccountPage() {
     getUserPurchases(userId),
   ]);
 
+  if (!dbUser) {
+    redirect("/sign-in");
+  }
+
   const formatPrice = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 
   // Calculate total tokens purchased
@@ -39,7 +43,7 @@ export default async function AccountPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="flex justify-center p-8">
-              <TokenUsage availableTokens={dbUser?.tokensBalance || 0} />
+              <TokenUsage availableTokens={dbUser.tokensBalance} />
             </CardContent>
           </Card>
 
@@ -51,7 +55,7 @@ export default async function AccountPage() {
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Current Balance</span>
                 <span className="text-2xl font-bold">
-                  {dbUser?.tokensBalance?.toLocaleString() || 0}
+                  {dbUser.tokensBalance.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between items-center">

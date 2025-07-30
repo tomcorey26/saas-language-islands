@@ -9,6 +9,7 @@
     "lint": "next lint",
     "test:e2e": "playwright test",
     "test": "npm run test:e2e",
+    "stripe:webhook": "stripe listen --forward-to localhost:3000/api/stripe/webhook",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:migrate:prod": "dotenv -e .env.prod drizzle-kit migrate",
