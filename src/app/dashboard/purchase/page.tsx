@@ -1,6 +1,5 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import Stripe from "stripe";
 import { env } from "@/data/env/server";
 import { getPaymentTierByPriceId } from "@/data/paymentTiers";
@@ -145,9 +144,7 @@ async function fulfillCheckoutImmediate(sessionId: string): Promise<{
         stripeCustomerId: checkoutSession.customer as string,
       }),
     ]);
-
-    // Invalidate dashboard cache to show updated token count
-    revalidatePath("/dashboard");
+    // Note: Revalidation will happen naturally when user navigates to dashboard
 
     return {
       success: true,
