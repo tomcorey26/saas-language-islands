@@ -4,6 +4,10 @@ import { auth } from "@clerk/nextjs/server";
 import { cardDifficulties } from "@/data/cardDifficulties";
 import { revalidatePath } from "next/cache";
 import { getDeck } from "@/server/db/decks";
+import { getUser } from "@/server/db/users";
+import { db } from "@/drizzle/db";
+import { UserTable } from "@/drizzle/user";
+import { eq, sql } from "drizzle-orm";
 import {
   CreateIslandRequest,
   CreateIslandRequestSchema,
@@ -44,13 +48,34 @@ export async function generateIslandAction(data: CreateIslandRequest): Promise<
 
     const { deckId, prompt } = parsedData.data;
 
-    // Verify deck ownership
-    const deck = await getDeck({ id: deckId, clerkUserId: userId });
+    // Verify deck ownership and get user data
+    const [deck, user] = await Promise.all([
+      getDeck({ id: deckId, clerkUserId: userId }),
+      getUser(userId),
+    ]);
 
     if (!deck) {
       return {
         error: true,
         message: "Unauthorized",
+      };
+    }
+
+    if (!user) {
+      return {
+        error: true,
+        message: "User not found",
+      };
+    }
+
+    // Check if user has enough tokens
+    const tokensRequired = parsedData.data.count;
+    const availableTokens = user.tokensBalance || 0;
+
+    if (availableTokens < tokensRequired) {
+      return {
+        error: true,
+        message: `Insufficient tokens. You need ${tokensRequired} tokens but only have ${availableTokens}.`,
       };
     }
 
@@ -82,10 +107,21 @@ export async function generateIslandAction(data: CreateIslandRequest): Promise<
 
     await createCardsDb(cards);
 
+    // Deduct tokens from user's balance
+    await db
+      .update(UserTable)
+      .set({
+        tokensBalance: sql`${UserTable.tokensBalance} - ${tokensRequired}`,
+      })
+      .where(eq(UserTable.clerkUserId, userId));
+
+    // Revalidate both the deck page and dashboard to update token display
     revalidatePath(`/dashboard/decks/${deckId}`);
+    revalidatePath("/dashboard");
+
     return {
       error: false,
-      message: "Cards generated successfully",
+      message: `Cards generated successfully! ${tokensRequired} tokens used.`,
     };
   } catch (error) {
     console.error("Error generating cards:", error);

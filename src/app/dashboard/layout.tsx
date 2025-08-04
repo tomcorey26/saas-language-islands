@@ -1,7 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { auth } from "@clerk/nextjs/server";
-import { getUser } from "@/server/db/users";
+import { getUser, createUser } from "@/server/db/users";
 import { redirect } from "next/navigation";
 
 export default async function Layout({
@@ -16,10 +16,28 @@ export default async function Layout({
   }
 
   // Fetch user data server-side
-  const dbUser = await getUser(userId);
+  let dbUser = await getUser(userId);
 
+  // If user doesn't exist in database, create them
   if (!dbUser) {
-    redirect("/sign-in");
+    try {
+      await createUser({
+        clerkUserId: userId,
+      });
+
+      // Fetch the newly created user
+      dbUser = await getUser(userId);
+
+      // If still no user, something is seriously wrong
+      if (!dbUser) {
+        console.error("Failed to create user in database for userId:", userId);
+        redirect("/sign-in");
+      }
+    } catch (error) {
+      console.error("Error creating user:", error);
+      // For now, redirect to sign-in, but you might want to show an error page instead
+      redirect("/sign-in");
+    }
   }
 
   const userTokens = dbUser.tokensBalance;
