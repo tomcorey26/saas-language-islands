@@ -35,6 +35,18 @@ interface CreateCheckoutSessionResult {
 export async function createCheckoutSession(
   tier: PaidTierNames
 ): Promise<CreateCheckoutSessionResult> {
+  // Validate the tier exists
+  const tierConfig = paymentTiers[tier];
+  if (!tierConfig || !tierConfig.stripePriceId) {
+    console.error(`[STRIPE] Invalid payment tier: ${tier}`);
+    return {
+      error: true,
+      message:
+        "Invalid payment tier selected. Internal error, please try again later",
+    };
+  }
+
+  // validate the tier exists
   console.log(`[STRIPE] Creating checkout session for tier: ${tier}`);
 
   const clerkUser = await currentUser();
@@ -54,17 +66,6 @@ export async function createCheckoutSession(
       error: true,
       message:
         "User account not found. Please contact support if this problem persists.",
-    };
-  }
-
-  // Validate the tier exists
-  const tierConfig = paymentTiers[tier];
-  if (!tierConfig || !tierConfig.stripePriceId) {
-    console.error(`[STRIPE] Invalid payment tier: ${tier}`);
-    return {
-      error: true,
-      message:
-        "Invalid payment tier selected. Internal error, please try again later",
     };
   }
 
@@ -351,7 +352,7 @@ export async function fulfillCheckoutSession(
   console.log(
     `[STRIPE] Processing purchase: ${tier.generationCount} tokens for ${clerkUserId}`
   );
-  
+
   try {
     const success = await fulfillPurchaseTransaction(
       clerkUserId,
@@ -384,7 +385,8 @@ export async function fulfillCheckoutSession(
     return {
       success: false,
       error: "Database error",
-      details: error instanceof Error ? error.message : "Unknown database error",
+      details:
+        error instanceof Error ? error.message : "Unknown database error",
     };
   }
 
