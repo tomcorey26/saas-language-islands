@@ -1,3 +1,5 @@
+"use client";
+
 // import { ClerkIcon } from "@/app/(marketing)/_icons/Clerk";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,6 +7,7 @@ import { SignUpButton } from "@clerk/nextjs";
 import { ArrowRightIcon, BrainIcon, MicIcon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { TryItOutDemo } from "@/components/TryItOutDemo";
 
 // TODO: add example of flashcards generated
 
@@ -22,14 +25,15 @@ export default function Home() {
           become conversational in no time—start your language journey now!
         </p>
         <div className="flex flex-row gap-4">
-          <Link href="/create">
-            <Button
-              variant="outline"
-              className="text-lg p-6 rounded-xl flex gap-2"
-            >
-              Try it out
-            </Button>
-          </Link>
+          <Button
+            variant="outline"
+            className="text-lg p-6 rounded-xl flex gap-2"
+            onClick={() => {
+              document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
+            Try it out
+          </Button>
           <SignUpButton>
             <Button variant="cta" className="text-lg p-6 rounded-xl flex gap-2">
               Get started for free <ArrowRightIcon className="size-5" />
@@ -37,6 +41,7 @@ export default function Home() {
           </SignUpButton>
         </div>
       </section>
+      <TryItOutDemo />
       <section className="py-16 bg-accent/10">
         <div className="container px-8 md:px-16">
           <div className="max-w-4xl mx-auto text-center">
