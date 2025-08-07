@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { DeckHero } from "@/app/dashboard/decks/[deckId]/_components/ui/DeckHero";
 import { EmptyState } from "@/app/dashboard/decks/[deckId]/_components/ui/EmptyState";
 import { CategoryTabs } from "@/app/dashboard/decks/[deckId]/_components/ui/CategoryTabs";
@@ -16,12 +16,13 @@ export default async function DeckPage({
 }) {
   const { userId } = await auth();
   if (!userId) {
-    throw new Error("Not authenticated");
+    redirect("/sign-in");
   }
 
   const { deckId } = await params;
 
   const deck = await getDeckWithCards(deckId);
+
   if (!deck) {
     notFound();
   }

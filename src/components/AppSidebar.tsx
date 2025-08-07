@@ -1,4 +1,4 @@
-import { BarChart, BookOpen, Home, Settings, CreditCard } from "lucide-react";
+import { BarChart, BookOpen, Home, Settings, User } from "lucide-react";
 
 import {
   Sidebar,
@@ -13,7 +13,6 @@ import {
 import { UserButton } from "@clerk/nextjs";
 import { Separator } from "@/components/ui/separator";
 import { TokenUsage } from "@/components/TokenUsage";
-import { Button } from "@/components/ui/button";
 
 // Menu items.
 const items = [
@@ -27,6 +26,12 @@ const items = [
     title: "Decks",
     url: "/dashboard/decks",
     icon: BookOpen,
+    disabled: false,
+  },
+  {
+    title: "Account",
+    url: "/dashboard/account",
+    icon: User,
     disabled: false,
   },
   {
@@ -50,7 +55,11 @@ const items = [
   },
 ];
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  userTokens: number;
+}
+
+export function AppSidebar({ userTokens }: AppSidebarProps) {
   return (
     <Sidebar>
       <SidebarContent>
@@ -88,20 +97,7 @@ export function AppSidebar() {
               <Separator className="my-2" />
               <SidebarMenuItem>
                 {/* Token usage visualization */}
-                <div className="flex justify-center py-2">
-                  <TokenUsage tokensUsed={100} totalTokens={1000} />
-                </div>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                {/* Buy Credits button */}
-                <div className="px-2 py-1">
-                  <a href="/dashboard/purchase">
-                    <Button variant="cta" className="w-full" size="sm">
-                      <CreditCard className="mr-2 h-4 w-4" />
-                      Buy Credits
-                    </Button>
-                  </a>
-                </div>
+                <TokenUsage availableTokens={userTokens} />
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>

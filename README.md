@@ -38,3 +38,14 @@ Migration guide:
 3. Run seed
 4. What do i do if data has chagned for enum
 5. run in prod
+
+## How to create a user in db
+
+- just migrate the prod db to dev db, bc the webhooks are pointing at prod
+
+How to test stripe webhooks
+
+1. Run npm run stripe:webhook
+2. Add the webhook id to env file
+3. Run npm run stripe:webhook
+4. Run the app, then make a purchase using 424242 card
