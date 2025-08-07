@@ -24,6 +24,11 @@ export async function POST(request: NextRequest) {
   const event = data;
   console.log(`[WEBHOOK] Received event: ${event.type} (${event.id})`);
 
+  // Optional events you might consider later:
+  // - payment_intent.payment_failed - Track failed payments for analytics
+  // - customer.subscription.created/updated/deleted - If you add subscription features
+  // - invoice.payment_succeeded - For recurring billing
+
   switch (event.type) {
     case "checkout.session.completed":
     case "checkout.session.async_payment_succeeded": {
@@ -32,28 +37,31 @@ export async function POST(request: NextRequest) {
 
       // Handle fulfillment result and return appropriate status
       if (!result.success) {
-        console.error(`[WEBHOOK] Fulfillment failed for session ${session.id}:`, {
-          error: result.error,
-          details: result.details,
-          sessionId: session.id,
-          customerId: session.customer,
-          paymentIntent: session.payment_intent,
-        });
+        console.error(
+          `[WEBHOOK] Fulfillment failed for session ${session.id}:`,
+          {
+            error: result.error,
+            details: result.details,
+            sessionId: session.id,
+            customerId: session.customer,
+            paymentIntent: session.payment_intent,
+          }
+        );
 
         // Determine if Stripe should retry based on error type
         // Return 500 for temporary errors (Stripe will retry)
         // Return 200 for permanent errors or already-fulfilled (no retry needed)
         const temporaryErrors = [
           "Database error",
-          "Network error", 
+          "Network error",
           "Unexpected error",
-          "Fulfillment failed"
+          "Fulfillment failed",
         ];
-        
-        const shouldRetry = temporaryErrors.some(err => 
+
+        const shouldRetry = temporaryErrors.some((err) =>
           result.error?.includes(err)
         );
-        
+
         if (shouldRetry) {
           console.error(`[WEBHOOK] Returning 500 for retry: ${result.error}`);
           return new Response(
@@ -63,7 +71,9 @@ export async function POST(request: NextRequest) {
         }
 
         // For permanent failures, return 200 to acknowledge receipt
-        console.log(`[WEBHOOK] Permanent error, acknowledging: ${result.error}`);
+        console.log(
+          `[WEBHOOK] Permanent error, acknowledging: ${result.error}`
+        );
         return new Response(null, { status: 200 });
       }
 
@@ -78,7 +88,7 @@ export async function POST(request: NextRequest) {
       );
       break; // Continue to success response
     }
-    
+
     default: {
       console.log(`[WEBHOOK] Unhandled event type: ${event.type}`);
     }

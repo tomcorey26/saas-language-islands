@@ -67,44 +67,43 @@ export async function updatePurchase(
 }
 
 /**
- * Atomically fulfills a purchase by adding tokens and recording the purchase
- * in a single database transaction. This ensures data consistency.
+ * Fulfills a purchase by adding tokens and recording the purchase.
+ * Uses idempotency checks and manual rollback for consistency.
  */
 export async function fulfillPurchaseTransaction(
   clerkUserId: string,
   tokensToAdd: number,
   purchaseData: CreatePurchaseInput
 ) {
-  // Perform both operations in a single transaction
-  return db.transaction(async (tx) => {
-    // Check if purchase already exists (idempotency check)
-    const existingPurchase = await tx.query.PurchasesTable.findFirst({
-      where: eq(PurchasesTable.stripeSessionId, purchaseData.stripeSessionId),
-    });
-    
-    if (existingPurchase) {
-      // Already fulfilled, return success without making changes
-      console.log(`Purchase already fulfilled for session ${purchaseData.stripeSessionId}`);
-      return true;
-    }
+  // Check if purchase already exists (idempotency check)
+  const existingPurchase = await db.query.PurchasesTable.findFirst({
+    where: eq(PurchasesTable.stripeSessionId, purchaseData.stripeSessionId),
+  });
+  
+  if (existingPurchase) {
+    // Already fulfilled, return success without making changes
+    console.log(`Purchase already fulfilled for session ${purchaseData.stripeSessionId}`);
+    return true;
+  }
 
-    // 1. Record the purchase first (to claim the session ID)
-    const [purchase] = await tx
-      .insert(PurchasesTable)
-      .values(purchaseData)
-      .onConflictDoNothing({
-        target: PurchasesTable.stripeSessionId,
-      })
-      .returning({ id: PurchasesTable.id });
+  // 1. Record the purchase first (to claim the session ID)
+  const [purchase] = await db
+    .insert(PurchasesTable)
+    .values(purchaseData)
+    .onConflictDoNothing({
+      target: PurchasesTable.stripeSessionId,
+    })
+    .returning({ id: PurchasesTable.id });
 
-    // If insert returned nothing, another process already claimed this session
-    if (!purchase) {
-      console.log(`Purchase session ${purchaseData.stripeSessionId} already claimed by another process`);
-      return true;
-    }
+  // If insert returned nothing, another process already claimed this session
+  if (!purchase) {
+    console.log(`Purchase session ${purchaseData.stripeSessionId} already claimed by another process`);
+    return true;
+  }
 
+  try {
     // 2. Add tokens to user's balance only if purchase was successfully recorded
-    const userUpdateResult = await tx
+    const userUpdateResult = await db
       .update(UserTable)
       .set({
         tokensBalance: sql`${UserTable.tokensBalance} + ${tokensToAdd}`,
@@ -114,10 +113,29 @@ export async function fulfillPurchaseTransaction(
 
     // Check if user was found and updated
     if (!userUpdateResult || userUpdateResult.length === 0) {
-      throw new Error(`User ${clerkUserId} not found`);
+      // Rollback: delete the purchase record we just created
+      await db
+        .delete(PurchasesTable)
+        .where(eq(PurchasesTable.id, purchase.id));
+      
+      throw new Error(`User ${clerkUserId} not found - purchase record rolled back`);
     }
 
     console.log(`Successfully fulfilled purchase for session ${purchaseData.stripeSessionId}: ${tokensToAdd} tokens added`);
     return true;
-  });
+  } catch (error) {
+    // If we haven't already deleted the purchase record in the user check above, do it now
+    if (error instanceof Error && !error.message.includes('rolled back')) {
+      try {
+        await db
+          .delete(PurchasesTable)
+          .where(eq(PurchasesTable.id, purchase.id));
+        console.log(`Rolled back purchase record for session ${purchaseData.stripeSessionId}`);
+      } catch (rollbackError) {
+        console.error(`Failed to rollback purchase record for session ${purchaseData.stripeSessionId}:`, rollbackError);
+      }
+    }
+    
+    throw error;
+  }
 }

@@ -22,11 +22,7 @@ import {
   getPurchaseBySessionId as getPurchaseBySessionIdDb,
   getRecentPurchaseAttempts,
 } from "@/server/db/purchases";
-import {
-  shouldAllowRetry,
-  getUserFriendlyMessage,
-} from "@/lib/stripe";
-export { getRecoveryAction } from "@/lib/stripe";
+import { shouldAllowRetry, getUserFriendlyMessage } from "@/lib/stripe";
 
 const stripe = new Stripe(serverEnv.STRIPE_SECRET_KEY);
 
@@ -40,7 +36,7 @@ export async function createCheckoutSession(
   tier: PaidTierNames
 ): Promise<CreateCheckoutSessionResult> {
   console.log(`[STRIPE] Creating checkout session for tier: ${tier}`);
-  
+
   const clerkUser = await currentUser();
   if (clerkUser == null) {
     console.error("[STRIPE] Checkout failed: User not authenticated");
@@ -122,10 +118,14 @@ export async function createCheckoutSession(
   }
 
   // Create the checkout session
-  console.log(`[STRIPE] Creating checkout session for customer: ${stripeCustomerId}`);
+  console.log(
+    `[STRIPE] Creating checkout session for customer: ${stripeCustomerId}`
+  );
   const url = await getCheckoutSession(tier, clerkUser, stripeCustomerId);
   if (url == null) {
-    console.error(`[STRIPE] Failed to create checkout session for tier: ${tier}`);
+    console.error(
+      `[STRIPE] Failed to create checkout session for tier: ${tier}`
+    );
     return {
       error: true,
       message:
@@ -150,7 +150,9 @@ async function getCheckoutSession(
       return null;
     }
 
-    console.log(`[STRIPE] Creating session: tier=${tier}, customer=${stripeCustomerId}`);
+    console.log(
+      `[STRIPE] Creating session: tier=${tier}, customer=${stripeCustomerId}`
+    );
     const session = await stripe.checkout.sessions.create({
       customer: stripeCustomerId,
       metadata: {
@@ -203,8 +205,10 @@ export async function fulfillCheckoutSession(
   sessionId: string,
   isWebhook: boolean = false
 ): Promise<FulfillmentResult> {
-  console.log(`[STRIPE] Fulfilling session: ${sessionId} (webhook=${isWebhook})`);
-  
+  console.log(
+    `[STRIPE] Attempting to fulfill session: ${sessionId} (webhook=${isWebhook})`
+  );
+
   if (!sessionId || typeof sessionId !== "string") {
     console.error(`[STRIPE] Invalid session ID provided`);
     return {
@@ -231,7 +235,9 @@ export async function fulfillCheckoutSession(
     checkoutSession = await stripe.checkout.sessions.retrieve(sessionId, {
       expand: ["line_items"],
     });
-    console.log(`[STRIPE] Retrieved session: status=${checkoutSession.payment_status}`);
+    console.log(
+      `[STRIPE] Retrieved session: status=${checkoutSession.payment_status}`
+    );
   } catch (error) {
     console.error(`[STRIPE] Failed to retrieve session ${sessionId}:`, error);
     return {
@@ -247,7 +253,9 @@ export async function fulfillCheckoutSession(
     checkoutSession.payment_status !== "paid" &&
     checkoutSession.payment_status !== "no_payment_required"
   ) {
-    console.warn(`[STRIPE] Payment not completed for session ${sessionId}: ${checkoutSession.payment_status}`);
+    console.warn(
+      `[STRIPE] Payment not completed for session ${sessionId}: ${checkoutSession.payment_status}`
+    );
     return {
       success: false,
       error: "Payment not completed",
@@ -258,7 +266,9 @@ export async function fulfillCheckoutSession(
   // Validate required metadata
   const clerkUserId = checkoutSession.metadata?.clerkUserId;
   if (!clerkUserId) {
-    console.error(`[STRIPE] No clerkUserId in metadata for session ${sessionId}`);
+    console.error(
+      `[STRIPE] No clerkUserId in metadata for session ${sessionId}`
+    );
     return {
       success: false,
       error: "Account information missing",
@@ -277,9 +287,11 @@ export async function fulfillCheckoutSession(
         details: "You must be signed in to complete this purchase",
       };
     }
-    
+
     if (currentClerkUser.id !== clerkUserId) {
-      console.error(`[STRIPE] User mismatch: current=${currentClerkUser.id}, session=${clerkUserId}`);
+      console.error(
+        `[STRIPE] User mismatch: current=${currentClerkUser.id}, session=${clerkUserId}`
+      );
       return {
         success: false,
         error: "Unauthorized access",
@@ -312,9 +324,7 @@ export async function fulfillCheckoutSession(
 
   // Validate payment intent and customer
   if (!checkoutSession.payment_intent || !checkoutSession.customer) {
-    console.error(
-      `[STRIPE] Missing payment data for session ${sessionId}`
-    );
+    console.error(`[STRIPE] Missing payment data for session ${sessionId}`);
     return {
       success: false,
       error: "Payment information incomplete",
@@ -324,7 +334,10 @@ export async function fulfillCheckoutSession(
 
   // Verify the Stripe customer ID matches the user's stored customer ID
   const user = await getUserDb(clerkUserId);
-  if (user?.stripeCustomerId && user.stripeCustomerId !== checkoutSession.customer) {
+  if (
+    user?.stripeCustomerId &&
+    user.stripeCustomerId !== checkoutSession.customer
+  ) {
     console.error(
       `[STRIPE] Customer mismatch for ${sessionId}: expected=${user.stripeCustomerId}, got=${checkoutSession.customer}`
     );
@@ -335,30 +348,49 @@ export async function fulfillCheckoutSession(
     };
   }
 
-  console.log(`[STRIPE] Processing purchase: ${tier.generationCount} tokens for ${clerkUserId}`);
-  const success = await fulfillPurchaseTransaction(
-    clerkUserId,
-    tier.generationCount,
-    {
-      clerkUserId,
-      tokensPurchased: tier.generationCount,
-      amountPaidCents: tier.priceInCents,
-      stripeSessionId: sessionId,
-      stripePaymentIntentId: checkoutSession.payment_intent as string,
-      stripeCustomerId: checkoutSession.customer as string,
-    }
+  console.log(
+    `[STRIPE] Processing purchase: ${tier.generationCount} tokens for ${clerkUserId}`
   );
+  
+  try {
+    const success = await fulfillPurchaseTransaction(
+      clerkUserId,
+      tier.generationCount,
+      {
+        clerkUserId,
+        tokensPurchased: tier.generationCount,
+        amountPaidCents: tier.priceInCents,
+        stripeSessionId: sessionId,
+        stripePaymentIntentId: checkoutSession.payment_intent as string,
+        stripeCustomerId: checkoutSession.customer as string,
+      }
+    );
 
-  if (!success) {
-    console.error(`[STRIPE] Failed to fulfill purchase for session ${sessionId}`);
+    if (!success) {
+      console.error(
+        `[STRIPE] Failed to fulfill purchase for session ${sessionId}`
+      );
+      return {
+        success: false,
+        error: "Fulfillment failed",
+        details: "Failed to complete purchase",
+      };
+    }
+  } catch (error) {
+    console.error(
+      `[STRIPE] Exception during fulfillment for session ${sessionId}:`,
+      error
+    );
     return {
       success: false,
-      error: "Fulfillment failed",
-      details: "Failed to complete purchase",
+      error: "Database error",
+      details: error instanceof Error ? error.message : "Unknown database error",
     };
   }
 
-  console.log(`[STRIPE] Successfully fulfilled session ${sessionId}: ${tier.generationCount} tokens`);
+  console.log(
+    `[STRIPE] Successfully fulfilled session ${sessionId}: ${tier.generationCount} tokens`
+  );
   return {
     success: true,
     tokensAdded: tier.generationCount,
@@ -424,4 +456,3 @@ export async function attemptPaymentRecovery(
     };
   }
 }
-

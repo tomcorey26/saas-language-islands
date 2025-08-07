@@ -1,9 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import {
-  getRecoveryAction,
-  fulfillCheckoutSession,
-} from "@/server/actions/stripe";
+import { fulfillCheckoutSession } from "@/server/actions/stripe";
 import { Button } from "@/components/ui/button";
 import {
   AlertTriangle,
@@ -13,6 +10,7 @@ import {
   Home,
   ShoppingCart,
 } from "lucide-react";
+import { getRecoveryAction } from "@/lib/stripe";
 
 interface ConfirmationPageProps {
   searchParams: Promise<{
@@ -155,11 +153,6 @@ export default async function ConfirmationPage({
               🎉 {fulfillmentResult.tokensAdded.toLocaleString()} tokens added
               to your account!
             </p>
-            {fulfillmentResult.alreadyFulfilled && (
-              <p className="text-blue-700 text-sm mt-1">
-                (Previously processed - no duplicate charge)
-              </p>
-            )}
           </div>
         )}
 
