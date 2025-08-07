@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PaidTierNames, paymentTiers } from "@/data/paymentTiers";
-import { Sparkles } from "lucide-react";
+import { Sparkles, AlertTriangle, RefreshCw } from "lucide-react";
 import { createCheckoutSession } from "@/server/actions/stripe";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 // Simple emoji icons for each tier
 const IslandIcon = ({ tier }: { tier: string; className?: string }) => {
@@ -17,7 +18,10 @@ const IslandIcon = ({ tier }: { tier: string; className?: string }) => {
 };
 
 export function CreditPurchaseCards() {
+  const [errorTier, setErrorTier] = useState<string | null>(null);
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
 
   // Filter out the free tier for purchase display
   const purchasableTiers = Object.entries(paymentTiers).filter(
@@ -83,21 +87,69 @@ export function CreditPurchaseCards() {
   };
 
   const handlePurchase = async (tierKey: string) => {
+    // Clear any previous errors
+    setErrorTier(null);
     setLoadingTier(tierKey);
 
-    try {
-      const result = await createCheckoutSession(tierKey as PaidTierNames);
+    startTransition(async () => {
+      const data = await createCheckoutSession(tierKey as PaidTierNames);
 
-      if (result?.error) {
-        // Handle error - you might want to show a toast here
-        console.error("Failed to create checkout session");
-      }
-      // If successful, the action will redirect to Stripe checkout
-    } catch (error) {
-      console.error("Error creating checkout session:", error);
-    } finally {
-      setLoadingTier(null);
+      startTransition(() => {
+        if (data?.error) {
+          console.error("Checkout session creation failed:", data);
+          setErrorTier(tierKey);
+          
+          // Show specific error messages based on the error type
+          const errorTitle = getErrorTitle(data.message);
+          const errorDescription = getErrorDescription(data.message);
+          
+          toast({
+            title: errorTitle,
+            description: errorDescription,
+            variant: "destructive",
+          });
+        } else if (data?.message) {
+          // Success case - redirecting to Stripe
+          toast({
+            title: "Redirecting to payment",
+            description: "You will be redirected to Stripe checkout...",
+          });
+        }
+
+        setLoadingTier(null);
+      });
+    });
+  };
+
+  const getErrorTitle = (message?: string): string => {
+    if (!message) return "Checkout Error";
+    
+    if (message.includes("sign in") || message.includes("signed in")) {
+      return "Authentication Required";
     }
+    if (message.includes("rate limit") || message.includes("too many")) {
+      return "Rate Limit Exceeded";
+    }
+    if (message.includes("account not found")) {
+      return "Account Error";
+    }
+    if (message.includes("payment tier")) {
+      return "Configuration Error";
+    }
+    
+    return "Checkout Error";
+  };
+
+  const getErrorDescription = (message?: string): string => {
+    if (!message) return "Unable to create checkout session. Please try again.";
+    
+    // Return the actual message from the server, which is already user-friendly
+    return message;
+  };
+
+  const handleRetry = (tierKey: string) => {
+    setErrorTier(null);
+    handlePurchase(tierKey);
   };
 
   return (
@@ -161,31 +213,55 @@ export function CreditPurchaseCards() {
                   )}
                 </p>
 
-                {/* Enhanced Purchase Button */}
-                <Button
-                  onClick={() => handlePurchase(tierKey)}
-                  disabled={loadingTier === tierKey}
-                  className={`
-                    w-full py-3 px-6 text-white font-semibold text-lg
-                    bg-gradient-to-r ${getGradientColors(index)} 
-                    hover:shadow-lg hover:shadow-primary/25
-                    transition-shadow duration-300
-                    border-0 relative overflow-hidden
-                    disabled:opacity-70 disabled:cursor-not-allowed
-                  `}
-                >
-                  <span className="relative z-10">
-                    {loadingTier === tierKey ? (
-                      <div className="flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Processing...
+                {/* Enhanced Purchase Button with Error States */}
+                {errorTier === tierKey ? (
+                  <div className="space-y-3">
+                    <div className="flex flex-col items-center justify-center p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+                      <div className="flex items-center mb-1">
+                        <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400 mr-2" />
+                        <span className="text-sm font-medium text-red-700 dark:text-red-300">
+                          Checkout failed
+                        </span>
                       </div>
-                    ) : (
-                      `Buy for ${formatPrice(tier.priceInCents)}`
-                    )}
-                  </span>
-                  <div className="absolute inset-0 bg-white opacity-0 hover:opacity-10 transition-opacity duration-300" />
-                </Button>
+                      <span className="text-xs text-red-600 dark:text-red-400 text-center">
+                        Check the error message above for details
+                      </span>
+                    </div>
+                    <Button
+                      onClick={() => handleRetry(tierKey)}
+                      variant="outline"
+                      className="w-full py-3 px-6 font-semibold text-lg"
+                    >
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Try Again
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={() => handlePurchase(tierKey)}
+                    disabled={isPending && loadingTier === tierKey}
+                    className={`
+                      w-full py-3 px-6 text-white font-semibold text-lg
+                      bg-gradient-to-r ${getGradientColors(index)} 
+                      hover:shadow-lg hover:shadow-primary/25
+                      transition-all duration-300
+                      border-0 relative overflow-hidden
+                      disabled:opacity-70 disabled:cursor-not-allowed
+                    `}
+                  >
+                    <span className="relative z-10">
+                      {isPending && loadingTier === tierKey ? (
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Creating checkout...
+                        </div>
+                      ) : (
+                        `Buy for ${formatPrice(tier.priceInCents)}`
+                      )}
+                    </span>
+                    <div className="absolute inset-0 bg-white opacity-0 hover:opacity-10 transition-opacity duration-300" />
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </div>

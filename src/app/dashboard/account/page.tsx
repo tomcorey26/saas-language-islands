@@ -51,27 +51,31 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
       },
     };
 
-    const errorConfig = errorMessages[error as keyof typeof errorMessages];
-    if (!errorConfig) return null;
+    if (error) {
+      const errorConfig = errorMessages[error as keyof typeof errorMessages];
+      if (!errorConfig) return null;
 
-    return (
-      <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-        <div className="text-red-600 mt-0.5">{errorConfig.icon}</div>
-        <div className="flex-1">
-          <h3 className="font-semibold text-red-800 mb-1">
-            {errorConfig.title}
-          </h3>
-          <p className="text-red-700 text-sm">{errorConfig.message}</p>
+      return (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+          <div className="text-red-600 mt-0.5">{errorConfig.icon}</div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-red-800 mb-1">
+              {errorConfig.title}
+            </h3>
+            <p className="text-red-700 text-sm">{errorConfig.message}</p>
+          </div>
+          <a
+            href="/dashboard/account"
+            className="text-red-600 hover:text-red-800 transition-colors"
+            title="Dismiss error"
+          >
+            <X className="h-4 w-4" />
+          </a>
         </div>
-        <a
-          href="/dashboard/account"
-          className="text-red-600 hover:text-red-800 transition-colors"
-          title="Dismiss error"
-        >
-          <X className="h-4 w-4" />
-        </a>
-      </div>
-    );
+      );
+    }
+
+    return null;
   };
 
   return (

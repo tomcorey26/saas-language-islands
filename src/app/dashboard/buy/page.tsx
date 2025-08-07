@@ -1,13 +1,54 @@
 import { CreditPurchaseCards } from "@/components/CreditPurchaseCards";
 import { DashboardPageLayout } from "@/app/dashboard/_components/DashboardPageLayout";
+import { AlertTriangle, X } from "lucide-react";
+import Link from "next/link";
 
-export default function PurchasePage() {
+interface BuyPageProps {
+  searchParams: Promise<{
+    cancelled?: string;
+  }>;
+}
+
+export default async function BuyPage({ searchParams }: BuyPageProps) {
+  const { cancelled } = await searchParams;
+
+  // Cancelled message rendering
+  const renderCancelledMessage = () => {
+    if (!cancelled) return null;
+
+    return (
+      <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg flex items-start gap-3">
+        <div className="text-yellow-600 dark:text-yellow-400 mt-0.5">
+          <AlertTriangle className="h-5 w-5" />
+        </div>
+        <div className="flex-1">
+          <h3 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-1">
+            Payment Cancelled
+          </h3>
+          <p className="text-yellow-700 dark:text-yellow-300 text-sm">
+            Your payment was cancelled. You can try again anytime.
+          </p>
+        </div>
+        <Link
+          href="/dashboard/buy"
+          className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-200 transition-colors"
+          title="Dismiss message"
+        >
+          <X className="h-4 w-4" />
+        </Link>
+      </div>
+    );
+  };
+
   return (
     <DashboardPageLayout
-      pageTitle="Choose Your Credit Package"
+      pageTitle="Choose Your Tokens Package"
       backButtonHref="/dashboard"
     >
       <div className="flex flex-col gap-6 w-full">
+        {/* Cancelled Message */}
+        {renderCancelledMessage()}
+
         {/* Description */}
         <div>
           <p className="text-xl text-muted-foreground">
