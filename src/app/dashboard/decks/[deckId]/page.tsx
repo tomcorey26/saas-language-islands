@@ -1,13 +1,12 @@
 import { auth } from "@clerk/nextjs/server";
 import { notFound, redirect } from "next/navigation";
-import { DeckHero } from "@/app/dashboard/decks/[deckId]/_components/ui/DeckHero";
-import { EmptyState } from "@/app/dashboard/decks/[deckId]/_components/ui/EmptyState";
-import { CategoryTabs } from "@/app/dashboard/decks/[deckId]/_components/ui/CategoryTabs";
 import { getDeckWithCards } from "@/server/db/decks";
 import { DashboardPageLayout } from "@/app/dashboard/_components/DashboardPageLayout";
+import { DeckContent, DeckContentSkeleton } from "@/components/DeckContent";
 import { Button } from "@/components/ui/button";
 import { Play, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 
 export default async function DeckPage({
   params,
@@ -21,8 +20,8 @@ export default async function DeckPage({
 
   const { deckId } = await params;
 
+  // Check if deck exists for page title and actions
   const deck = await getDeckWithCards(deckId);
-
   if (!deck) {
     notFound();
   }
@@ -31,7 +30,6 @@ export default async function DeckPage({
     (acc, island) => acc + island.cards.length,
     0
   );
-  const totalIslands = deck.islands.length;
 
   return (
     <DashboardPageLayout
@@ -58,21 +56,9 @@ export default async function DeckPage({
         </>
       }
     >
-      {/* Hero Section */}
-      <DeckHero
-        deck={deck}
-        totalCards={totalCards}
-        totalIslands={totalIslands}
-      />
-
-      {/* Main Content */}
-      {deck.islands.length === 0 ? (
-        <EmptyState deckId={deck.id} />
-      ) : (
-        <div className="space-y-6">
-          <CategoryTabs islands={deck.islands} deck={deck} />
-        </div>
-      )}
+      <Suspense fallback={<DeckContentSkeleton />}>
+        <DeckContent deckId={deckId} />
+      </Suspense>
     </DashboardPageLayout>
   );
 }

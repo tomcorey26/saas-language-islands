@@ -1,8 +1,11 @@
 import { db } from "@/drizzle/db";
 import { DeckTable } from "@/drizzle/schema";
 import { and, eq } from "drizzle-orm";
+import { cache } from "react";
+import { createCachedFunction, cacheConfig } from "@/lib/cache";
 
-export async function getDeckWithCards(deckId: string) {
+// Internal function for deck with cards
+async function getDeckWithCardsInternal(deckId: string) {
   const deck = await db.query.DeckTable.findFirst({
     where: eq(DeckTable.id, deckId),
     with: {
@@ -17,6 +20,13 @@ export async function getDeckWithCards(deckId: string) {
   });
 
   return deck;
+}
+
+// React cache for request deduplication
+const getCachedDeckWithCards = cache(getDeckWithCardsInternal);
+
+export async function getDeckWithCards(deckId: string) {
+  return getCachedDeckWithCards(deckId);
 }
 
 export async function createDeck(data: typeof DeckTable.$inferInsert) {
@@ -48,16 +58,27 @@ export async function getDeck(data: { id: string; clerkUserId: string }) {
   return deck;
 }
 
-export async function getDecks(
+// Internal function for getting decks
+async function getDecksInternal(
   userId: string,
-  { limit, offset }: { limit?: number; offset?: number } = {}
+  options: { limit?: number; offset?: number } = {}
 ) {
   return db.query.DeckTable.findMany({
     where: eq(DeckTable.clerkUserId, userId),
     orderBy: (decks, { desc }) => [desc(decks.createdAt)],
-    limit: limit,
-    offset: offset ?? 0,
+    limit: options.limit,
+    offset: options.offset ?? 0,
   });
+}
+
+// React cache for request deduplication
+const getCachedDecks = cache(getDecksInternal);
+
+export async function getDecks(
+  userId: string,
+  { limit, offset }: { limit?: number; offset?: number } = {}
+) {
+  return getCachedDecks(userId, { limit, offset });
 }
 
 export async function deleteDeck(data: { id: string; clerkUserId: string }) {

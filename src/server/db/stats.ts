@@ -1,8 +1,11 @@
 import { db } from "@/drizzle/db";
 import { DeckTable } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
+import { cache } from "react";
+import { createCachedFunction, cacheConfig, cacheKeys } from "@/lib/cache";
 
-export async function getStats(clerkUserId: string) {
+// Internal stats function
+async function getStatsInternal(clerkUserId: string) {
   const decks = await db.query.DeckTable.findMany({
     where: eq(DeckTable.clerkUserId, clerkUserId),
     with: {
@@ -20,4 +23,21 @@ export async function getStats(clerkUserId: string) {
     totalDecks: decks.length,
     totalMasteredCards,
   };
+}
+
+// React cache for deduplication within the same request
+const getCachedStats = cache(async (clerkUserId: string) => {
+  return getStatsInternal(clerkUserId);
+});
+
+// Next.js cache for persistence across requests
+const getNextCachedStats = createCachedFunction(
+  getStatsInternal,
+  "user-stats",
+  cacheConfig.stats
+);
+
+export async function getStats(clerkUserId: string) {
+  // Use React cache for request deduplication and Next.js cache for persistence
+  return getCachedStats(clerkUserId);
 }

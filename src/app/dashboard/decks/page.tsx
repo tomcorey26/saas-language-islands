@@ -1,10 +1,10 @@
 import { auth } from "@clerk/nextjs/server";
-import { getDecks } from "@/server/db/decks";
 import { Button } from "@/components/ui/button";
-import DeckItem from "@/app/dashboard/decks/_components/DeckItem";
 import Link from "next/link";
 import { DashboardPageLayout } from "@/app/dashboard/_components/DashboardPageLayout";
 import { Sparkles } from "lucide-react";
+import { Suspense } from "react";
+import { DecksList, DecksListSkeleton } from "@/components/DecksList";
 
 /*
   TODO:
@@ -52,8 +52,6 @@ export default async function DashboardPage() {
 
   if (userId == null) return redirectToSignIn();
 
-  const decks = await getDecks(userId, { limit: 10 });
-
   return (
     <DashboardPageLayout
       pageTitle="Decks"
@@ -67,26 +65,9 @@ export default async function DashboardPage() {
       }
       backButtonHref="/dashboard"
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {decks.length === 0 ? (
-          <Link href="/dashboard/decks/new">
-            <Button
-              variant="outline"
-              className="h-[300px] border-dashed w-full"
-            >
-              <div className="flex flex-col items-center gap-2">
-                <div className="text-6xl mb-2">🏝️</div>
-                <span className="text-lg font-medium">
-                  Create Your First Deck
-                </span>
-                <div className="flex items-center gap-2 text-2xl">+</div>
-              </div>
-            </Button>
-          </Link>
-        ) : (
-          decks.map((deck) => <DeckItem key={deck.id} deck={deck} />)
-        )}
-      </div>
+      <Suspense fallback={<DecksListSkeleton />}>
+        <DecksList userId={userId} />
+      </Suspense>
     </DashboardPageLayout>
   );
 }
