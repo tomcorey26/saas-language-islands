@@ -3,8 +3,36 @@ import { NextResponse } from 'next/server';
 import axios from 'axios';
 import { env } from '@/data/env/server';
 import { CreateWorldRequestSchema } from '@/zod/contracts/world.schema';
+import { currentUser } from '@clerk/nextjs/server';
+import { getUser } from '@/server/db/users';
 
 export async function POST(request: Request) {
+  // Authentication check
+  const user = await currentUser();
+  if (!user) {
+    return NextResponse.json(
+      { error: 'Authentication required' },
+      { status: 401 }
+    );
+  }
+
+  // Get user data to check token balance
+  const dbUser = await getUser(user.id);
+  if (!dbUser) {
+    return NextResponse.json(
+      { error: 'User not found' },
+      { status: 404 }
+    );
+  }
+
+  // Check if user has tokens (basic authorization)
+  if (dbUser.tokenBalance <= 0) {
+    return NextResponse.json(
+      { error: 'Insufficient tokens. Please purchase tokens to generate content.' },
+      { status: 403 }
+    );
+  }
+
   const requestData = await request.json();
 
   const parsedData = CreateWorldRequestSchema.safeParse(requestData);

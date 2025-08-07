@@ -6,7 +6,6 @@ const isPublicRoute = createRouteMatcher([
   "/sign-up(.*)",
   "/create(.*)",
   "/api/webhooks(.*)",
-  "/api/world(.*)",
   // "/api(.*)", // TODO: Uncomment this line to make all API routes public (Temp while forwarding port)
 ]);
 
