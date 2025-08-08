@@ -1,18 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
-import {
-  ArrowRightIcon,
-  Send,
-  Sparkles,
-  Zap,
-  Trophy,
-  Star,
-} from "lucide-react";
+import { ArrowRightIcon, Send, Zap, Trophy } from "lucide-react";
 import { motion } from "motion/react";
 import {
   Select,
@@ -48,6 +40,7 @@ export function TryItOutDemo() {
   const [flashcards, setFlashcards] = useState<FlashCard[]>([]);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const flashcardsRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(DemoRequestSchema),
@@ -67,6 +60,14 @@ export function TryItOutDemo() {
       if (result.success) {
         setFlashcards(result.data.flashcards);
         form.reset(); // Clear the form on success
+
+        // Smooth scroll to flashcards after a brief delay
+        setTimeout(() => {
+          flashcardsRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }, 100);
       } else {
         setError(result.error);
         if (result.retryAfter) {
@@ -198,22 +199,35 @@ export function TryItOutDemo() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-center justify-center text-xl md:text-2xl">
                 <motion.div
-                  animate={{ rotate: 360 }}
+                  className="text-4xl"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [1, 0.8, 1],
+                    rotate: [0, 10, 0, -10, 0],
+                  }}
                   transition={{
-                    duration: 20,
+                    duration: 1,
                     repeat: Infinity,
-                    ease: "linear",
+                    ease: "easeInOut",
                   }}
                 >
-                  <Sparkles className="size-6 text-yellow-500" />
+                  {selectedLangData?.flag}
                 </motion.div>
-                Try it out! Generate {selectedLangData?.name}{" "}
-                {selectedLangData?.flag} Flashcards
+                Try it out! Generate {selectedLangData?.name} Flashcards
                 <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
+                  className="text-4xl"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [1, 0.8, 1],
+                    rotate: [0, 10, 0, -10, 0],
+                  }}
+                  transition={{
+                    duration: 1,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
                 >
-                  <Star className="size-5 text-yellow-500 fill-yellow-500" />
+                  {selectedLangData?.flag}
                 </motion.div>
               </CardTitle>
             </CardHeader>
@@ -245,9 +259,8 @@ export function TryItOutDemo() {
                                     value={lang.languageCode}
                                   >
                                     <span className="flex items-center gap-2">
-                                      <span className="text-xl">
-                                        {lang.flag}
-                                      </span>
+                                      {lang.flag}
+                                      <span className="text-xl"></span>
                                       <span>{lang.name}</span>
                                     </span>
                                   </SelectItem>
@@ -285,7 +298,20 @@ export function TryItOutDemo() {
                       className="w-full"
                     >
                       {isPending ? (
-                        <LoadingSpinner />
+                        <>
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{
+                              duration: 1,
+                              repeat: Infinity,
+                              ease: "linear",
+                            }}
+                            className="inline-block mr-2"
+                          >
+                            <Zap className="size-4" />
+                          </motion.div>
+                          Generating...
+                        </>
                       ) : (
                         <>
                           <Send className="size-4 mr-2" />
@@ -377,6 +403,7 @@ export function TryItOutDemo() {
 
               {!isPending && flashcards.length > 0 && (
                 <motion.div
+                  ref={flashcardsRef}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
