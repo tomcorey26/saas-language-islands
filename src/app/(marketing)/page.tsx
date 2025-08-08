@@ -1,14 +1,14 @@
-import { DemoSection } from "@/components/DemoSection";
 import { WhatAreSpeechIslandsSection } from "@/components/WhatAreSpeechIslandsSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
+import { TryItOutDemo } from "@/components/TryItOutDemo";
 
 // TODO: add example of flashcards generated
 
 export default function Home() {
   return (
     <>
-      <DemoSection />
+      <TryItOutDemo />
       <WhatAreSpeechIslandsSection />
       <FeaturesSection />
       <TestimonialsSection />
@@ -142,4 +142,3 @@ export default function Home() {
 //     </div>
 //   );
 // }
-

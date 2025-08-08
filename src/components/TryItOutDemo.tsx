@@ -13,7 +13,7 @@ import {
   Trophy,
   Star,
 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import {
   Select,
   SelectContent,
@@ -21,39 +21,52 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { supportedLanguagesArray } from "@/data/supportedLanguages";
 import { SignUpButton } from "@clerk/nextjs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { generateDemoFlashcards } from "@/server/actions/demo";
+import { DemoRequestSchema } from "@/zod/contracts/demo.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 interface FlashCard {
   phrase: string;
   translation: string;
 }
 
+type FormData = z.infer<typeof DemoRequestSchema>;
+
 export function TryItOutDemo() {
-  const [prompt, setPrompt] = useState("");
-  const [selectedLanguage, setSelectedLanguage] = useState("es");
   const [flashcards, setFlashcards] = useState<FlashCard[]>([]);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!prompt.trim()) return;
+  const form = useForm<FormData>({
+    resolver: zodResolver(DemoRequestSchema),
+    defaultValues: {
+      prompt: "",
+      language: "es",
+    },
+  });
 
+  const onSubmit = async (data: FormData) => {
     setError("");
     setFlashcards([]);
 
     startTransition(async () => {
-      const result = await generateDemoFlashcards(
-        prompt.trim(),
-        selectedLanguage
-      );
+      const result = await generateDemoFlashcards(data.prompt, data.language);
 
       if (result.success) {
         setFlashcards(result.data.flashcards);
-        setPrompt(""); // Clear the prompt on success
+        form.reset(); // Clear the form on success
       } else {
         setError(result.error);
         if (result.retryAfter) {
@@ -65,8 +78,11 @@ export function TryItOutDemo() {
     });
   };
 
+  const watchedLanguage = form.watch("language");
+  const watchedPrompt = form.watch("prompt");
+
   const selectedLangData = supportedLanguagesArray.find(
-    (lang) => lang.languageCode === selectedLanguage
+    (lang) => lang.languageCode === watchedLanguage
   );
 
   const examples = [
@@ -77,91 +93,127 @@ export function TryItOutDemo() {
     `Making small talk at work`,
   ];
 
-  const handleExampleClick = async (example: string) => {
+  const handleExampleClick = (example: string) => {
     if (isPending) return;
 
-    setPrompt(example);
+    form.setValue("prompt", example);
     setError("");
     setFlashcards([]);
 
-    startTransition(async () => {
-      const result = await generateDemoFlashcards(
-        example.trim(),
-        selectedLanguage
-      );
-
-      if (result.success) {
-        setFlashcards(result.data.flashcards);
-        setPrompt("");
-      } else {
-        setError(result.error);
-        if (result.retryAfter) {
-          setError(
-            `${result.error} (Try again in ${result.retryAfter} seconds)`
-          );
-        }
-      }
-    });
+    // Auto-submit the form
+    const formData = { prompt: example, language: watchedLanguage };
+    onSubmit(formData);
   };
 
-  // Get gradient from language data with forced Tailwind recognition
-  const getLanguageGradient = () => {
-    const gradientMap: Record<string, string> = {
-      es: "from-red-700 via-yellow-400 to-red-700",
-      fr: "from-blue-800 via-white to-red-600",
-      de: "from-black via-red-600 to-yellow-400",
-      it: "from-green-600 via-white to-red-600",
-      pt: "from-green-700 via-red-500 to-yellow-400",
+  // Get gradient colors that complement the green CTA
+  const getLanguageColors = () => {
+    const colorMap: Record<
+      string,
+      { primary: string; secondary: string; accent: string }
+    > = {
+      es: {
+        primary: "emerald-400",
+        secondary: "teal-300",
+        accent: "green-200",
+      },
+      fr: { primary: "blue-400", secondary: "indigo-300", accent: "sky-200" },
+      de: {
+        primary: "amber-400",
+        secondary: "orange-300",
+        accent: "yellow-200",
+      },
+      it: {
+        primary: "green-400",
+        secondary: "emerald-300",
+        accent: "lime-200",
+      },
+      pt: {
+        primary: "emerald-500",
+        secondary: "green-400",
+        accent: "teal-200",
+      },
     };
 
-    return gradientMap[selectedLanguage] || gradientMap.es;
+    return colorMap[watchedLanguage] || colorMap.es;
   };
 
   return (
     <section
       id="demo"
-      className="min-h-screen py-20 flex items-center relative overflow-hidden"
+      className="pt-24 pb-20 relative overflow-hidden min-h-[100vh]"
     >
-      {/* Animated background gradient */}
-      <div
-        className={`absolute inset-0 opacity-20 transition-all duration-1000 bg-gradient-to-br ${getLanguageGradient()}`}
-      />
+      {/* Animated background with patterns */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Primary gradient background */}
+        <div
+          className={`absolute inset-0 opacity-10 transition-all duration-1000 bg-gradient-to-br from-${
+            getLanguageColors().primary
+          }/30 via-${getLanguageColors().secondary}/20 to-${
+            getLanguageColors().accent
+          }/10`}
+        />
 
-      {/* Floating emoji animations */}
-      <AnimatePresence>
-        {flashcards.length > 0 && (
-          <>
-            <motion.div
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0 }}
-              className="absolute top-20 left-10 text-4xl"
-            >
-              🎆
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1, rotate: 360 }}
-              exit={{ opacity: 0, scale: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="absolute top-32 right-20 text-3xl"
-            >
-              ⭐
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 50 }}
-              transition={{ delay: 0.4, type: "spring" }}
-              className="absolute bottom-20 left-20 text-5xl"
-            >
-              🏆
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+        {/* Animated gradient orbs */}
+        <motion.div
+          className={`absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-${
+            getLanguageColors().primary
+          }/20 to-${getLanguageColors().secondary}/10 rounded-full blur-3xl`}
+          animate={{
+            x: [0, 50, -30, 0],
+            y: [0, -30, 20, 0],
+            scale: [1, 1.1, 0.9, 1],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className={`absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-${
+            getLanguageColors().secondary
+          }/15 to-${getLanguageColors().accent}/10 rounded-full blur-3xl`}
+          animate={{
+            x: [0, -40, 30, 0],
+            y: [0, 40, -20, 0],
+            scale: [1, 0.8, 1.2, 1],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2,
+          }}
+        />
+        <motion.div
+          className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-emerald-400/10 to-green-300/5 rounded-full blur-2xl`}
+          animate={{
+            rotate: [0, 360],
+            scale: [1, 1.3, 1],
+          }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        />
 
-      <div className="container px-8 md:px-16 max-w-6xl mx-auto relative z-10">
+        {/* Subtle pattern overlay */}
+        <div
+          className="absolute inset-0 opacity-5"
+          style={{
+            backgroundImage: `radial-gradient(circle at 25% 25%, ${
+              getLanguageColors().primary
+            } 1px, transparent 1px), radial-gradient(circle at 75% 75%, ${
+              getLanguageColors().secondary
+            } 1px, transparent 1px)`,
+            backgroundSize: "50px 50px",
+            backgroundPosition: "0 0, 25px 25px",
+          }}
+        />
+      </div>
+
+      <div className="container px-8 md:px-16 max-w-6xl mx-auto relative z-0 mt-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -175,7 +227,7 @@ export function TryItOutDemo() {
             transition={{ duration: 0.3, type: "spring" }}
             className="inline-block"
           >
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight mb-3 text-balance flex items-center justify-center gap-3">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-3 text-balance flex items-center justify-center gap-3">
               <motion.span
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 3 }}
@@ -198,24 +250,19 @@ export function TryItOutDemo() {
               </motion.span>
             </h1>
           </motion.div>
-          <p className="text-sm md:text-base lg:text-lg max-w-screen-xl mb-6 text-muted-foreground">
+          <p className="text-base md:text-lg lg:text-xl max-w-screen-xl mb-6 text-muted-foreground">
             Generate AI-powered flashcards for real conversations
           </p>
           <div className="flex flex-row gap-4 justify-center mb-6">
             <SignUpButton>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <Button
+                variant="cta"
+                className="text-lg p-6 rounded-xl flex gap-2"
               >
-                <Button
-                  variant="cta"
-                  className="text-base md:text-lg p-4 md:p-6 rounded-full flex gap-2 shadow-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 border-2 border-green-400"
-                >
-                  <Zap className="size-5" />
-                  Start Learning Free
-                  <ArrowRightIcon className="size-5" />
-                </Button>
-              </motion.div>
+                <Zap className="size-5 md:size-6" />
+                Start Learning Free
+                <ArrowRightIcon className="size-5 md:size-6" />
+              </Button>
             </SignUpButton>
           </div>
         </motion.div>
@@ -250,55 +297,71 @@ export function TryItOutDemo() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="flex flex-col lg:flex-row gap-3">
-                  <Select
-                    value={selectedLanguage}
-                    onValueChange={setSelectedLanguage}
-                    disabled={isPending}
-                  >
-                    <SelectTrigger className="w-full lg:w-[200px] text-base md:text-lg py-5 md:py-6 border-2 hover:border-primary/50 transition-colors">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {supportedLanguagesArray.map((lang) => (
-                        <SelectItem
-                          key={lang.languageCode}
-                          value={lang.languageCode}
-                        >
-                          <span className="flex items-center gap-2">
-                            <span className="text-xl">{lang.flag}</span>
-                            <span>{lang.name}</span>
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <div className="flex-1 relative">
-                    <Input
-                      value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
-                      placeholder={`e.g., Ordering coffee in ${selectedLangData?.name}`}
-                      className="w-full text-base md:text-lg py-5 md:py-6 pl-10 border-2 hover:border-primary/50 focus:border-primary transition-colors"
-                      maxLength={100}
-                      disabled={isPending}
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4"
+                >
+                  <div className="flex flex-col lg:flex-row gap-3">
+                    <FormField
+                      control={form.control}
+                      name="language"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                              disabled={isPending}
+                            >
+                              <SelectTrigger className="w-full lg:w-[200px] text-base md:text-lg py-5 md:py-6 border-2 hover:border-primary/50 transition-colors">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {supportedLanguagesArray.map((lang) => (
+                                  <SelectItem
+                                    key={lang.languageCode}
+                                    value={lang.languageCode}
+                                  >
+                                    <span className="flex items-center gap-2">
+                                      <span className="text-xl">
+                                        {lang.flag}
+                                      </span>
+                                      <span>{lang.name}</span>
+                                    </span>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                    <motion.div
-                      className="absolute left-2 top-1/2 -translate-y-1/2 text-lg pointer-events-none z-10"
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
-                      💡
-                    </motion.div>
+                    <FormField
+                      control={form.control}
+                      name="prompt"
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder={`e.g., Ordering coffee in ${selectedLangData?.name}`}
+                              className="w-full text-base md:text-lg py-5 md:py-6 border-2 hover:border-primary/50 focus:border-primary transition-colors"
+                              maxLength={100}
+                              disabled={isPending}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
+                  <div>
                     <Button
                       type="submit"
-                      disabled={!prompt.trim() || isPending}
-                      className="px-5 md:px-6 py-5 md:py-6 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 shadow-lg border border-violet-400 text-base md:text-lg font-semibold"
+                      disabled={!watchedPrompt.trim() || isPending}
+                      className="w-full"
                     >
                       {isPending ? (
                         <LoadingSpinner />
@@ -309,9 +372,9 @@ export function TryItOutDemo() {
                         </>
                       )}
                     </Button>
-                  </motion.div>
-                </div>
-              </form>
+                  </div>
+                </form>
+              </Form>
 
               {/* Example prompts */}
               <div className="space-y-3">
@@ -398,16 +461,6 @@ export function TryItOutDemo() {
                   transition={{ duration: 0.5 }}
                   className="space-y-4"
                 >
-                  <motion.h3
-                    className="text-lg font-semibold text-center flex items-center justify-center gap-2"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", bounce: 0.5 }}
-                  >
-                    <Trophy className="size-5 text-yellow-500" />
-                    Your Flashcards Are Ready!
-                    <span className="text-2xl">🎉</span>
-                  </motion.h3>
                   <div className="grid gap-3">
                     {flashcards.map((card, index) => (
                       <motion.div
@@ -451,7 +504,7 @@ export function TryItOutDemo() {
                         onClick={() => (window.location.href = "/sign-up")}
                       >
                         <Trophy className="size-5 mr-2" />
-                        Unlock Full Access - It&apos;s Free!
+                        Start Learning Free!
                       </Button>
                     </motion.div>
                   </div>
