@@ -140,63 +140,10 @@ export function TryItOutDemo() {
   return (
     <section
       id="demo"
-      className="pt-24 pb-20 relative overflow-hidden min-h-[100vh]"
+      className="pt-24 pb-20 relative overflow-hidden min-h-[100vh] bg-gray-50"
     >
-      {/* Animated background with patterns */}
+      {/* Simple clean background */}
       <div className="absolute inset-0 overflow-hidden">
-        {/* Primary gradient background */}
-        <div
-          className={`absolute inset-0 opacity-10 transition-all duration-1000 bg-gradient-to-br from-${
-            getLanguageColors().primary
-          }/30 via-${getLanguageColors().secondary}/20 to-${
-            getLanguageColors().accent
-          }/10`}
-        />
-
-        {/* Animated gradient orbs */}
-        <motion.div
-          className={`absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-${
-            getLanguageColors().primary
-          }/20 to-${getLanguageColors().secondary}/10 rounded-full blur-3xl`}
-          animate={{
-            x: [0, 50, -30, 0],
-            y: [0, -30, 20, 0],
-            scale: [1, 1.1, 0.9, 1],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className={`absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-${
-            getLanguageColors().secondary
-          }/15 to-${getLanguageColors().accent}/10 rounded-full blur-3xl`}
-          animate={{
-            x: [0, -40, 30, 0],
-            y: [0, 40, -20, 0],
-            scale: [1, 0.8, 1.2, 1],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 2,
-          }}
-        />
-        <motion.div
-          className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-emerald-400/10 to-green-300/5 rounded-full blur-2xl`}
-          animate={{
-            rotate: [0, 360],
-            scale: [1, 1.3, 1],
-          }}
-          transition={{
-            duration: 30,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-        />
 
         {/* Subtle pattern overlay */}
         <div
@@ -214,11 +161,7 @@ export function TryItOutDemo() {
       </div>
 
       <div className="container px-8 md:px-16 max-w-6xl mx-auto relative z-0 mt-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
+        <div
           className="text-center mb-8"
         >
           <motion.div
@@ -265,7 +208,7 @@ export function TryItOutDemo() {
               </Button>
             </SignUpButton>
           </div>
-        </motion.div>
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -463,30 +406,31 @@ export function TryItOutDemo() {
                 >
                   <div className="grid gap-3">
                     {flashcards.map((card, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.1 }}
-                        className="p-4 border-2 rounded-xl bg-gradient-to-r from-accent/5 to-accent/10 hover:shadow-lg transition-all hover:scale-[1.02] hover:border-primary/30 cursor-pointer group"
-                      >
-                        <div className="space-y-2">
-                          <div className="flex items-start gap-2">
-                            <span className="text-lg mt-0.5">🇺🇸</span>
-                            <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                              {card.phrase}
-                            </p>
+                      <SignUpButton key={index}>
+                        <motion.div
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.3, delay: index * 0.1 }}
+                          className="p-4 border-2 rounded-xl bg-gradient-to-r from-accent/5 to-accent/10 hover:shadow-lg transition-all hover:scale-[1.02] hover:border-primary/30 cursor-pointer group"
+                        >
+                          <div className="space-y-2">
+                            <div className="flex items-start gap-2">
+                              <span className="text-lg mt-0.5">🇺🇸</span>
+                              <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                                {card.phrase}
+                              </p>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <span className="text-lg mt-0.5">
+                                {selectedLangData?.flag}
+                              </span>
+                              <p className="text-muted-foreground">
+                                {card.translation}
+                              </p>
+                            </div>
                           </div>
-                          <div className="flex items-start gap-2">
-                            <span className="text-lg mt-0.5">
-                              {selectedLangData?.flag}
-                            </span>
-                            <p className="text-muted-foreground">
-                              {card.translation}
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
+                        </motion.div>
+                      </SignUpButton>
                     ))}
                   </div>
                   <div className="text-center pt-4">
