@@ -1,8 +1,9 @@
 import { supportedLanguageCodes } from "@/data/supportedLanguages";
+import { DEMO_CONFIG } from "@/constants/examples";
 import { z } from "zod";
 
 export const DemoRequestSchema = z.object({
-  prompt: z.string().min(1).max(100),
+  prompt: z.string().min(1).max(DEMO_CONFIG.MAX_PROMPT_LENGTH),
   language: z.enum(supportedLanguageCodes),
 });
 

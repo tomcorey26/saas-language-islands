@@ -1,18 +1,14 @@
 "use client";
 
+import { DEMO_EXAMPLES } from "@/constants/examples";
+
 interface ExamplePromptsProps {
   onExampleClick: (example: string) => void;
   isPending: boolean;
 }
 
 export function ExamplePrompts({ onExampleClick, isPending }: ExamplePromptsProps) {
-  const examples = [
-    `Ordering food at a restaurant`,
-    `Asking for directions`,
-    `Shopping for clothes`,
-    `Booking a hotel room`,
-    `Making small talk at work`,
-  ];
+  const examples = DEMO_EXAMPLES;
 
   return (
     <div className="space-y-3">

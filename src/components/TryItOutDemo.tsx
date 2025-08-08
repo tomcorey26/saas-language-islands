@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useTransition, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { DEMO_EXAMPLES, DEMO_CONFIG } from "@/constants/examples";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -37,6 +40,8 @@ interface FlashCard {
 type FormData = z.infer<typeof DemoRequestSchema>;
 
 export function TryItOutDemo() {
+  const router = useRouter();
+  const prefersReducedMotion = useReducedMotion();
   const [flashcards, setFlashcards] = useState<FlashCard[]>([]);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -49,6 +54,8 @@ export function TryItOutDemo() {
       language: "es",
     },
   });
+
+  // Reduced motion preference is available for future animation improvements
 
   const onSubmit = async (data: FormData) => {
     setError("");
@@ -86,24 +93,18 @@ export function TryItOutDemo() {
     (lang) => lang.languageCode === watchedLanguage
   );
 
-  const examples = [
-    `Ordering food at a restaurant`,
-    `Asking for directions`,
-    `Shopping for clothes`,
-    `Booking a hotel room`,
-    `Making small talk at work`,
-  ];
+  const examples = DEMO_EXAMPLES;
 
   const handleExampleClick = (example: string) => {
     if (isPending) return;
 
+    // Set form values and trigger validation
     form.setValue("prompt", example);
     setError("");
     setFlashcards([]);
 
-    // Auto-submit the form
-    const formData = { prompt: example, language: watchedLanguage };
-    onSubmit(formData);
+    // Use form.handleSubmit to ensure form validation and state consistency
+    form.handleSubmit(onSubmit)();
   };
 
   // Get gradient colors that complement the green CTA
@@ -163,9 +164,13 @@ export function TryItOutDemo() {
       <div className="container px-8 md:px-16 max-w-6xl mx-auto relative z-0 mt-8">
         <div className="text-center mb-8">
           <motion.div
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.3, type: "spring" }}
+            {...(prefersReducedMotion
+              ? {}
+              : {
+                  initial: { scale: 0.9 },
+                  animate: { scale: 1 },
+                  transition: { duration: 0.3, type: "spring" },
+                })}
             className="inline-block"
           >
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-3 text-balance flex items-center justify-center gap-3">
@@ -190,10 +195,14 @@ export function TryItOutDemo() {
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          viewport={{ once: true }}
+          {...(prefersReducedMotion
+            ? {}
+            : {
+                initial: { opacity: 0, y: 20 },
+                whileInView: { opacity: 1, y: 0 },
+                transition: { duration: 0.6, delay: 0.2 },
+                viewport: { once: true },
+              })}
         >
           <Card className="shadow-2xl border-2 hover:shadow-3xl transition-shadow duration-300">
             <CardHeader>
@@ -249,7 +258,10 @@ export function TryItOutDemo() {
                               onValueChange={field.onChange}
                               disabled={isPending}
                             >
-                              <SelectTrigger className="w-full lg:w-[200px] text-base md:text-lg py-5 md:py-6 border-2 hover:border-primary/50 transition-colors">
+                              <SelectTrigger 
+                                className="w-full lg:w-[200px] text-base md:text-lg py-5 md:py-6 border-2 hover:border-primary/50 transition-colors"
+                                aria-label="Select target language for flashcards"
+                              >
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -282,8 +294,10 @@ export function TryItOutDemo() {
                               {...field}
                               placeholder={`e.g., Ordering coffee in ${selectedLangData?.name}`}
                               className="w-full text-base md:text-lg py-5 md:py-6 border-2 hover:border-primary/50 focus:border-primary transition-colors"
-                              maxLength={100}
+                              maxLength={DEMO_CONFIG.MAX_PROMPT_LENGTH}
                               disabled={isPending}
+                              aria-label="Describe the scenario you want to learn phrases for"
+                              aria-describedby="prompt-description"
                             />
                           </FormControl>
                           <FormMessage />
@@ -296,6 +310,7 @@ export function TryItOutDemo() {
                       type="submit"
                       disabled={!watchedPrompt.trim() || isPending}
                       className="w-full"
+                      aria-label={isPending ? "Generating flashcards, please wait" : "Generate flashcards for your scenario"}
                     >
                       {isPending ? (
                         <>
@@ -328,6 +343,9 @@ export function TryItOutDemo() {
                 <p className="text-sm text-muted-foreground text-center">
                   Or try one of these examples:
                 </p>
+                <div id="prompt-description" className="sr-only">
+                  Describe a scenario or situation you want to practice. Maximum {DEMO_CONFIG.MAX_PROMPT_LENGTH} characters.
+                </div>
                 <div className="flex flex-wrap gap-2 justify-center">
                   {examples.map((example, index) => (
                     <motion.button
@@ -352,6 +370,8 @@ export function TryItOutDemo() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="text-red-600 text-center p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800 flex items-center justify-center gap-2"
+                  role="alert"
+                  aria-live="assertive"
                 >
                   <span className="text-xl">⚠️</span>
                   {error}
@@ -364,6 +384,9 @@ export function TryItOutDemo() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
                   className="space-y-4"
+                  role="status"
+                  aria-live="polite"
+                  aria-label="Generating flashcards"
                 >
                   <h3 className="text-lg font-semibold text-center flex items-center justify-center gap-2">
                     <motion.div
@@ -404,6 +427,10 @@ export function TryItOutDemo() {
               {!isPending && flashcards.length > 0 && (
                 <motion.div
                   ref={flashcardsRef}
+                  data-testid="flashcards-results"
+                  role="region"
+                  aria-live="polite"
+                  aria-label={`Generated ${flashcards.length} flashcards`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
@@ -416,7 +443,7 @@ export function TryItOutDemo() {
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.3, delay: index * 0.1 }}
-                          className="p-4 border-2 rounded-xl bg-gradient-to-r from-accent/5 to-accent/10 hover:shadow-lg transition-all hover:scale-[1.02] hover:border-primary/30 cursor-pointer group"
+                          className="flashcard p-4 border-2 rounded-xl bg-gradient-to-r from-accent/5 to-accent/10 hover:shadow-lg transition-all hover:scale-[1.02] hover:border-primary/30 cursor-pointer group"
                         >
                           <div className="space-y-2">
                             <div className="flex items-start gap-2">
@@ -450,7 +477,7 @@ export function TryItOutDemo() {
                       <Button
                         variant="cta"
                         className="text-base md:text-lg px-6 py-3 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-xl border-2 border-green-400"
-                        onClick={() => (window.location.href = "/sign-up")}
+                        onClick={() => router.push("/sign-up")}
                       >
                         <Trophy className="size-5 mr-2" />
                         Start Learning Free!

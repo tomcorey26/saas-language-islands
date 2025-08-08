@@ -2,13 +2,16 @@ import { WhatAreSpeechIslandsSection } from "@/components/WhatAreSpeechIslandsSe
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { TryItOutDemo } from "@/components/TryItOutDemo";
+import { DemoErrorBoundary } from "@/components/DemoErrorBoundary";
 
 // TODO: add example of flashcards generated
 
 export default function Home() {
   return (
     <>
-      <TryItOutDemo />
+      <DemoErrorBoundary>
+        <TryItOutDemo />
+      </DemoErrorBoundary>
       <WhatAreSpeechIslandsSection />
       <FeaturesSection />
       <TestimonialsSection />

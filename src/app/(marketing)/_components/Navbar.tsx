@@ -12,9 +12,9 @@ export function NavBar() {
             <BrandLogo />
           </Link>
           {/* Desktop only */}
-          <Link className="text-lg hidden md:block" href="/#pricing">
+          {/* <Link className="text-lg hidden md:block" href="/#pricing">
             Pricing
-          </Link>
+          </Link> */}
         </div>
 
         {/* Desktop Navigation - Right side */}

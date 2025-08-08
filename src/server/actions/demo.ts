@@ -3,6 +3,8 @@
 import { OpenAI } from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { headers } from "next/headers";
+import { createHash } from "crypto";
+import { DEMO_CONFIG } from "@/constants/examples";
 import { unstable_noStore as noStore } from "next/cache";
 import {
   DemoRequestSchema,
@@ -43,9 +45,13 @@ async function getClientIdentifier(): Promise<string> {
 
   const ip = forwarded?.split(",")[0] || realIp || cfIp || "unknown";
 
-  // Create a fingerprint combining IP and user agent
+  // Create a fingerprint combining IP and user agent with proper hashing
   const userAgent = headersList.get("user-agent") || "unknown";
-  return `${ip}-${userAgent.substring(0, 50)}`;
+  const combinedInfo = `${ip}-${userAgent}`;
+  
+  // Hash the combined information to avoid collisions and protect privacy
+  const hash = createHash("sha256").update(combinedInfo).digest("hex");
+  return hash.substring(0, 16); // Use first 16 characters for the fingerprint
 }
 
 function checkRateLimit(identifier: string): {
@@ -171,7 +177,7 @@ export async function generateDemoFlashcards(
       ],
       response_format: zodResponseFormat(DemoResponseSchema, "demo_response"),
       temperature: 0.7,
-      max_tokens: 500, // Limit token usage
+      max_tokens: DEMO_CONFIG.MAX_TOKENS, // Limit token usage
     });
 
     const result = completion.choices[0].message;
