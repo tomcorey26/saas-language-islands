@@ -17,7 +17,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Islands of Language",
+  title: "Speech Islands",
   description: "Master languages through spaced repetition flashcards",
   icons: {
     icon: [

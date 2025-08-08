@@ -1,138 +1,20 @@
-// import { ClerkIcon } from "@/app/(marketing)/_icons/Clerk";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SignUpButton } from "@clerk/nextjs";
-import { ArrowRightIcon, BrainIcon, MicIcon, SparklesIcon } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
+import { WhatAreSpeechIslandsSection } from "@/components/WhatAreSpeechIslandsSection";
+import { FeaturesSection } from "@/components/FeaturesSection";
+import { TestimonialsSection } from "@/components/TestimonialsSection";
+import { TryItOutDemo } from "@/components/TryItOutDemo";
+import { DemoErrorBoundary } from "@/components/DemoErrorBoundary";
 
 // TODO: add example of flashcards generated
 
 export default function Home() {
-  // text-balance makes the text break into even lines when the container is resized
   return (
     <>
-      <section className="min-h-screen bg-[radial-gradient(hsl(180,72%,65%,40%),hsl(190,62%,73%,40%),hsl(var(--background))_60%)] flex items-center justify-center text-center text-balance flex-col gap-8 px-4">
-        {/* Tracking makes the spacing closer between letters because in large font sizes it makes it easier to read */}
-        <h1 className="text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight m-4">
-          Welcome to Islands of Language
-        </h1>
-        <p className="text-lg lg:text-3xl max-w-screen-xl">
-          Generate flashcards to master real conversations faster than ever and
-          become conversational in no time—start your language journey now!
-        </p>
-        <div className="flex flex-row gap-4">
-          <Link href="/create">
-            <Button
-              variant="outline"
-              className="text-lg p-6 rounded-xl flex gap-2"
-            >
-              Try it out
-            </Button>
-          </Link>
-          <SignUpButton>
-            <Button variant="cta" className="text-lg p-6 rounded-xl flex gap-2">
-              Get started for free <ArrowRightIcon className="size-5" />
-            </Button>
-          </SignUpButton>
-        </div>
-      </section>
-      <section className="py-16 bg-accent/10">
-        <div className="container px-8 md:px-16">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl text-balance font-semibold mb-6">
-              What are Language Islands?
-            </h2>
-            <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">
-              Language Islands are focused conversation scenarios that help you
-              master real-world situations. Watch this quick explanation to see
-              how this revolutionary approach transforms language learning.
-            </p>
-            <div className="relative w-full max-w-3xl mx-auto">
-              <div className="relative pb-[56.25%] h-0 rounded-xl overflow-hidden shadow-2xl">
-                <iframe
-                  className="absolute top-0 left-0 w-full h-full"
-                  src="https://www.youtube.com/embed/_g1s25Zmp3w"
-                  title="What are Language Islands?"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground mt-8 max-w-2xl mx-auto">
-              Instead of memorizing random vocabulary, Language Islands help you
-              learn complete conversation flows for specific situations—like
-              ordering at a restaurant, asking for directions, or booking a
-              hotel.
-            </p>
-          </div>
-        </div>
-      </section>
-      <section className="py-16 bg-background">
-        <div className="container px-8 md:px-16">
-          <h2 className="text-4xl text-center text-balance font-semibold mb-16">
-            Powerful features to accelerate your learning
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <FeatureCard
-              icon={<BrainIcon className="size-8 text-blue-500" />}
-              title="Spaced Repetition"
-              description="Master vocabulary with scientifically-proven spaced repetition algorithms that optimize your study schedule for maximum retention."
-            />
-            <FeatureCard
-              icon={<MicIcon className="size-8 text-green-500" />}
-              title="Speaking Games"
-              description="Practice pronunciation and conversational skills through interactive speaking exercises and real-world scenario games."
-            />
-            <FeatureCard
-              icon={<SparklesIcon className="size-8 text-purple-500" />}
-              title="AI-Powered Learning"
-              description="Get personalized flashcards and content generated by advanced AI, tailored to your specific learning goals and interests."
-            />
-          </div>
-        </div>
-      </section>
-      <section className="py-16 bg-background">
-        <div className="container px-8 md:px-16">
-          <h2 className="text-4xl text-center text-balance font-semibold mb-16">
-            What our learners are saying
-          </h2>
-          <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-              <div className="flex justify-center">
-                <div className="relative w-80 h-96 rounded-2xl overflow-hidden">
-                  <Image
-                    src="/images/testimonial-person.webp"
-                    alt="Tom Corey, Spanish language learner"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-              <div className="space-y-6">
-                <blockquote className="text-lg text-muted-foreground leading-relaxed">
-                  I had 2 months to prepare for my solo backpacking trip through
-                  Spain. I needed to learn practical Spanish fast - ordering
-                  food, asking for directions, booking hostels, and having real
-                  conversations with locals.
-                  <br />
-                  <br />
-                  These flashcards were perfect because I could focus on exactly
-                  what I&apos;d need while traveling. Way more effective than
-                  generic textbook phrases. My trip was incredible and I felt
-                  confident speaking Spanish!
-                </blockquote>
-                <div className="space-y-1">
-                  <div className="font-semibold text-foreground">Tom Corey</div>
-                  <div className="text-sm text-muted-foreground">
-                    Spanish student 🇪🇸 (B1)
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <DemoErrorBoundary>
+        <TryItOutDemo />
+      </DemoErrorBoundary>
+      <WhatAreSpeechIslandsSection />
+      <FeaturesSection />
+      <TestimonialsSection />
       {/* <section className="bg-primary text-primary-foreground">
         <div className="container py-16 flex flex-col gap-16 px-8 md:px-16">
           <h2 className="text-3xl text-center text-balance">
@@ -263,25 +145,3 @@ export default function Home() {
 //     </div>
 //   );
 // }
-
-function FeatureCard({
-  icon,
-  title,
-  description,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}) {
-  return (
-    <Card className="p-8 text-center">
-      <CardHeader className="items-center">
-        <div className="text-accent font-semibold mb-4">{icon}</div>
-        <CardTitle className="text-2xl font-bold">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-lg text-muted-foreground">{description}</p>
-      </CardContent>
-    </Card>
-  );
-}
