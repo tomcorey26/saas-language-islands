@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { DEMO_EXAMPLES, DEMO_CONFIG } from "@/constants/examples";
 import { Button } from "@/components/ui/button";
@@ -40,7 +39,6 @@ interface FlashCard {
 type FormData = z.infer<typeof DemoRequestSchema>;
 
 export function TryItOutDemo() {
-  const router = useRouter();
   const prefersReducedMotion = useReducedMotion();
   const [flashcards, setFlashcards] = useState<FlashCard[]>([]);
   const [error, setError] = useState("");
@@ -258,7 +256,7 @@ export function TryItOutDemo() {
                               onValueChange={field.onChange}
                               disabled={isPending}
                             >
-                              <SelectTrigger 
+                              <SelectTrigger
                                 className="w-full lg:w-[200px] text-base md:text-lg py-5 md:py-6 border-2 hover:border-primary/50 transition-colors"
                                 aria-label="Select target language for flashcards"
                               >
@@ -310,7 +308,11 @@ export function TryItOutDemo() {
                       type="submit"
                       disabled={!watchedPrompt.trim() || isPending}
                       className="w-full"
-                      aria-label={isPending ? "Generating flashcards, please wait" : "Generate flashcards for your scenario"}
+                      aria-label={
+                        isPending
+                          ? "Generating flashcards, please wait"
+                          : "Generate flashcards for your scenario"
+                      }
                     >
                       {isPending ? (
                         <>
@@ -344,7 +346,8 @@ export function TryItOutDemo() {
                   Or try one of these examples:
                 </p>
                 <div id="prompt-description" className="sr-only">
-                  Describe a scenario or situation you want to practice. Maximum {DEMO_CONFIG.MAX_PROMPT_LENGTH} characters.
+                  Describe a scenario or situation you want to practice. Maximum{" "}
+                  {DEMO_CONFIG.MAX_PROMPT_LENGTH} characters.
                 </div>
                 <div className="flex flex-wrap gap-2 justify-center">
                   {examples.map((example, index) => (
@@ -470,19 +473,15 @@ export function TryItOutDemo() {
                       Like what you see? Get personalized flashcards for your
                       learning goals!
                     </p>
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
+                    <SignUpButton>
                       <Button
                         variant="cta"
-                        className="text-base md:text-lg px-6 py-3 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-xl border-2 border-green-400"
-                        onClick={() => router.push("/sign-up")}
+                        className="text-base md:text-lg px-6 py-3 rounded-full"
                       >
                         <Trophy className="size-5 mr-2" />
                         Start Learning Free!
                       </Button>
-                    </motion.div>
+                    </SignUpButton>
                   </div>
                 </motion.div>
               )}
