@@ -64,7 +64,7 @@ export function TryItOutDemo() {
 
       if (result.success) {
         setFlashcards(result.data.flashcards);
-        form.reset(); // Clear the form on success
+        form.setValue("prompt", ""); // Only clear the prompt, preserve language selection
 
         // Smooth scroll to flashcards after a brief delay
         setTimeout(() => {
