@@ -144,7 +144,6 @@ export function TryItOutDemo() {
     >
       {/* Simple clean background */}
       <div className="absolute inset-0 overflow-hidden">
-
         {/* Subtle pattern overlay */}
         <div
           className="absolute inset-0 opacity-5"
@@ -161,39 +160,18 @@ export function TryItOutDemo() {
       </div>
 
       <div className="container px-8 md:px-16 max-w-6xl mx-auto relative z-0 mt-8">
-        <div
-          className="text-center mb-8"
-        >
+        <div className="text-center mb-8">
           <motion.div
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.3, type: "spring" }}
             className="inline-block"
           >
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-3 text-balance flex items-center justify-center gap-3">
-              <motion.span
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 3 }}
-                className="inline-block"
-              >
-                🏝️
-              </motion.span>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-3 text-balance flex items-center justify-center gap-3">
               Welcome to Speech Islands
-              <motion.span
-                animate={{ rotate: [0, -10, 10, 0] }}
-                transition={{
-                  duration: 0.5,
-                  repeat: Infinity,
-                  repeatDelay: 3,
-                  delay: 0.2,
-                }}
-                className="inline-block"
-              >
-                🌍
-              </motion.span>
             </h1>
           </motion.div>
-          <p className="text-base md:text-lg lg:text-xl max-w-screen-xl mb-6 text-muted-foreground">
+          <p className="text-lg md:text-xl lg:text-2xl max-w-screen-xl mb-6 text-muted-foreground">
             Generate AI-powered flashcards for real conversations
           </p>
           <div className="flex flex-row gap-4 justify-center mb-6">
