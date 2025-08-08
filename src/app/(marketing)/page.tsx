@@ -1,11 +1,6 @@
-"use client";
-
 // import { ClerkIcon } from "@/app/(marketing)/_icons/Clerk";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SignUpButton } from "@clerk/nextjs";
-import { ArrowRightIcon, BrainIcon, MicIcon, SparklesIcon } from "lucide-react";
-import Link from "next/link";
+import { BrainIcon, MicIcon, SparklesIcon } from "lucide-react";
 import Image from "next/image";
 import { TryItOutDemo } from "@/components/TryItOutDemo";
 
@@ -15,41 +10,15 @@ export default function Home() {
   // text-balance makes the text break into even lines when the container is resized
   return (
     <>
-      <section className="min-h-screen bg-[radial-gradient(hsl(180,72%,65%,40%),hsl(190,62%,73%,40%),hsl(var(--background))_60%)] flex items-center justify-center text-center text-balance flex-col gap-8 px-4">
-        {/* Tracking makes the spacing closer between letters because in large font sizes it makes it easier to read */}
-        <h1 className="text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight m-4">
-          Welcome to Islands of Language
-        </h1>
-        <p className="text-lg lg:text-3xl max-w-screen-xl">
-          Generate flashcards to master real conversations faster than ever and
-          become conversational in no time—start your language journey now!
-        </p>
-        <div className="flex flex-row gap-4">
-          <Button
-            variant="outline"
-            className="text-lg p-6 rounded-xl flex gap-2"
-            onClick={() => {
-              document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          >
-            Try it out
-          </Button>
-          <SignUpButton>
-            <Button variant="cta" className="text-lg p-6 rounded-xl flex gap-2">
-              Get started for free <ArrowRightIcon className="size-5" />
-            </Button>
-          </SignUpButton>
-        </div>
-      </section>
       <TryItOutDemo />
       <section className="py-16 bg-accent/10">
         <div className="container px-8 md:px-16">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl text-balance font-semibold mb-6">
-              What are Language Islands?
+              What are Speech Islands?
             </h2>
             <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">
-              Language Islands are focused conversation scenarios that help you
+              Speech Islands are focused conversation scenarios that help you
               master real-world situations. Watch this quick explanation to see
               how this revolutionary approach transforms language learning.
             </p>
@@ -58,14 +27,14 @@ export default function Home() {
                 <iframe
                   className="absolute top-0 left-0 w-full h-full"
                   src="https://www.youtube.com/embed/_g1s25Zmp3w"
-                  title="What are Language Islands?"
+                  title="What are Speech Islands?"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 />
               </div>
             </div>
             <p className="text-sm text-muted-foreground mt-8 max-w-2xl mx-auto">
-              Instead of memorizing random vocabulary, Language Islands help you
+              Instead of memorizing random vocabulary, Speech Islands help you
               learn complete conversation flows for specific situations—like
               ordering at a restaurant, asking for directions, or booking a
               hotel.

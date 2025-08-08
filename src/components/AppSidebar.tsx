@@ -64,7 +64,7 @@ export function AppSidebar({ userTokens }: AppSidebarProps) {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Islands of Language</SidebarGroupLabel>
+          <SidebarGroupLabel>Speech Islands</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {/* User profile section with separator and better styling */}
