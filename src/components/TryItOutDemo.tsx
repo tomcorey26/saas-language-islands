@@ -79,21 +79,26 @@ export function TryItOutDemo() {
 
   const handleExampleClick = async (example: string) => {
     if (isPending) return;
-    
+
     setPrompt(example);
     setError("");
     setFlashcards([]);
 
     startTransition(async () => {
-      const result = await generateDemoFlashcards(example.trim(), selectedLanguage);
-      
+      const result = await generateDemoFlashcards(
+        example.trim(),
+        selectedLanguage
+      );
+
       if (result.success) {
         setFlashcards(result.data.flashcards);
         setPrompt("");
       } else {
         setError(result.error);
         if (result.retryAfter) {
-          setError(`${result.error} (Try again in ${result.retryAfter} seconds)`);
+          setError(
+            `${result.error} (Try again in ${result.retryAfter} seconds)`
+          );
         }
       }
     });
@@ -103,12 +108,12 @@ export function TryItOutDemo() {
   const getLanguageGradient = () => {
     const gradientMap: Record<string, string> = {
       es: "from-red-700 via-yellow-400 to-red-700",
-      fr: "from-blue-800 via-white to-red-600", 
+      fr: "from-blue-800 via-white to-red-600",
       de: "from-black via-red-600 to-yellow-400",
       it: "from-green-600 via-white to-red-600",
       pt: "from-green-700 via-red-500 to-yellow-400",
     };
-    
+
     return gradientMap[selectedLanguage] || gradientMap.es;
   };
 
@@ -414,15 +419,15 @@ export function TryItOutDemo() {
                       >
                         <div className="space-y-2">
                           <div className="flex items-start gap-2">
-                            <span className="text-lg mt-0.5">
-                              {selectedLangData?.flag}
-                            </span>
+                            <span className="text-lg mt-0.5">🇺🇸</span>
                             <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
                               {card.phrase}
                             </p>
                           </div>
                           <div className="flex items-start gap-2">
-                            <span className="text-lg mt-0.5">🇺🇸</span>
+                            <span className="text-lg mt-0.5">
+                              {selectedLangData?.flag}
+                            </span>
                             <p className="text-muted-foreground">
                               {card.translation}
                             </p>

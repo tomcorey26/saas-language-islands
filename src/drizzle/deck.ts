@@ -1,19 +1,11 @@
-import {
-  SupportedLanguageCode,
-  supportedLanguages,
-} from "@/data/supportedLanguages";
+import { supportedLanguageCodes } from "@/data/supportedLanguages";
 import { CardTable } from "@/drizzle/card";
 import { IslandTable } from "@/drizzle/island";
 import { createdAt, id, updatedAt } from "@/drizzle/schemaHelpers";
 import { relations } from "drizzle-orm";
 import { pgTable, text, index, pgEnum } from "drizzle-orm/pg-core";
 
-export const LanguageEnum = pgEnum(
-  "language",
-  Object.values(supportedLanguages).map((lang) => lang.languageCode) as [
-    SupportedLanguageCode
-  ]
-);
+export const LanguageEnum = pgEnum("language", supportedLanguageCodes);
 export const DeckTable = pgTable(
   "decks",
   {
