@@ -9,7 +9,6 @@ export type CreateCardRequest = z.infer<typeof CreateCardRequestSchema>;
 export const UpdateCardRequestSchema = createUpdateSchema(CardTable).pick({
   phrase: true,
   translation: true,
-  position: true,
   difficulty: true,
   easeFactor: true,
   repetitions: true,

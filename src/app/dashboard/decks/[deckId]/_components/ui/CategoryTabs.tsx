@@ -68,11 +68,13 @@ export function CategoryTabs({ islands, deck }: CategoryTabsProps) {
                     mass: 0.5,
                   }}
                 >
-                  <FlashCardList
-                    island={island}
-                    cards={island.cards}
-                    deck={deck}
-                  />
+                  <div data-tour="flashcard-list">
+                    <FlashCardList
+                      island={island}
+                      cards={island.cards}
+                      deck={deck}
+                    />
+                  </div>
                 </motion.div>
               )
           )}

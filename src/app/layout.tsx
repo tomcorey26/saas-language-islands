@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/toaster";
+import { Toaster as SonnerToaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = localFont({
@@ -45,6 +46,7 @@ export default function RootLayout({
         >
           {children}
           <Toaster />
+          <SonnerToaster />
           <Analytics />
         </body>
       </html>

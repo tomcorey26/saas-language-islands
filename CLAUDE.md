@@ -84,3 +84,4 @@ Stripe webhook testing requires running `npm run stripe:webhook` and using test 
 ## Payment System
 
 Three-tier token-based system: Starter, Pro, and Premium plans with different token allocations for AI-generated content.
+- Please for the love of god use server components as much as you can, try to only use server components at the leafs of the component tree

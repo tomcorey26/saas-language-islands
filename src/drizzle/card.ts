@@ -11,6 +11,7 @@ import {
   pgTable,
   uuid,
   varchar,
+  timestamp,
 } from "drizzle-orm/pg-core";
 
 export const DifficultyEnum = pgEnum(
@@ -35,8 +36,8 @@ export const CardTable = pgTable(
     // Spaced repetition fields
     easeFactor: integer("ease_factor").default(250), // Stored as integer (2.50 * 100)
     repetitions: integer("repetitions").default(0),
-    lastReviewedAt: integer("last_reviewed_at", { mode: "timestamp" }),
-    nextReviewAt: integer("next_review_at", { mode: "timestamp" }),
+    lastReviewedAt: timestamp("last_reviewed_at", { withTimezone: true }),
+    nextReviewAt: timestamp("next_review_at", { withTimezone: true }),
     // Memory technique fields
     memoryPalaceLocation: varchar("memory_palace_location", { length: 1000 }),
     visualImagery: varchar("visual_imagery", { length: 1000 }),

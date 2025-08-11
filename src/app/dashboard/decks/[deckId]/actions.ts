@@ -18,6 +18,7 @@ import {
   deleteCardById as deleteCardByIdDb,
   getCardWithDeck as getCardWithDeckDb,
   updateCard as updateCardDb,
+  getCardsForStudy as getCardsForStudyDb,
 } from "@/server/db/cards";
 import {
   createIsland as createIslandDb,
@@ -230,11 +231,14 @@ export async function updateCardAction(
   }
 
   if (!success) {
+    console.error("Schema validation failed:", UpdateCardRequestSchema.safeParse(unsafeData));
     return {
       error: true,
       message: "Invalid request data",
     };
   }
+
+  console.log("Update data received:", data);
 
   // Verify deck ownership
   const card = await getCardWithDeckDb(cardId);
@@ -264,9 +268,22 @@ export async function updateCardAction(
   if (data.difficulty !== undefined) {
     trimmedUpdates.difficulty = data.difficulty;
   }
+  if (data.easeFactor !== undefined) {
+    trimmedUpdates.easeFactor = data.easeFactor;
+  }
+  if (data.repetitions !== undefined) {
+    trimmedUpdates.repetitions = data.repetitions;
+  }
+  if (data.lastReviewedAt !== undefined) {
+    trimmedUpdates.lastReviewedAt = data.lastReviewedAt;
+  }
+  if (data.nextReviewAt !== undefined) {
+    trimmedUpdates.nextReviewAt = data.nextReviewAt;
+  }
 
   // Update the card
-  await updateCardDb(cardId, data);
+  console.log("Trimmed updates being sent to DB:", trimmedUpdates);
+  await updateCardDb(cardId, trimmedUpdates);
 
   revalidatePath(`/dashboard/decks/${card.deck.id}`);
   revalidatePath(`/dashboard/decks/${card.deck.id}/study`);
@@ -329,4 +346,19 @@ export async function updateCardMemoryTechniquesAction(
     error: false,
     message: "Memory techniques saved successfully",
   };
+}
+
+export async function getCardsForStudyAction(deckId: string, limit: number = 20) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Not authenticated");
+  }
+
+  // Verify deck ownership
+  const deck = await getDeck({ id: deckId, clerkUserId: userId });
+  if (!deck) {
+    throw new Error("Unauthorized");
+  }
+
+  return await getCardsForStudyDb(deckId, limit);
 }

@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CardDifficulty } from "@/data/cardDifficulties";
 import { SupportedLanguageCode } from "@/data/supportedLanguages";
-import { ArrowLeft, ArrowRight, Volume2, Brain } from "lucide-react";
+import { Volume2, Brain } from "lucide-react";
 import { FlashCard } from "@/zod/models/flashcard.model";
 import { updateCardAction, updateCardMemoryTechniquesAction } from "../../actions";
 import { calculateNextReview } from "@/lib/spaced-repetition";
@@ -20,12 +20,14 @@ import { cn } from "@/lib/utils";
 import { speak } from "@/lib/textToSpeech";
 import { motion, AnimatePresence } from "framer-motion";
 import { ImageryMemorizationModal } from "./ImageryMemorizationModal";
+import { useStudyWalkthrough } from "@/hooks/useWalkthrough";
 
 interface StudyModeProps {
   cards: FlashCard[];
   deckId: string;
   deckName: string;
   deckLanguage: SupportedLanguageCode;
+  onSessionComplete: (results: { totalReviewed: number; correctAnswers: number }) => void;
 }
 
 export function StudyMode({
@@ -33,12 +35,15 @@ export function StudyMode({
   deckId,
   deckName,
   deckLanguage,
+  onSessionComplete,
 }: StudyModeProps) {
   const router = useRouter();
+  useStudyWalkthrough();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
+  const [sessionStats, setSessionStats] = useState({ totalReviewed: 0, correctAnswers: 0 });
   const [optimisticCards, updateOptimisticCards] = useOptimistic(
     cards,
     (state, newDifficulty: { cardId: string; difficulty: CardDifficulty }) => {
@@ -60,6 +65,13 @@ export function StudyMode({
     if (isTransitioning) return;
 
     setIsTransitioning(true);
+
+    // Update session stats
+    const isCorrect = difficulty === "good" || difficulty === "easy";
+    setSessionStats(prev => ({
+      totalReviewed: prev.totalReviewed + 1,
+      correctAnswers: prev.correctAnswers + (isCorrect ? 1 : 0),
+    }));
 
     // Calculate new spaced repetition values using SM-2 algorithm
     const spacedRepetitionResult = calculateNextReview(difficulty, {
@@ -85,9 +97,16 @@ export function StudyMode({
       if (currentIndex < cards.length - 1) {
         setCurrentIndex((prev) => prev + 1);
         setIsFlipped(false);
+      } else {
+        // Session complete - call the completion handler with final stats
+        const finalStats = {
+          totalReviewed: sessionStats.totalReviewed + 1,
+          correctAnswers: sessionStats.correctAnswers + (isCorrect ? 1 : 0),
+        };
+        onSessionComplete(finalStats);
       }
       setIsTransitioning(false);
-    }, 400);
+    }, 800); // Slightly longer delay to show feedback
   };
 
   const handleSaveMemoryTechniques = async (techniques: {
@@ -107,18 +126,9 @@ export function StudyMode({
     (event: KeyboardEvent) => {
       if (event.code === "Space") {
         setIsFlipped((prev) => !prev);
-      } else if (
-        event.code === "ArrowRight" &&
-        currentIndex < cards.length - 1
-      ) {
-        setCurrentIndex((prev) => prev + 1);
-        setIsFlipped(false);
-      } else if (event.code === "ArrowLeft" && currentIndex > 0) {
-        setCurrentIndex((prev) => prev - 1);
-        setIsFlipped(false);
       }
     },
-    [currentIndex, cards.length]
+    []
   );
 
   useEffect(() => {
@@ -139,15 +149,8 @@ export function StudyMode({
   }, [isFlipped, playAudio]);
 
   if (!currentCard) {
-    return (
-      <div className="flex flex-col items-center justify-center h-[80vh] space-y-4">
-        <h2 className="text-2xl font-bold">¡Bien hecho! 🎉</h2>
-        <p className="text-lg">You&apos;ve reviewed all the cards for now.</p>
-        <Button onClick={() => router.push(`/dashboard/decks/${deckId}`)}>
-          Back to Deck
-        </Button>
-      </div>
-    );
+    // This shouldn't happen as the session manager handles completion
+    return null;
   }
 
   return (
@@ -171,45 +174,39 @@ export function StudyMode({
         {/* Desktop header */}
         <div className="hidden md:flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <Button
-              variant="outline"
-              onClick={() => router.push(`/dashboard/decks/${deckId}`)}
-            >
-              Exit Study Mode
-            </Button>
+            <div data-tour="exit-study">
+              <Button
+                variant="outline"
+                onClick={() => router.push(`/dashboard/decks/${deckId}`)}
+              >
+                Exit Study Mode
+              </Button>
+            </div>
             <h1 className="text-xl font-semibold text-muted-foreground">
               Studying: {deckName}
             </h1>
           </div>
-          <div className="text-sm text-muted-foreground">
-            Card {currentIndex + 1} of {cards.length}
-          </div>
-        </div>
-
-        <div className="hidden md:flex justify-center mb-4">
-          <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <kbd className="px-2 py-1 bg-muted rounded border text-xs font-mono">
-                Space
-              </kbd>
-              <span>Flip card</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <kbd className="px-2 py-1 bg-muted rounded border text-xs font-mono">
-                ←
-              </kbd>
-              <span>Previous</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <kbd className="px-2 py-1 bg-muted rounded border text-xs font-mono">
-                →
-              </kbd>
-              <span>Next</span>
+          <div data-tour="study-stats" className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span>Card {currentIndex + 1} of {cards.length}</span>
+            <div className="w-32 bg-muted rounded-full h-2">
+              <div 
+                className="bg-primary h-2 rounded-full transition-all duration-300"
+                style={{ width: `${((currentIndex + 1) / cards.length) * 100}%` }}
+              />
             </div>
           </div>
         </div>
 
-        <Card className="relative h-96 mb-4 md:mb-8 cursor-pointer overflow-hidden">
+        <div data-tour="progress-bar" className="hidden md:flex justify-center mb-4">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <kbd className="px-2 py-1 bg-muted rounded border text-xs font-mono">
+              Space
+            </kbd>
+            <span>Flip card</span>
+          </div>
+        </div>
+
+        <Card data-tour="study-card" className="relative h-96 mb-4 md:mb-8 cursor-pointer overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={`card-${currentIndex}`}
@@ -298,44 +295,11 @@ export function StudyMode({
           </AnimatePresence>
         </Card>
 
-        {/* Mobile controls - compact and touch-friendly */}
+        {/* Mobile controls - difficulty buttons only */}
         <div className="flex md:hidden flex-col gap-3">
-          {/* Navigation buttons */}
-          <div className="flex justify-between items-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                if (currentIndex > 0) {
-                  setCurrentIndex((prev) => prev - 1);
-                  setIsFlipped(false);
-                }
-              }}
-              disabled={currentIndex === 0}
-              className="px-3 py-2 h-9"
-            >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Prev
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                if (currentIndex < cards.length - 1) {
-                  setCurrentIndex((prev) => prev + 1);
-                  setIsFlipped(false);
-                }
-              }}
-              disabled={currentIndex === cards.length - 1}
-              className="px-3 py-2 h-9"
-            >
-              Next
-              <ArrowRight className="h-4 w-4 ml-1" />
-            </Button>
+          <div className="text-center text-sm text-muted-foreground">
+            Rate how well you knew this card
           </div>
-
-          {/* Difficulty buttons */}
           <div className="grid grid-cols-2 gap-2">
             <div className="flex flex-col gap-1">
               <div className="text-xs text-muted-foreground text-center">
@@ -416,24 +380,12 @@ export function StudyMode({
           </div>
         </div>
 
-        {/* Desktop controls - original layout */}
-        <div className="hidden md:flex flex-col sm:flex-row justify-between items-center gap-4">
-          <Button
-            variant="outline"
-            onClick={() => {
-              if (currentIndex > 0) {
-                setCurrentIndex((prev) => prev - 1);
-                setIsFlipped(false);
-              }
-            }}
-            disabled={currentIndex === 0}
-            className="w-full sm:w-auto"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Previous
-          </Button>
-
-          <div className="flex gap-2 w-full sm:w-auto justify-center">
+        {/* Desktop controls - difficulty buttons only */}
+        <div className="hidden md:flex flex-col items-center gap-4">
+          <div className="text-sm text-muted-foreground">
+            Rate how well you knew this card
+          </div>
+          <div data-tour="difficulty-buttons" className="flex gap-2 justify-center">
             <div className="flex flex-col gap-1 items-center">
               <div className="text-xs text-muted-foreground text-center">
                 &lt;1m
@@ -507,21 +459,6 @@ export function StudyMode({
               </Button>
             </div>
           </div>
-
-          <Button
-            variant="outline"
-            onClick={() => {
-              if (currentIndex < cards.length - 1) {
-                setCurrentIndex((prev) => prev + 1);
-                setIsFlipped(false);
-              }
-            }}
-            disabled={currentIndex === cards.length - 1}
-            className="w-full sm:w-auto"
-          >
-            Next
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
         </div>
       </div>
 
