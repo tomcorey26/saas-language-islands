@@ -26,6 +26,8 @@ import {
 import {
   UpdateCardRequest,
   UpdateCardRequestSchema,
+  UpdateCardMemoryTechniquesRequest,
+  UpdateCardMemoryTechniquesRequestSchema,
 } from "@/zod/contracts/card.schema";
 
 export async function generateIslandAction(data: CreateIslandRequest): Promise<
@@ -271,5 +273,60 @@ export async function updateCardAction(
   return {
     error: false,
     message: "Card updated successfully",
+  };
+}
+
+export async function updateCardMemoryTechniquesAction(
+  cardId: string,
+  unsafeData: UpdateCardMemoryTechniquesRequest
+): Promise<
+  | {
+      error: boolean;
+      message: string;
+    }
+  | undefined
+> {
+  const { userId } = await auth();
+  const { success, data } = UpdateCardMemoryTechniquesRequestSchema.safeParse(unsafeData);
+  
+  if (!userId) {
+    return {
+      error: true,
+      message: "Not authenticated",
+    };
+  }
+
+  if (!success) {
+    return {
+      error: true,
+      message: "Invalid request data",
+    };
+  }
+
+  // Verify deck ownership
+  const card = await getCardWithDeckDb(cardId);
+
+  if (!card) {
+    return {
+      error: true,
+      message: "Card not found",
+    };
+  }
+
+  if (card?.deck.clerkUserId !== userId) {
+    return {
+      error: true,
+      message: "Unauthorized",
+    };
+  }
+
+  // Update the card with memory techniques
+  await updateCardDb(cardId, data);
+
+  revalidatePath(`/dashboard/decks/${card.deck.id}`);
+  revalidatePath(`/dashboard/decks/${card.deck.id}/study`);
+  return {
+    error: false,
+    message: "Memory techniques saved successfully",
   };
 }

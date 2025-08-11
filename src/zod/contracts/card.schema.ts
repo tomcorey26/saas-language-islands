@@ -11,6 +11,22 @@ export const UpdateCardRequestSchema = createUpdateSchema(CardTable).pick({
   translation: true,
   position: true,
   difficulty: true,
+  easeFactor: true,
+  repetitions: true,
+  lastReviewedAt: true,
+  nextReviewAt: true,
 });
 
 export type UpdateCardRequest = z.infer<typeof UpdateCardRequestSchema>;
+
+export const UpdateCardMemoryTechniquesRequestSchema = createUpdateSchema(CardTable).pick({
+  memoryPalaceLocation: true,
+  visualImagery: true,
+  personalConnection: true,
+  easeFactor: true,
+  repetitions: true,
+  lastReviewedAt: true,
+  nextReviewAt: true,
+});
+
+export type UpdateCardMemoryTechniquesRequest = z.infer<typeof UpdateCardMemoryTechniquesRequestSchema>;

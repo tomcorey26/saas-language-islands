@@ -32,10 +32,22 @@ export const CardTable = pgTable(
     translation: varchar("translation", { length: 500 }).notNull(),
     difficulty: DifficultyEnum("difficulty").notNull().default("again"),
     position: integer("position").notNull(),
+    // Spaced repetition fields
+    easeFactor: integer("ease_factor").default(250), // Stored as integer (2.50 * 100)
+    repetitions: integer("repetitions").default(0),
+    lastReviewedAt: integer("last_reviewed_at", { mode: "timestamp" }),
+    nextReviewAt: integer("next_review_at", { mode: "timestamp" }),
+    // Memory technique fields
+    memoryPalaceLocation: varchar("memory_palace_location", { length: 1000 }),
+    visualImagery: varchar("visual_imagery", { length: 1000 }),
+    personalConnection: varchar("personal_connection", { length: 1000 }),
     createdAt,
     updatedAt,
   },
-  (t) => [index("cards.deck_id_index").on(t.deckId)]
+  (t) => [
+    index("cards.deck_id_index").on(t.deckId),
+    index("cards.next_review_at_index").on(t.nextReviewAt)
+  ]
 );
 
 export const cardRelations = relations(CardTable, ({ one }) => ({

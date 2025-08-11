@@ -12,12 +12,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CardDifficulty } from "@/data/cardDifficulties";
 import { SupportedLanguageCode } from "@/data/supportedLanguages";
-import { ArrowLeft, ArrowRight, Volume2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Volume2, Brain } from "lucide-react";
 import { FlashCard } from "@/zod/models/flashcard.model";
-import { updateCardAction } from "../../actions";
+import { updateCardAction, updateCardMemoryTechniquesAction } from "../../actions";
+import { calculateNextReview } from "@/lib/spaced-repetition";
 import { cn } from "@/lib/utils";
 import { speak } from "@/lib/textToSpeech";
 import { motion, AnimatePresence } from "framer-motion";
+import { ImageryMemorizationModal } from "./ImageryMemorizationModal";
 
 interface StudyModeProps {
   cards: FlashCard[];
@@ -36,6 +38,7 @@ export function StudyMode({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
   const [optimisticCards, updateOptimisticCards] = useOptimistic(
     cards,
     (state, newDifficulty: { cardId: string; difficulty: CardDifficulty }) => {
@@ -58,10 +61,23 @@ export function StudyMode({
 
     setIsTransitioning(true);
 
+    // Calculate new spaced repetition values using SM-2 algorithm
+    const spacedRepetitionResult = calculateNextReview(difficulty, {
+      easeFactor: currentCard.easeFactor ? currentCard.easeFactor / 100 : undefined,
+      repetitions: currentCard.repetitions || undefined,
+      lastReviewedAt: currentCard.lastReviewedAt || undefined,
+    });
+
     // Optimistically update the card first to show immediate feedback
     startTransition(async () => {
       updateOptimisticCards({ cardId, difficulty });
-      await updateCardAction(cardId, { difficulty });
+      await updateCardAction(cardId, { 
+        difficulty,
+        easeFactor: Math.round(spacedRepetitionResult.easeFactor * 100),
+        repetitions: spacedRepetitionResult.repetitions,
+        lastReviewedAt: new Date(),
+        nextReviewAt: spacedRepetitionResult.nextReviewAt,
+      });
     });
 
     // Show the selection for a brief moment before advancing
@@ -72,6 +88,19 @@ export function StudyMode({
       }
       setIsTransitioning(false);
     }, 400);
+  };
+
+  const handleSaveMemoryTechniques = async (techniques: {
+    memoryPalaceLocation?: string;
+    visualImagery?: string;
+    personalConnection?: string;
+  }) => {
+    try {
+      await updateCardMemoryTechniquesAction(currentCard.id, techniques);
+      // Optionally show success feedback
+    } catch (error) {
+      console.error("Failed to save memory techniques:", error);
+    }
   };
 
   const handleKeyDown = useCallback(
@@ -201,7 +230,25 @@ export function StudyMode({
                     className="absolute inset-0 p-8 flex flex-col"
                     onClick={() => setIsFlipped(true)}
                   >
-                    <div className="absolute top-4 right-4">
+                    <div className="absolute top-4 right-4 flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsMemoryModalOpen(true);
+                        }}
+                        className={cn(
+                          "p-2 h-8 w-8",
+                          (currentCard.memoryPalaceLocation || 
+                           currentCard.visualImagery || 
+                           currentCard.personalConnection)
+                            ? "text-purple-600 hover:text-purple-700"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        <Brain className="h-4 w-4" />
+                      </Button>
                       <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded-full">
                         Phrase
                       </span>
@@ -477,6 +524,20 @@ export function StudyMode({
           </Button>
         </div>
       </div>
+
+      {/* Memory Techniques Modal */}
+      <ImageryMemorizationModal
+        isOpen={isMemoryModalOpen}
+        onClose={() => setIsMemoryModalOpen(false)}
+        onSave={handleSaveMemoryTechniques}
+        phrase={currentCard.phrase}
+        translation={currentCard.translation}
+        initialTechniques={{
+          memoryPalaceLocation: currentCard.memoryPalaceLocation || undefined,
+          visualImagery: currentCard.visualImagery || undefined,
+          personalConnection: currentCard.personalConnection || undefined,
+        }}
+      />
     </div>
   );
 }
