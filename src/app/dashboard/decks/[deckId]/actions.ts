@@ -27,6 +27,119 @@ import {
   UpdateCardRequest,
   UpdateCardRequestSchema,
 } from "@/zod/contracts/card.schema";
+import { z } from "zod";
+
+// Schema for processing streamed flashcard data
+const ProcessStreamedIslandSchema = z.object({
+  deckId: z.string(),
+  prompt: z.string(),
+  islandName: z.string(),
+  cards: z.array(z.object({
+    phrase: z.string(),
+    translation: z.string(),
+  })),
+  tokensUsed: z.number(),
+});
+
+type ProcessStreamedIslandRequest = z.infer<typeof ProcessStreamedIslandSchema>;
+
+export async function processStreamedIslandAction(
+  data: ProcessStreamedIslandRequest
+): Promise<
+  | {
+      error: boolean;
+      message: string;
+      islandId?: string;
+    }
+  | undefined
+> {
+  try {
+    const { userId } = await auth();
+    
+    const parsedData = ProcessStreamedIslandSchema.safeParse(data);
+    if (!parsedData.success || userId == null) {
+      return {
+        error: true,
+        message: "Invalid request data",
+      };
+    }
+
+    const { deckId, prompt, islandName, cards, tokensUsed } = parsedData.data;
+
+    // Verify deck ownership and get user data
+    const [deck, user] = await Promise.all([
+      getDeck({ id: deckId, clerkUserId: userId }),
+      getUser(userId),
+    ]);
+
+    if (!deck) {
+      return {
+        error: true,
+        message: "Unauthorized",
+      };
+    }
+
+    if (!user) {
+      return {
+        error: true,
+        message: "User not found",
+      };
+    }
+
+    // Double-check token balance (client-side validation backup)
+    const availableTokens = user.tokensBalance || 0;
+    if (availableTokens < tokensUsed) {
+      return {
+        error: true,
+        message: "Insufficient tokens",
+      };
+    }
+
+    // Create the island
+    const island = await createIslandDb({
+      deckId,
+      prompt,
+      name: islandName,
+    });
+
+    // Save cards to database
+    const cardData = cards.map((card, index) => ({
+      deckId,
+      islandId: island.id,
+      phrase: card.phrase,
+      translation: card.translation,
+      difficulty: cardDifficulties.again,
+      position: index,
+    }));
+
+    await createCardsDb(cardData);
+
+    // Deduct tokens from user's balance
+    await db
+      .update(UserTable)
+      .set({
+        tokensBalance: sql`${UserTable.tokensBalance} - ${tokensUsed}`,
+      })
+      .where(eq(UserTable.clerkUserId, userId));
+
+    // Revalidate both the deck page and dashboard to update token display
+    revalidatePath(`/dashboard/decks/${deckId}`);
+    revalidatePath("/dashboard");
+
+    return {
+      error: false,
+      message: `Island "${islandName}" created successfully! ${tokensUsed} tokens used.`,
+      islandId: island.id,
+    };
+  } catch (error) {
+    console.error("Error processing streamed island:", error);
+    return {
+      error: true,
+      message:
+        error instanceof Error ? error.message : "Failed to process island",
+    };
+  }
+}
 
 export async function generateIslandAction(data: CreateIslandRequest): Promise<
   | {
