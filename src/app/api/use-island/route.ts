@@ -43,6 +43,9 @@ export async function POST(req: Request) {
       );
     }
 
+    // Track if tokens have been deducted to avoid double deduction
+    let tokensDeducted = false;
+
     // Then stream the flashcards array
     const result = streamObject({
       model: openai("gpt-4o-mini"),
@@ -56,16 +59,20 @@ export async function POST(req: Request) {
       - Make the flashcards relevant to the prompt
       - Make them useful for conversation with a native speaker
       - Include a mix of questions and statements`,
+      onFinish: async ({ object, error }) => {
+        // Only deduct tokens if generation completed successfully with valid object
+        if (!tokensDeducted && object && !error) {
+          await deductTokensFromUser(userId, tokensRequired);
+          tokensDeducted = true;
+        }
+      },
+      onError: ({ error }) => {
+        console.error("AI generation error:", error);
+        // Don't deduct tokens if there's an error
+      },
     });
 
-    const response = result.toTextStreamResponse();
-
-    // only deduct tokens if we successfully stream the response
-    if (response.ok) {
-      await deductTokensFromUser(userId, tokensRequired);
-    }
-
-    return response;
+    return result.toTextStreamResponse();
   } catch (error) {
     console.error("API error:", error);
     return new Response("Internal server error", { status: 500 });

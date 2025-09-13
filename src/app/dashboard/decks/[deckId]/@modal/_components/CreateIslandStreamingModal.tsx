@@ -115,10 +115,6 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
             prompt: state.lastFormData.prompt,
             timestamp: Date.now(),
           };
-          console.log("Saving to localStorage:", {
-            storageData,
-            lastFormData: state.lastFormData,
-          });
           localStorage.setItem(
             `island-generation-${action.deckId}`,
             JSON.stringify(storageData)
@@ -218,7 +214,7 @@ export function CreateIslandStreamingModal({
 
       // Update deducted tokens after successful generation
       if (completed.length > 0 && state.lastFormData) {
-        setDeductedTokens(prev => prev + state.lastFormData!.count);
+        setDeductedTokens((prev) => prev + state.lastFormData!.count);
       }
     },
   });
@@ -246,7 +242,6 @@ export function CreateIslandStreamingModal({
       const stored = localStorage.getItem(`island-generation-${deckId}`);
       if (stored) {
         const data = JSON.parse(stored);
-        console.log("Loaded from localStorage:", data);
         dispatch({ type: "SET_PREVIOUS_GENERATION", data });
       }
     } catch (error) {
@@ -329,13 +324,6 @@ export function CreateIslandStreamingModal({
       state.viewingPreviousCards && state.previousGeneration
         ? state.previousGeneration.prompt
         : state.lastFormData.prompt;
-
-    console.log("Saving island with prompt:", {
-      promptToUse,
-      viewingPreviousCards: state.viewingPreviousCards,
-      previousGeneration: state.previousGeneration,
-      lastFormData: state.lastFormData,
-    });
 
     const result = await createIslandAction({
       deckId,
@@ -486,9 +474,12 @@ export function CreateIslandStreamingModal({
                             <div className="border border-amber-200 bg-amber-50 p-3 rounded-md flex items-start gap-2">
                               <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
                               <p className="text-sm text-amber-800">
-                                You need {watchedCount - currentTokens} more token
-                                {watchedCount - currentTokens !== 1 ? "s" : ""} to
-                                generate this many cards.
+                                You need {watchedCount - currentTokens} more
+                                token
+                                {watchedCount - currentTokens !== 1
+                                  ? "s"
+                                  : ""}{" "}
+                                to generate this many cards.
                               </p>
                             </div>
                           )}
