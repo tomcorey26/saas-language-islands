@@ -1,8 +1,8 @@
-import { generateWorld } from '@/services/openai';
-import { NextResponse } from 'next/server';
-import axios from 'axios';
-import { env } from '@/data/env/server';
-import { CreateWorldRequestSchema } from '@/zod/contracts/world.schema';
+import { generateWorld } from "@/services/ai";
+import { NextResponse } from "next/server";
+import axios from "axios";
+import { env } from "@/data/env/server";
+import { CreateWorldRequestSchema } from "@/zod/contracts/world.schema";
 
 export async function POST(request: Request) {
   const requestData = await request.json();
@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
   if (!parsedData.success) {
     return NextResponse.json(
-      { error: 'Invalid request data', issues: parsedData.error.errors },
+      { error: "Invalid request data", issues: parsedData.error.errors },
       { status: 400 }
     );
   }
@@ -28,14 +28,14 @@ export async function POST(request: Request) {
 
     if (!success || score < 0.5) {
       return NextResponse.json(
-        { error: 'CAPTCHA verification failed' },
+        { error: "CAPTCHA verification failed" },
         { status: 400 }
       );
     }
   } catch (error) {
-    console.error('CAPTCHA verification error:', error);
+    console.error("CAPTCHA verification error:", error);
     return NextResponse.json(
-      { error: 'CAPTCHA verification failed' },
+      { error: "CAPTCHA verification failed" },
       { status: 400 }
     );
   }
@@ -46,16 +46,16 @@ export async function POST(request: Request) {
 
     if (!flashcards) {
       return NextResponse.json(
-        { error: 'No flashcards generated' },
+        { error: "No flashcards generated" },
         { status: 500 }
       );
     }
 
     return NextResponse.json(flashcards);
   } catch (error) {
-    console.error('Error generating flashcards:', error);
+    console.error("Error generating flashcards:", error);
     return NextResponse.json(
-      { error: 'Error generating flashcards' },
+      { error: "Error generating flashcards" },
       { status: 500 }
     );
   }

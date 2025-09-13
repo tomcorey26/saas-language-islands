@@ -5,14 +5,6 @@ import { cardDifficulties } from "@/data/cardDifficulties";
 import { revalidatePath } from "next/cache";
 import { getDeck } from "@/server/db/decks";
 import { getUser } from "@/server/db/users";
-import { db } from "@/drizzle/db";
-import { UserTable } from "@/drizzle/user";
-import { eq, sql } from "drizzle-orm";
-import {
-  CreateIslandRequest,
-  CreateIslandRequestSchema,
-} from "@/zod/contracts/island.schema";
-import { generateFlashcardsIsland } from "@/services/openai";
 import {
   createCards as createCardsDb,
   deleteCardById as deleteCardByIdDb,
@@ -27,26 +19,33 @@ import {
   UpdateCardRequest,
   UpdateCardRequestSchema,
 } from "@/zod/contracts/card.schema";
+import {
+  CreateIslandRequest,
+  CreateIslandRequestSchema,
+} from "@/zod/contracts/island.schema";
+import { openai } from "@ai-sdk/openai";
+import { islandNameSchema } from "@/zod/contracts/islandStream.schema";
+import { generateObject } from "ai";
 
-export async function generateIslandAction(data: CreateIslandRequest): Promise<
-  | {
-      error: boolean;
-      message: string;
-    }
-  | undefined
-> {
+// Server action to save completed island data from SSE
+export async function createIslandAction(unsafeData: CreateIslandRequest) {
   try {
-    const { userId } = await auth();
-
-    const parsedData = CreateIslandRequestSchema.safeParse(data);
-    if (!parsedData.success || userId == null) {
+    const { success, data } = CreateIslandRequestSchema.safeParse(unsafeData);
+    if (!success) {
       return {
         error: true,
         message: "Invalid request data",
       };
     }
 
-    const { deckId, prompt } = parsedData.data;
+    const { deckId, prompt, cards } = data;
+    const { userId } = await auth();
+    if (!userId) {
+      return {
+        error: true,
+        message: "Not authenticated",
+      };
+    }
 
     // Verify deck ownership and get user data
     const [deck, user] = await Promise.all([
@@ -68,35 +67,22 @@ export async function generateIslandAction(data: CreateIslandRequest): Promise<
       };
     }
 
-    // Check if user has enough tokens
-    const tokensRequired = parsedData.data.count;
-    const availableTokens = user.tokensBalance || 0;
-
-    if (availableTokens < tokensRequired) {
-      return {
-        error: true,
-        message: `Insufficient tokens. You need ${tokensRequired} tokens but only have ${availableTokens}.`,
-      };
-    }
-
-    // Generate cards using OpenAI
-    const completion = await generateFlashcardsIsland({
-      ...parsedData.data,
-      language: deck.language,
+    // First, generate the island name
+    const nameResult = await generateObject({
+      model: openai("gpt-4o-mini"),
+      schema: islandNameSchema,
+      prompt: `Create a short, descriptive name (2-4 words) for a collection of ${cards.length} ${deck.language} flashcards based on this prompt: ${prompt}`,
     });
 
-    if (!completion) {
-      throw new Error("Failed to generate cards");
-    }
-
+    // Create the island
     const island = await createIslandDb({
       deckId,
       prompt,
-      name: completion.name,
+      name: nameResult.object.name,
     });
 
     // Save cards to database
-    const cards = completion.island.map((card, index) => ({
+    const cardData = cards.map((card, index) => ({
       deckId,
       islandId: island.id,
       phrase: card.phrase,
@@ -105,15 +91,7 @@ export async function generateIslandAction(data: CreateIslandRequest): Promise<
       position: index,
     }));
 
-    await createCardsDb(cards);
-
-    // Deduct tokens from user's balance
-    await db
-      .update(UserTable)
-      .set({
-        tokensBalance: sql`${UserTable.tokensBalance} - ${tokensRequired}`,
-      })
-      .where(eq(UserTable.clerkUserId, userId));
+    await createCardsDb(cardData);
 
     // Revalidate both the deck page and dashboard to update token display
     revalidatePath(`/dashboard/decks/${deckId}`);
@@ -121,10 +99,11 @@ export async function generateIslandAction(data: CreateIslandRequest): Promise<
 
     return {
       error: false,
-      message: `Cards generated successfully! ${tokensRequired} tokens used.`,
+      message: `Island "${island.name}" created successfully!`,
+      islandId: island.id,
     };
   } catch (error) {
-    console.error("Error generating cards:", error);
+    console.error("Error generating and saving island:", error);
     return {
       error: true,
       message:
@@ -170,6 +149,11 @@ export async function deleteIslandAction(
       : "There was an error deleting the island",
   };
 }
+
+/**
+ * Below are server actions for individual card operations
+ * (delete, update, etc.)
+ */
 
 export async function deleteCardAction(
   cardId: string,

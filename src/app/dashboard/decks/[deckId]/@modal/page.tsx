@@ -1,4 +1,4 @@
-import { CreateIslandModal } from "@/app/dashboard/decks/[deckId]/@modal/_components/CreateIslandModal";
+import { CreateIslandStreamingModal } from "@/app/dashboard/decks/[deckId]/@modal/_components/CreateIslandStreamingModal";
 import { DeleteIslandDialog } from "@/app/dashboard/decks/[deckId]/_components/ui/DeleteIslandDialog";
 import { getUser } from "@/server/db/users";
 import { auth } from "@clerk/nextjs/server";
@@ -21,7 +21,7 @@ export default async function ModalPage({
   return (
     <>
       <DeleteIslandDialog />
-      <CreateIslandModal deckId={deckId} userTokens={user.tokensBalance} />
+      <CreateIslandStreamingModal deckId={deckId} userTokens={user.tokensBalance} />
     </>
   );
 }

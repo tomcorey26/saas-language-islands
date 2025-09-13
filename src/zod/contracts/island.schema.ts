@@ -2,6 +2,7 @@ import { z } from "zod";
 import { FlashCardModel } from "../models/flashcard.model";
 import { createInsertSchema } from "drizzle-zod";
 import { IslandTable } from "@/drizzle/schema";
+import { flashcardSchema } from "@/zod/contracts/islandStream.schema";
 
 export const CreateIslandRequestSchema = createInsertSchema(IslandTable)
   .omit({
@@ -16,6 +17,7 @@ export const CreateIslandRequestSchema = createInsertSchema(IslandTable)
       .string()
       .min(1, "Prompt must be at least 1 character")
       .max(150, "Prompt must be at most 150 characters"),
+    cards: z.array(flashcardSchema),
   });
 
 export type CreateIslandRequest = z.infer<typeof CreateIslandRequestSchema>;
