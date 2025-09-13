@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { openai } from "@ai-sdk/openai";
 import { streamObject } from "ai";
 import { getDeck } from "@/server/db/decks";
-import { getUser } from "@/server/db/users";
+import { deductTokensFromUser, getUser } from "@/server/db/users";
 import { flashcardSchema } from "@/zod/contracts/islandStream.schema";
 
 // Allow streaming responses up to 30 seconds
@@ -41,6 +41,8 @@ export async function POST(req: Request) {
         { status: 402 }
       );
     }
+
+    await deductTokensFromUser(userId, tokensRequired);
 
     // Then stream the flashcards array
     const result = streamObject({

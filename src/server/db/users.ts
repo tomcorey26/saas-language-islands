@@ -40,6 +40,18 @@ export function addTokensToUser(clerkUserId: string, tokensToAdd: number) {
     .where(eq(UserTable.clerkUserId, clerkUserId));
 }
 
+export function deductTokensFromUser(
+  clerkUserId: string,
+  tokensToDeduct: number
+) {
+  return db
+    .update(UserTable)
+    .set({
+      tokensBalance: sql`${UserTable.tokensBalance} - ${tokensToDeduct}`,
+    })
+    .where(eq(UserTable.clerkUserId, clerkUserId));
+}
+
 export function deleteUser(clerkUserId: string) {
   return db.batch([
     db.delete(UserTable).where(eq(UserTable.clerkUserId, clerkUserId)),

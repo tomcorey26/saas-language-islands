@@ -7,7 +7,7 @@ function unwrapError(e: unknown): Error {
   return new Error(typeof e === "string" ? e : "Unknown error");
 }
 
-function actionFactory<T extends ZodTypeAny, R>(
+export function actionFactory<T extends ZodTypeAny, R>(
   cb: (data: z.infer<T>) => R,
   schema: T
 ) {

@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
                         )
                       );
                     }
-                  } catch (e) {
+                  } catch {
                     // Ignore JSON parsing errors for incomplete lines
                   }
                 }
