@@ -3,7 +3,7 @@ import { openai } from "@ai-sdk/openai";
 import { streamObject } from "ai";
 import { getDeck } from "@/server/db/decks";
 import { deductTokensFromUser, getUser } from "@/server/db/users";
-import { flashcardSchema } from "@/zod/contracts/islandStream.schema";
+import { flashcardSchema, useIslandRequestSchema } from "@/zod/contracts/islandStream.schema";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -15,7 +15,8 @@ export async function POST(req: Request) {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const { deckId, prompt, count } = await req.json();
+    const body = await req.json();
+    const { deckId, prompt, count } = useIslandRequestSchema.parse(body);
 
     // Verify deck ownership and get user data
     const [deck, user] = await Promise.all([

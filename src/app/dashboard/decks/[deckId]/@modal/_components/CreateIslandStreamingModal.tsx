@@ -204,7 +204,7 @@ export function CreateIslandStreamingModal({
   const { object, submit, isLoading, error } = useObject({
     api: "/api/use-island",
     schema: z.array(flashcardSchema),
-    onFinish: (result: { object: DeepPartial<Flashcard>[] | undefined }) => {
+    onFinish: (result) => {
       // Auto-select all completed cards when generation finishes
       const completed =
         result.object?.filter(

@@ -28,6 +28,14 @@ export const flashcardIslandSchema = z.object({
     .describe("Array of flashcards for language learning"),
 });
 
+// Schema for use-island API request
+export const useIslandRequestSchema = z.object({
+  deckId: z.string(),
+  prompt: z.string(),
+  count: z.number().int().positive(),
+});
+
 export type Flashcard = z.infer<typeof flashcardSchema>;
 export type IslandName = z.infer<typeof islandNameSchema>;
 export type FlashcardIsland = z.infer<typeof flashcardIslandSchema>;
+export type UseIslandRequest = z.infer<typeof useIslandRequestSchema>;
