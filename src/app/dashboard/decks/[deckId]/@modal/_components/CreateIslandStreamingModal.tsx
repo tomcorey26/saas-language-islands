@@ -45,7 +45,147 @@ import z from "zod";
 import { toast } from "@/hooks/use-toast";
 import { createIslandAction } from "../../actions";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useMemo, useEffect, useReducer } from "react";
+
+// State management types
+type ModalView = "form" | "cardSelection";
+
+type ModalState = {
+  view: ModalView;
+  selectedCards: Set<number>;
+  isSaving: boolean;
+  lastFormData: { count: number; prompt: string } | null;
+  viewingPreviousCards: Flashcard[] | null;
+  previousGeneration: {
+    cards: Flashcard[];
+    prompt: string;
+    timestamp: number;
+  } | null;
+};
+
+type ModalAction =
+  | { type: "RESET" }
+  | { type: "SET_VIEW"; view: ModalView }
+  | { type: "SET_PREVIOUS_GENERATION"; data: ModalState["previousGeneration"] }
+  | { type: "START_GENERATION"; formData: { count: number; prompt: string } }
+  | { type: "GENERATION_COMPLETE"; cards: Flashcard[]; deckId: string }
+  | { type: "TOGGLE_CARD_SELECTION"; index: number }
+  | { type: "SELECT_ALL_CARDS"; indices: number[] }
+  | { type: "DESELECT_ALL_CARDS" }
+  | { type: "START_SAVING" }
+  | { type: "SAVE_COMPLETE" }
+  | { type: "VIEW_PREVIOUS_GENERATION" }
+  | { type: "BACK_TO_FORM" };
+
+const initialState: ModalState = {
+  view: "form",
+  selectedCards: new Set(),
+  isSaving: false,
+  lastFormData: null,
+  viewingPreviousCards: null,
+  previousGeneration: null,
+};
+
+function modalReducer(state: ModalState, action: ModalAction): ModalState {
+  switch (action.type) {
+    case "RESET":
+      return initialState;
+
+    case "SET_VIEW":
+      return { ...state, view: action.view };
+
+    case "SET_PREVIOUS_GENERATION":
+      return { ...state, previousGeneration: action.data };
+
+    case "START_GENERATION":
+      return {
+        ...state,
+        view: "cardSelection",
+        lastFormData: action.formData,
+        selectedCards: new Set(),
+        viewingPreviousCards: null,
+      };
+
+    case "GENERATION_COMPLETE":
+      // Save to localStorage when generation completes
+      if (action.cards.length > 0 && state.lastFormData) {
+        try {
+          const storageData = {
+            cards: action.cards,
+            prompt: state.lastFormData.prompt,
+            timestamp: Date.now(),
+          };
+          console.log("Saving to localStorage:", {
+            storageData,
+            lastFormData: state.lastFormData,
+          });
+          localStorage.setItem(
+            `island-generation-${action.deckId}`,
+            JSON.stringify(storageData)
+          );
+        } catch (error) {
+          console.error("Failed to save to localStorage:", error);
+        }
+      }
+
+      return {
+        ...state,
+        previousGeneration: {
+          cards: action.cards,
+          prompt: state.lastFormData?.prompt || "",
+          timestamp: Date.now(),
+        },
+        selectedCards: new Set(action.cards.map((_, index) => index)),
+      };
+
+    case "TOGGLE_CARD_SELECTION":
+      const newSet = new Set(state.selectedCards);
+      if (newSet.has(action.index)) {
+        newSet.delete(action.index);
+      } else {
+        newSet.add(action.index);
+      }
+      return { ...state, selectedCards: newSet };
+
+    case "SELECT_ALL_CARDS":
+      return { ...state, selectedCards: new Set(action.indices) };
+
+    case "DESELECT_ALL_CARDS":
+      return { ...state, selectedCards: new Set() };
+
+    case "START_SAVING":
+      return { ...state, isSaving: true };
+
+    case "SAVE_COMPLETE":
+      return { ...state, isSaving: false };
+
+    case "VIEW_PREVIOUS_GENERATION":
+      if (!state.previousGeneration) return state;
+      return {
+        ...state,
+        view: "cardSelection",
+        lastFormData: {
+          count: state.previousGeneration.cards.length,
+          prompt: state.previousGeneration.prompt,
+        },
+        selectedCards: new Set(
+          state.previousGeneration.cards.map((_, index) => index)
+        ),
+        viewingPreviousCards: state.previousGeneration.cards,
+      };
+
+    case "BACK_TO_FORM":
+      return {
+        ...state,
+        view: "form",
+        selectedCards: new Set(),
+        viewingPreviousCards: null,
+      };
+
+    default:
+      return state;
+  }
+}
 
 export function CreateIslandStreamingModal({
   deckId,
@@ -56,59 +196,24 @@ export function CreateIslandStreamingModal({
 }) {
   const searchParams = useSearchParams();
   const isModalOpen = searchParams.get("createIsland") === "true";
+  const router = useRouter();
 
-  // Use a ref to hold the form data for the onFinish callback
-  const formDataRef = useRef<{ count: number; prompt: string } | null>(null);
+  // Use reducer for complex state management
+  const [state, dispatch] = useReducer(modalReducer, initialState);
 
   const { object, submit, isLoading, error } = useObject({
     api: "/api/use-island",
     schema: z.array(flashcardSchema),
-    onFinish: (result) => {
+    onFinish: (result: { object: DeepPartial<Flashcard>[] | undefined }) => {
       // Auto-select all completed cards when generation finishes
       const completed =
         result.object?.filter(
           (card): card is Flashcard => !!(card?.phrase && card?.translation)
         ) || [];
 
-      // Save to localStorage using the ref
-      if (completed.length > 0 && formDataRef.current) {
-        const storageData = {
-          cards: completed,
-          prompt: formDataRef.current.prompt,
-          timestamp: Date.now(),
-        };
-        console.log("Saving to localStorage:", { storageData, formDataRef: formDataRef.current });
-        localStorage.setItem(
-          `island-generation-${deckId}`,
-          JSON.stringify(storageData)
-        );
-      }
-
-      setSelectedCards(new Set(completed.map((_, index) => index)));
-      setShowCardSelection(true);
+      dispatch({ type: "GENERATION_COMPLETE", cards: completed, deckId });
     },
   });
-
-  const router = useRouter();
-
-  // State for card selection phase
-  const [showCardSelection, setShowCardSelection] = useState(false);
-  const [selectedCards, setSelectedCards] = useState<Set<number>>(new Set());
-  const [isSaving, setIsSaving] = useState(false);
-  const [lastFormData, setLastFormData] = useState<{
-    count: number;
-    prompt: string;
-  } | null>(null);
-  const [viewingPreviousCards, setViewingPreviousCards] = useState<
-    Flashcard[] | null
-  >(null);
-
-  // State for previous generation
-  const [previousGeneration, setPreviousGeneration] = useState<{
-    cards: Flashcard[];
-    prompt: string;
-    timestamp: number;
-  } | null>(null);
 
   const form = useForm<Omit<CreateIslandRequest, "deckId" | "cards">>({
     resolver: zodResolver(
@@ -131,7 +236,7 @@ export function CreateIslandStreamingModal({
       if (stored) {
         const data = JSON.parse(stored);
         console.log("Loaded from localStorage:", data);
-        setPreviousGeneration(data);
+        dispatch({ type: "SET_PREVIOUS_GENERATION", data });
       }
     } catch (error) {
       console.error("Failed to load previous generation:", error);
@@ -147,24 +252,16 @@ export function CreateIslandStreamingModal({
     );
   }, [object]);
 
-  function closeModal() {
+  const closeModal = () => {
     form.reset();
-    setShowCardSelection(false);
-    setSelectedCards(new Set());
-    setIsSaving(false);
-    setLastFormData(null);
-    setViewingPreviousCards(null);
+    dispatch({ type: "RESET" });
     router.replace(`/dashboard/decks/${deckId}`);
-  }
+  };
 
   const onSubmit = async (
     data: Omit<CreateIslandRequest, "deckId" | "cards">
   ) => {
-    setLastFormData(data);
-    formDataRef.current = data; // Set the ref for onFinish callback
-    setShowCardSelection(true); // Switch to card selection immediately
-    setSelectedCards(new Set()); // Start with no cards selected
-    setViewingPreviousCards(null); // Clear any previous cards being viewed
+    dispatch({ type: "START_GENERATION", formData: data });
 
     submit({
       deckId,
@@ -174,31 +271,31 @@ export function CreateIslandStreamingModal({
 
     toast({
       title: "Island Generation Started",
-      description: `Your islands are being generated, ${data.count} token${
-        data.count !== 1 ? "s" : ""
-      } will be deducted.`,
+      description: `Your islands are being generated. Tokens will be deducted after successful generation.`,
     });
   };
 
   const toggleCardSelection = (index: number) => {
-    setSelectedCards((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(index)) {
-        newSet.delete(index);
-      } else {
-        newSet.add(index);
-      }
-      return newSet;
-    });
+    dispatch({ type: "TOGGLE_CARD_SELECTION", index });
+  };
+
+  const selectAllCards = () => {
+    const cardsToUse = state.viewingPreviousCards || completedCards;
+    const allIndices = cardsToUse.map((_, index) => index);
+    dispatch({ type: "SELECT_ALL_CARDS", indices: allIndices });
+  };
+
+  const deselectAllCards = () => {
+    dispatch({ type: "DESELECT_ALL_CARDS" });
   };
 
   const handleSaveIsland = async () => {
-    if (!lastFormData) return;
+    if (!state.lastFormData) return;
 
     // Use previous cards if viewing them, otherwise use current completed cards
-    const cardsToUse = viewingPreviousCards || completedCards;
+    const cardsToUse = state.viewingPreviousCards || completedCards;
     const selectedCardData = cardsToUse
-      .filter((_, index) => selectedCards.has(index))
+      .filter((_, index) => state.selectedCards.has(index))
       .map((card) => ({
         phrase: card.phrase,
         translation: card.translation,
@@ -213,14 +310,20 @@ export function CreateIslandStreamingModal({
       return;
     }
 
-    setIsSaving(true);
+    dispatch({ type: "START_SAVING" });
 
     // Use the correct prompt - from previous generation if viewing previous, otherwise from lastFormData
-    const promptToUse = viewingPreviousCards && previousGeneration
-      ? previousGeneration.prompt
-      : lastFormData.prompt;
+    const promptToUse =
+      state.viewingPreviousCards && state.previousGeneration
+        ? state.previousGeneration.prompt
+        : state.lastFormData.prompt;
 
-    console.log("Saving island with prompt:", { promptToUse, viewingPreviousCards, previousGeneration, lastFormData });
+    console.log("Saving island with prompt:", {
+      promptToUse,
+      viewingPreviousCards: state.viewingPreviousCards,
+      previousGeneration: state.previousGeneration,
+      lastFormData: state.lastFormData,
+    });
 
     const result = await createIslandAction({
       deckId,
@@ -228,6 +331,8 @@ export function CreateIslandStreamingModal({
       count: selectedCardData.length,
       cards: selectedCardData,
     });
+
+    dispatch({ type: "SAVE_COMPLETE" });
 
     if (result?.error) {
       toast({
@@ -242,38 +347,20 @@ export function CreateIslandStreamingModal({
       });
       closeModal();
     }
-
-    setIsSaving(false);
   };
 
   const goBackToForm = () => {
-    setShowCardSelection(false);
-    setSelectedCards(new Set());
-    setViewingPreviousCards(null);
+    dispatch({ type: "BACK_TO_FORM" });
   };
 
   const handleRegenerate = () => {
-    if (!lastFormData) return;
-    setShowCardSelection(false);
-    setSelectedCards(new Set());
-    setViewingPreviousCards(null);
-    formDataRef.current = lastFormData; // Set the ref for onFinish callback
-    onSubmit(lastFormData);
+    if (!state.lastFormData) return;
+    dispatch({ type: "BACK_TO_FORM" });
+    onSubmit(state.lastFormData);
   };
 
   const viewPreviousGeneration = () => {
-    if (!previousGeneration) return;
-
-    // Set up the selection view with previous data
-    setLastFormData({
-      count: previousGeneration.cards.length,
-      prompt: previousGeneration.prompt,
-    });
-    setSelectedCards(
-      new Set(previousGeneration.cards.map((_, index) => index))
-    );
-    setViewingPreviousCards(previousGeneration.cards);
-    setShowCardSelection(true);
+    dispatch({ type: "VIEW_PREVIOUS_GENERATION" });
   };
 
   return (
@@ -282,20 +369,22 @@ export function CreateIslandStreamingModal({
         open={isModalOpen}
         onOpenChange={(open) => (open ? null : closeModal())}
       >
-        <DialogContent className="w-[95vw] sm:max-w-[800px] max-h-[90vh] sm:max-h-[80vh] overflow-y-auto">
-          {showCardSelection ? (
+        <DialogContent className="sm:max-w-[800px] max-h-[90vh] sm:max-h-[80vh] overflow-y-auto">
+          {state.view === "cardSelection" ? (
             <CardSelectionView
-              completedCards={viewingPreviousCards || completedCards}
-              selectedCards={selectedCards}
+              completedCards={state.viewingPreviousCards || completedCards}
+              selectedCards={state.selectedCards}
               toggleCardSelection={toggleCardSelection}
+              selectAllCards={selectAllCards}
+              deselectAllCards={deselectAllCards}
               handleSaveIsland={handleSaveIsland}
               handleRegenerate={handleRegenerate}
               goBackToForm={goBackToForm}
-              isSaving={isSaving}
-              isLoading={isLoading && !viewingPreviousCards}
+              isSaving={state.isSaving}
+              isLoading={isLoading && !state.viewingPreviousCards}
               error={error}
-              object={viewingPreviousCards || object}
-              isViewingPrevious={!!viewingPreviousCards}
+              object={state.viewingPreviousCards || object}
+              isViewingPrevious={!!state.viewingPreviousCards}
             />
           ) : (
             <>
@@ -312,7 +401,7 @@ export function CreateIslandStreamingModal({
                 <TokensBalance userTokens={userTokens} />
 
                 {/* Previous Generation */}
-                {previousGeneration && (
+                {state.previousGeneration && (
                   <div className="border border-green-200 bg-green-50 p-4 rounded-lg">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -322,9 +411,12 @@ export function CreateIslandStreamingModal({
                             Previous Generation Available
                           </span>
                           <p className="text-xs text-green-700">
-                            {previousGeneration.cards.length} cards • &quot;
-                            {previousGeneration.prompt.slice(0, 50)}
-                            {previousGeneration.prompt.length > 50 ? "..." : ""}
+                            {state.previousGeneration.cards.length} cards •
+                            &quot;
+                            {state.previousGeneration.prompt.slice(0, 50)}
+                            {state.previousGeneration.prompt.length > 50
+                              ? "..."
+                              : ""}
                             &quot;
                           </p>
                         </div>
@@ -375,16 +467,6 @@ export function CreateIslandStreamingModal({
                           <div className="flex items-center justify-between text-xs">
                             <span className="text-gray-500">
                               Generate up to 20 cards per island
-                            </span>
-                            <span
-                              className={`font-medium ${
-                                hasInsufficientTokens
-                                  ? "text-red-500"
-                                  : "text-green-600"
-                              }`}
-                            >
-                              {watchedCount} token
-                              {watchedCount !== 1 ? "s" : ""} required
                             </span>
                           </div>
 
@@ -503,6 +585,8 @@ function CardSelectionView({
   completedCards,
   selectedCards,
   toggleCardSelection,
+  selectAllCards,
+  deselectAllCards,
   handleSaveIsland,
   handleRegenerate,
   goBackToForm,
@@ -515,6 +599,8 @@ function CardSelectionView({
   completedCards: Flashcard[];
   selectedCards: Set<number>;
   toggleCardSelection: (index: number) => void;
+  selectAllCards: () => void;
+  deselectAllCards: () => void;
   handleSaveIsland: () => void;
   handleRegenerate: () => void;
   goBackToForm: () => void;
@@ -600,6 +686,35 @@ function CardSelectionView({
                 Reviewing {completedCards.length} previously generated
                 flashcards
               </span>
+            </div>
+          </div>
+        )}
+
+        {/* Select All/Deselect All Buttons */}
+        {generationComplete && completedCards.length > 0 && (
+          <div className="flex items-center justify-between border-b pb-3">
+            <div className="text-sm text-muted-foreground">
+              {selectedCount} of {completedCards.length} cards selected
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={selectAllCards}
+                disabled={selectedCount === completedCards.length}
+                className="text-xs h-8"
+              >
+                Select All
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={deselectAllCards}
+                disabled={selectedCount === 0}
+                className="text-xs h-8"
+              >
+                Deselect All
+              </Button>
             </div>
           </div>
         )}

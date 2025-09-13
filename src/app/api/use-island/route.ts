@@ -42,8 +42,6 @@ export async function POST(req: Request) {
       );
     }
 
-    await deductTokensFromUser(userId, tokensRequired);
-
     // Then stream the flashcards array
     const result = streamObject({
       model: openai("gpt-4o-mini"),
@@ -59,8 +57,13 @@ export async function POST(req: Request) {
       - Include a mix of questions and statements`,
     });
 
-    // Add the name to the response headers so the client can access it
     const response = result.toTextStreamResponse();
+
+    // only deduct tokens if we successfully stream the response
+    if (response.ok) {
+      await deductTokensFromUser(userId, tokensRequired);
+    }
+
     return response;
   } catch (error) {
     console.error("API error:", error);
