@@ -45,7 +45,7 @@ import z from "zod";
 import { toast } from "@/hooks/use-toast";
 import { createIslandAction } from "../../actions";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useMemo, useEffect, useReducer } from "react";
+import { useMemo, useEffect, useReducer, useState } from "react";
 
 // State management types
 type ModalView = "form" | "cardSelection";
@@ -201,6 +201,9 @@ export function CreateIslandStreamingModal({
   // Use reducer for complex state management
   const [state, dispatch] = useReducer(modalReducer, initialState);
 
+  // Track tokens deducted from successful generations
+  const [deductedTokens, setDeductedTokens] = useState(0);
+
   const { object, submit, isLoading, error } = useObject({
     api: "/api/use-island",
     schema: z.array(flashcardSchema),
@@ -212,6 +215,11 @@ export function CreateIslandStreamingModal({
         ) || [];
 
       dispatch({ type: "GENERATION_COMPLETE", cards: completed, deckId });
+
+      // Update deducted tokens after successful generation
+      if (completed.length > 0 && state.lastFormData) {
+        setDeductedTokens(prev => prev + state.lastFormData!.count);
+      }
     },
   });
 
@@ -225,9 +233,12 @@ export function CreateIslandStreamingModal({
     },
   });
 
+  // Calculate current tokens as derived state
+  const currentTokens = userTokens - deductedTokens;
+
   const watchedCount = form.watch("count");
-  const hasInsufficientTokens = userTokens < watchedCount;
-  const hasNoTokens = userTokens === 0;
+  const hasInsufficientTokens = currentTokens < watchedCount;
+  const hasNoTokens = currentTokens === 0;
 
   // Load previous generation from localStorage
   useEffect(() => {
@@ -255,6 +266,7 @@ export function CreateIslandStreamingModal({
   const closeModal = () => {
     form.reset();
     dispatch({ type: "RESET" });
+    setDeductedTokens(0);
     router.replace(`/dashboard/decks/${deckId}`);
   };
 
@@ -398,7 +410,7 @@ export function CreateIslandStreamingModal({
                 </DialogDescription>
 
                 {/* Token Display */}
-                <TokensBalance userTokens={userTokens} />
+                <TokensBalance userTokens={currentTokens} />
 
                 {/* Previous Generation */}
                 {state.previousGeneration && (
@@ -474,8 +486,8 @@ export function CreateIslandStreamingModal({
                             <div className="border border-amber-200 bg-amber-50 p-3 rounded-md flex items-start gap-2">
                               <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
                               <p className="text-sm text-amber-800">
-                                You need {watchedCount - userTokens} more token
-                                {watchedCount - userTokens !== 1 ? "s" : ""} to
+                                You need {watchedCount - currentTokens} more token
+                                {watchedCount - currentTokens !== 1 ? "s" : ""} to
                                 generate this many cards.
                               </p>
                             </div>
