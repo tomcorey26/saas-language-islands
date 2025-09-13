@@ -1,6 +1,7 @@
 "use client";
 
-import { processStreamedIslandAction } from "@/app/dashboard/decks/[deckId]/actions";
+import { experimental_useObject as useObject } from "@ai-sdk/react";
+import { DeepPartial } from "ai";
 import { Button } from "@/components/ui/button";
 import {
   DialogContent,
@@ -19,36 +20,20 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Progress } from "@/components/ui/progress";
-
-import { useToast } from "@/hooks/use-toast";
 import {
   CreateIslandRequest,
   CreateIslandRequestSchema,
 } from "@/zod/contracts/island.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Sparkles, CreditCard, AlertTriangle, X } from "lucide-react";
+import { Sparkles, CreditCard, AlertTriangle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
+import {
+  Flashcard,
+  flashcardSchema,
+} from "@/zod/contracts/islandStream.schema";
 import Link from "next/link";
-
-interface StreamData {
-  type: 'progress' | 'content' | 'complete' | 'error';
-  message?: string;
-  cardsGenerated?: number;
-  totalCards?: number;
-  content?: string;
-  error?: string;
-  card?: { phrase: string; translation: string };
-  deckId?: string;
-  prompt?: string;
-}
-
-interface GeneratedCard {
-  phrase: string;
-  translation: string;
-}
+import z from "zod";
 
 export function CreateIslandStreamingModal({
   deckId,
@@ -60,14 +45,12 @@ export function CreateIslandStreamingModal({
   const searchParams = useSearchParams();
   const isModalOpen = searchParams.get("createIsland") === "true";
 
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [streamProgress, setStreamProgress] = useState(0);
-  const [progressMessage, setProgressMessage] = useState("");
-  const [generatedCards, setGeneratedCards] = useState<GeneratedCard[]>([]);
-  const [streamedContent, setStreamedContent] = useState("");
-  const [canCancel, setCanCancel] = useState(true);
+  const { object, submit, isLoading, stop, error } = useObject({
+    api: "/api/use-island",
+    schema: z.array(flashcardSchema),
+  });
 
-  const { toast } = useToast();
+  // const { toast } = useToast();
   const router = useRouter();
 
   const form = useForm<Omit<CreateIslandRequest, "deckId">>({
@@ -83,175 +66,16 @@ export function CreateIslandStreamingModal({
   const hasNoTokens = userTokens === 0;
 
   function closeModal() {
-    if (isGenerating && canCancel) {
-      // Reset streaming state
-      setIsGenerating(false);
-      setStreamProgress(0);
-      setProgressMessage("");
-      setGeneratedCards([]);
-      setStreamedContent("");
-      setCanCancel(true);
-    }
     form.reset();
     router.replace(`/dashboard/decks/${deckId}`);
   }
 
-  const parseStreamedContent = useCallback((content: string) => {
-    const lines = content.split('\n');
-    const cards: GeneratedCard[] = [];
-    let islandName = '';
-
-    for (const line of lines) {
-      if (line.trim().startsWith('{"type":"card"')) {
-        try {
-          const cardData = JSON.parse(line.trim());
-          if (cardData.type === 'card' && cardData.phrase && cardData.translation) {
-            cards.push({ phrase: cardData.phrase, translation: cardData.translation });
-          }
-        } catch (e) {
-          // Ignore JSON parsing errors
-        }
-      } else if (line.trim().startsWith('{"type":"name"')) {
-        try {
-          const nameData = JSON.parse(line.trim());
-          if (nameData.type === 'name' && nameData.value) {
-            islandName = nameData.value;
-          }
-        } catch (e) {
-          // Ignore JSON parsing errors
-        }
-      }
-    }
-
-    return { cards, islandName };
-  }, []);
-
   const onSubmit = async (data: Omit<CreateIslandRequest, "deckId">) => {
-    setIsGenerating(true);
-    setStreamProgress(0);
-    setProgressMessage("Starting generation...");
-    setGeneratedCards([]);
-    setStreamedContent("");
-    setCanCancel(true);
-
-    try {
-      const response = await fetch('/api/generate-island/stream', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          deckId,
-          count: data.count,
-          prompt: data.prompt,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to generate flashcards');
-      }
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-
-      if (!reader) {
-        throw new Error('No response body');
-      }
-
-      let accumulatedContent = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        
-        if (done) break;
-
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            
-            if (data === '[DONE]') {
-              setCanCancel(false);
-              
-              // Parse final content and save to database
-              const { cards, islandName } = parseStreamedContent(accumulatedContent);
-              
-              if (cards.length > 0 && islandName) {
-                const result = await processStreamedIslandAction({
-                  deckId,
-                  prompt: data.prompt,
-                  islandName,
-                  cards,
-                  tokensUsed: data.count,
-                });
-
-                if (result?.error) {
-                  throw new Error(result.message);
-                }
-
-                toast({
-                  title: "Success",
-                  description: result?.message || "Flashcards generated successfully!",
-                });
-
-                closeModal();
-              } else {
-                throw new Error("Failed to parse generated content");
-              }
-              return;
-            }
-
-            try {
-              const parsed: StreamData = JSON.parse(data);
-              
-              if (parsed.type === 'progress') {
-                setProgressMessage(parsed.message || "Generating...");
-                if (parsed.cardsGenerated !== undefined && parsed.totalCards !== undefined) {
-                  setStreamProgress((parsed.cardsGenerated / parsed.totalCards) * 100);
-                }
-                
-                // If this progress update includes a card, add it to our display
-                if (parsed.card) {
-                  setGeneratedCards(prev => {
-                    const exists = prev.some(card => 
-                      card.phrase === parsed.card?.phrase && card.translation === parsed.card?.translation
-                    );
-                    if (!exists) {
-                      return [...prev, parsed.card!];
-                    }
-                    return prev;
-                  });
-                }
-              } else if (parsed.type === 'content') {
-                accumulatedContent += parsed.content || '';
-                setStreamedContent(accumulatedContent);
-              } else if (parsed.type === 'complete') {
-                accumulatedContent = parsed.content || accumulatedContent;
-                setStreamedContent(accumulatedContent);
-                setProgressMessage(parsed.message || "Generation complete!");
-                setStreamProgress(100);
-              } else if (parsed.type === 'error') {
-                throw new Error(parsed.error || 'Unknown streaming error');
-              }
-            } catch (e) {
-              // Ignore JSON parsing errors for incomplete chunks
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error generating flashcards:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to generate flashcards",
-        variant: "destructive",
-      });
-      setIsGenerating(false);
-      setCanCancel(true);
-    }
+    submit({
+      deckId,
+      count: data.count,
+      prompt: data.prompt,
+    });
   };
 
   return (
@@ -261,88 +85,42 @@ export function CreateIslandStreamingModal({
     >
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <DialogTitle className="text-2xl font-bold">
-                Generate New Island
-              </DialogTitle>
-              <DialogDescription>
-                Create a new island with AI-generated flashcards. The island name
-                will be automatically generated based on your prompt.
-              </DialogDescription>
-            </div>
-            {isGenerating && canCancel && (
-              <Button variant="ghost" size="sm" onClick={closeModal}>
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
+          <DialogTitle className="text-2xl font-bold">
+            Generate New Island
+          </DialogTitle>
+          <DialogDescription>
+            Create a new island with AI-generated flashcards. The island name
+            will be automatically generated based on your prompt.
+          </DialogDescription>
 
           {/* Token Display */}
-          <div className="flex items-center justify-between bg-blue-50 p-3 rounded-lg border">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
-                <Sparkles className="h-3 w-3 text-white" />
-              </div>
-              <span className="text-sm font-medium text-blue-900">
-                Available Tokens:{" "}
-                <span className="font-bold">{userTokens.toLocaleString()}</span>
-              </span>
-            </div>
-            <Link href="/dashboard/buy">
-              <Button variant="outline" size="sm" className="text-xs">
-                <CreditCard className="h-3 w-3 mr-1" />
-                Buy More
-              </Button>
-            </Link>
-          </div>
+          <TokensBalance userTokens={userTokens} />
 
           {/* Progress Display */}
-          {isGenerating && (
-            <div className="bg-gray-50 p-4 rounded-lg border space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Generation Progress</span>
-                <span className="text-xs text-gray-600">{Math.round(streamProgress)}%</span>
+          {(isLoading || object) && (
+            <StreamingProgress
+              object={object}
+              onStop={stop}
+              error={error}
+              isLoading={isLoading}
+            />
+          )}
+          {error && (
+            <div className="border border-red-200 bg-red-50 p-4 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertTriangle className="h-4 w-4 text-red-600" />
+                <span className="text-sm font-medium text-red-900">
+                  Generation Failed
+                </span>
               </div>
-              <Progress value={streamProgress} className="w-full" />
-              <p className="text-sm text-gray-600">{progressMessage}</p>
-              
-              {/* Show generated cards as they come in */}
-              {generatedCards.length > 0 && (
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  <p className="text-xs font-medium text-gray-700">Generated Cards:</p>
-                  {generatedCards.map((card, index) => (
-                    <div key={index} className="bg-white p-2 rounded border text-xs">
-                      <div className="font-medium">{card.phrase}</div>
-                      <div className="text-gray-600">{card.translation}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <p className="text-sm text-red-800">{error.message}</p>
             </div>
           )}
         </DialogHeader>
-        
+
         <Form {...form}>
           {hasNoTokens ? (
-            <div className="text-center py-8">
-              <AlertTriangle className="h-16 w-16 text-amber-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">
-                No Tokens Available
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                You need tokens to generate flashcards. Purchase tokens to
-                continue creating islands.
-              </p>
-              <div className="flex justify-center">
-                <Link href="/dashboard/buy">
-                  <Button>
-                    <CreditCard className="h-4 w-4" />
-                    Buy Tokens
-                  </Button>
-                </Link>
-              </div>
-            </div>
+            <NoTokensMessage />
           ) : (
             <form
               onSubmit={form.handleSubmit(onSubmit)}
@@ -360,7 +138,7 @@ export function CreateIslandStreamingModal({
                         min={1}
                         max={20}
                         className="h-11"
-                        disabled={isGenerating}
+                        disabled={isLoading}
                         {...field}
                         onChange={(e) => {
                           const value = parseInt(e.target.value);
@@ -412,7 +190,7 @@ export function CreateIslandStreamingModal({
                         <Textarea
                           placeholder="Describe what kind of cards you want to generate..."
                           className="min-h-[120px]"
-                          disabled={isGenerating}
+                          disabled={isLoading}
                           {...field}
                           maxLength={150}
                         />
@@ -433,11 +211,11 @@ export function CreateIslandStreamingModal({
               <div className="flex justify-end pt-4">
                 <Button
                   type="submit"
-                  disabled={isGenerating || hasInsufficientTokens}
+                  disabled={isLoading || hasInsufficientTokens}
                   className="w-full sm:w-auto flex items-center gap-2"
                 >
-                  {isGenerating ? "Generating..." : "Generate Cards"}
-                  {!isGenerating && <Sparkles className="h-4 w-4" />}
+                  {isLoading ? "Generating..." : "Generate Cards"}
+                  {!isLoading && <Sparkles className="h-4 w-4" />}
                 </Button>
               </div>
             </form>
@@ -445,5 +223,126 @@ export function CreateIslandStreamingModal({
         </Form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function TokensBalance({ userTokens }: { userTokens: number }) {
+  return (
+    <div className="flex items-center justify-between bg-blue-50 p-3 rounded-lg border">
+      <div className="flex items-center gap-2">
+        <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
+          <Sparkles className="h-3 w-3 text-white" />
+        </div>
+        <span className="text-sm font-medium text-blue-900">
+          Available Tokens:{" "}
+          <span className="font-bold">{userTokens.toLocaleString()}</span>
+        </span>
+      </div>
+      <Link href="/dashboard/buy">
+        <Button variant="outline" size="sm" className="text-xs">
+          <CreditCard className="h-3 w-3 mr-1" />
+          Buy More
+        </Button>
+      </Link>
+    </div>
+  );
+}
+
+function NoTokensMessage() {
+  return (
+    <div className="text-center py-8">
+      <AlertTriangle className="h-16 w-16 text-amber-500 mx-auto mb-4" />
+      <h3 className="text-lg font-semibold mb-2">No Tokens Available</h3>
+      <p className="text-muted-foreground mb-4">
+        You need tokens to generate flashcards. Purchase tokens to continue
+        creating islands.
+      </p>
+      <div className="flex justify-center">
+        <Link href="/dashboard/buy">
+          <Button>
+            <CreditCard className="h-4 w-4" />
+            Buy Tokens
+          </Button>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function StreamingProgress({
+  object,
+  onStop,
+  error,
+  isLoading,
+}: {
+  object: DeepPartial<Flashcard[]> | undefined;
+  onStop: () => void;
+  error: Error | undefined;
+  isLoading: boolean;
+}) {
+  if (error) {
+    return "An error occurred during generation.";
+  }
+  console.log("Current streaming object state:", object);
+
+  const streamSection =
+    !object || object.length === 0 ? null : (
+      <div className="mt-2">
+        <h4 className="font-medium">
+          {isLoading ? "Streaming Progress" : "Generated Flashcards"}
+        </h4>
+        <div className="text-xs text-blue-700 mb-2">
+          Generated {object.length} flashcard(s){isLoading ? "..." : " ✓"}
+        </div>
+        <div className="flex flex-col gap-1 mt-2">
+          {object.map((card, index) => (
+            <div
+              key={card?.phrase || index}
+              className="text-xs text-blue-600 bg-blue-100 p-2 rounded animate-in slide-in-from-top-2 fade-in duration-300"
+              style={{
+                animationDelay: `${index * 100}ms`,
+                animationFillMode: "both",
+              }}
+            >
+              {card?.phrase && card?.translation && (
+                <>
+                  <div className="font-medium">{card.phrase}</div>
+                  <div>{card.translation}</div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+
+  return (
+    <div className="border border-blue-200 bg-blue-50 p-4 rounded-lg">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <Sparkles
+            className={`h-4 w-4 text-blue-600 ${
+              isLoading ? "animate-pulse" : ""
+            }`}
+          />
+          <span className="text-sm font-medium text-blue-900">
+            {isLoading
+              ? "Generating flashcards..."
+              : "Flashcards generated successfully!"}
+          </span>
+        </div>
+        {isLoading && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onStop}
+            className="text-xs"
+          >
+            Stop
+          </Button>
+        )}
+      </div>
+      {streamSection}
+    </div>
   );
 }

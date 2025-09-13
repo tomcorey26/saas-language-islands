@@ -1,5 +1,7 @@
 import { zodResponseFormat } from "openai/helpers/zod";
 import { OpenAI } from "openai";
+import { openai } from "@ai-sdk/openai";
+import { generateObject, streamObject } from "ai";
 import {
   CreateWorldRequest,
   CreateWorldResponseSchema,
@@ -7,6 +9,9 @@ import {
 import { CreateIslandRequest } from "@/zod/contracts/island.schema";
 import { z } from "zod";
 import { SupportedLanguageCode } from "@/data/supportedLanguages";
+
+// Learn AI SDK
+
 const openAiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const generateIslandsPrompt = (request: CreateWorldRequest) => {
@@ -85,36 +90,36 @@ function generateFlashcardsIslandPrompt(
   `;
 }
 
+const FlashcardIslandSchema = z.object({
+  island: z.array(
+    z.object({
+      phrase: z.string(),
+      translation: z.string(),
+    })
+  ),
+  name: z.string().min(1).max(50),
+});
+
 export async function generateFlashcardsIsland(
   request: CreateIslandRequestWithLanguage
 ) {
-  const completion = await openAiClient.beta.chat.completions.parse({
-    model: "gpt-4o-mini",
-    messages: [
-      {
-        role: "user",
-        content: generateFlashcardsIslandPrompt(request),
-      },
-    ],
-    response_format: zodResponseFormat(
-      z.object({
-        island: z.array(
-          z.object({
-            phrase: z.string(),
-            translation: z.string(),
-          })
-        ),
-        name: z.string().min(1).max(50),
-      }),
-      "island_response"
-    ),
+  const result = await generateObject({
+    model: openai("gpt-4o-mini"),
+    schema: FlashcardIslandSchema,
+    prompt: generateFlashcardsIslandPrompt(request),
   });
 
-  const island_response = completion.choices[0].message;
+  return result.object;
+}
 
-  if (island_response.refusal) {
-    throw new Error(island_response.refusal);
-  }
+export function streamFlashcardsIsland(
+  request: CreateIslandRequestWithLanguage
+) {
+  const result = streamObject({
+    model: openai("gpt-4o-mini"),
+    schema: FlashcardIslandSchema,
+    prompt: generateFlashcardsIslandPrompt(request),
+  });
 
-  return island_response.parsed;
+  return result;
 }
