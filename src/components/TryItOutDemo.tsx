@@ -3,24 +3,41 @@ import { ArrowRightIcon, Zap } from "lucide-react";
 import { SignUpButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { TryItOutFormClient } from "./TryItOutFormClient";
+import { supportedLanguagesArray } from "@/data/supportedLanguages";
 
 export function TryItOutDemo() {
+  const animationTypes = ["slow", "medium", "bob"];
+
+  // Generate random positions and delays for each language
+  const bubbleData = supportedLanguagesArray.map((_, index) => ({
+    topPosition: Math.random() * 90 + 5, // 5% to 95% from top
+    animationDelay: Math.random() * -60, // Random delay between 0 and -60 seconds
+    animationType: animationTypes[index % animationTypes.length],
+  }));
+
   return (
     <section
       id="demo"
-      className="pt-24 pb-20 relative overflow-hidden min-h-[100vh] bg-gray-50"
+      className="pt-24 pb-20 relative overflow-hidden min-h-[120vh] bg-gray-50"
     >
-      {/* Simple clean background */}
+      {/* Animated background */}
       <div className="absolute inset-0 overflow-hidden">
-        {/* Subtle pattern overlay */}
-        <div
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage: `radial-gradient(circle at 25% 25%, rgb(52 211 153) 1px, transparent 1px), radial-gradient(circle at 75% 75%, rgb(94 234 212) 1px, transparent 1px)`,
-            backgroundSize: "50px 50px",
-            backgroundPosition: "0 0, 25px 25px",
-          }}
-        />
+        {/* Dynamically generated floating country flags */}
+        {supportedLanguagesArray.map((language, index) => {
+          const bubble = bubbleData[index];
+          return (
+            <div
+              key={`${language.languageCode}-${index}`}
+              className={`absolute flex items-center justify-center w-32 h-32 md:bg-card md:border md:border-border/20 rounded-full md:shadow-lg animate-float-${bubble.animationType}`}
+              style={{
+                top: `${bubble.topPosition}%`,
+                animationDelay: `${bubble.animationDelay}s`,
+              }}
+            >
+              <span className="text-4xl md:text-6xl">{language.flag}</span>
+            </div>
+          );
+        })}
       </div>
 
       <div className="container px-8 md:px-16 max-w-6xl mx-auto relative z-0 mt-8">
@@ -51,9 +68,7 @@ export function TryItOutDemo() {
           <Card className="shadow-2xl border-2 hover:shadow-3xl transition-shadow duration-300">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-center justify-center text-xl md:text-2xl">
-                <span className="text-4xl animate-pulse">🌍</span>
                 Try it out! Generate Flashcards
-                <span className="text-4xl animate-pulse">🌍</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">

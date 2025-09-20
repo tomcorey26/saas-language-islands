@@ -37,6 +37,8 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --bubble-exit-point: -300px; /* Default exit point for bubbles */
   }
   .dark {
     --background: 240 10% 3.9%;
@@ -174,4 +176,68 @@
 .animate-slide-in-left {
   animation: slide-in-left 0.4s ease-out forwards;
   opacity: 0; /* Start hidden */
+}
+
+/* Flag drift animations for TryItOutDemo - Mario-style side scrolling with rotation */
+@keyframes flag-drift-slow {
+  0% {
+    transform: translateX(100vw) translateY(0) scale(1) rotate(0deg);
+  }
+  25% {
+    transform: translateX(75vw) translateY(0) scale(1) rotate(5deg);
+  }
+  50% {
+    transform: translateX(50vw) translateY(0) scale(1) rotate(0deg);
+  }
+  75% {
+    transform: translateX(25vw) translateY(0) scale(1) rotate(-3deg);
+  }
+  100% {
+    transform: translateX(-20vw) translateY(0) scale(1) rotate(0deg);
+  }
+}
+
+@keyframes flag-drift-medium {
+  0% {
+    transform: translateX(100vw) translateY(0) scale(1) rotate(0deg);
+  }
+  33% {
+    transform: translateX(66vw) translateY(0) scale(1.02) rotate(8deg);
+  }
+  66% {
+    transform: translateX(33vw) translateY(0) scale(0.98) rotate(-5deg);
+  }
+  100% {
+    transform: translateX(-20vw) translateY(0) scale(1) rotate(0deg);
+  }
+}
+
+@keyframes flag-drift-with-bob {
+  0% {
+    transform: translateX(100vw) translateY(0) scale(1) rotate(0deg);
+  }
+  25% {
+    transform: translateX(75vw) translateY(-10px) scale(1.05) rotate(6deg);
+  }
+  50% {
+    transform: translateX(50vw) translateY(0) scale(1) rotate(0deg);
+  }
+  75% {
+    transform: translateX(25vw) translateY(-5px) scale(0.95) rotate(-4deg);
+  }
+  100% {
+    transform: translateX(-20vw) translateY(0) scale(1) rotate(0deg);
+  }
+}
+
+.animate-float-slow {
+  animation: flag-drift-slow 45s linear infinite;
+}
+
+.animate-float-medium {
+  animation: flag-drift-medium 40s linear infinite;
+}
+
+.animate-float-bob {
+  animation: flag-drift-with-bob 50s linear infinite;
 }
