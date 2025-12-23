@@ -2,7 +2,7 @@
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FlashCardList } from "./FlashCardList";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Deck } from "@/zod/models/deck.model";
 import { Island } from "@/zod/models/island.model";
 import { FlashCard } from "@/zod/models/flashcard.model";
@@ -18,16 +18,15 @@ export function CategoryTabs({ islands, deck }: CategoryTabsProps) {
   const [selectedCategory, setSelectedCategory] = useState(
     islands[0]?.name || ""
   );
-  const [isInitialMount, setIsInitialMount] = useState(true);
-
-  useEffect(() => {
-    setIsInitialMount(false);
-  }, []);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   return (
     <Tabs
       defaultValue={selectedCategory}
-      onValueChange={(value) => setSelectedCategory(value)}
+      onValueChange={(value) => {
+        setSelectedCategory(value);
+        setHasInteracted(true);
+      }}
     >
       <TabsList className="flex items-center justify-start flex-wrap h-auto">
         {islands.map((island) => (
@@ -58,7 +57,7 @@ export function CategoryTabs({ islands, deck }: CategoryTabsProps) {
               island.name === selectedCategory && (
                 <motion.div
                   key={island.id}
-                  initial={isInitialMount ? false : { x: 300, opacity: 0 }}
+                  initial={hasInteracted ? { x: 300, opacity: 0 } : false}
                   animate={{ x: 0, opacity: 1 }}
                   exit={{ x: -300, opacity: 0 }}
                   transition={{
