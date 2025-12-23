@@ -9,6 +9,9 @@ import {
 export const CreateDeckRequestSchema = createInsertSchema(DeckTable)
   .omit({
     clerkUserId: true,
+    id: true,
+    createdAt: true,
+    updatedAt: true,
   })
   .extend({
     name: z
@@ -24,7 +27,7 @@ export const CreateDeckRequestSchema = createInsertSchema(DeckTable)
         SupportedLanguageCode
       ]
     ),
-    emoji: z.string().default("🏝️"),
+    emoji: z.string().min(1, { message: "Emoji is required" }),
   });
 
 export type CreateDeckRequest = z.infer<typeof CreateDeckRequestSchema>;

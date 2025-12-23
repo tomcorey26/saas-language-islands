@@ -159,7 +159,7 @@ export async function generateDemoFlashcards(
     }
 
     // Generate flashcards using OpenAI
-    const completion = await openAiClient.beta.chat.completions.parse({
+    const completion = await openAiClient.chat.completions.parse({
       model: "gpt-4o-mini",
       messages: [
         {

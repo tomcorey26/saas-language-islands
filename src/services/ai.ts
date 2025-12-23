@@ -53,7 +53,7 @@ const generateIslandsPrompt = (request: CreateWorldRequest) => {
 };
 
 export async function generateWorld(request: CreateWorldRequest) {
-  const completion = await openAiClient.beta.chat.completions.parse({
+  const completion = await openAiClient.chat.completions.parse({
     model: "gpt-4o-mini",
     messages: [{ role: "user", content: generateIslandsPrompt(request) }],
     response_format: zodResponseFormat(
