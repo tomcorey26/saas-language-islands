@@ -1,51 +1,169 @@
-## zod
+# Islands of Language
 
-- `/client` - client specific schemas
-- `/contracts` - server contract schemas
-- `/models` - server models (1:1 with db)
+A modern language learning SaaS application that uses AI-powered spaced repetition flashcards to help users master new languages. Cards are organized into thematic "islands" within language-specific "decks" for a structured learning experience.
 
-## Useful links
+## Features
 
-- Shadcdn: https://shadcdn.com/
+- **AI-Powered Flashcard Generation**: Create contextual flashcards using OpenAI for real-world language scenarios
+- **Spaced Repetition System**: Smart review scheduling based on your performance
+- **Token-Based Pricing**: Flexible payment tiers (Starter, Pro, Premium) for generating content
+- **Multi-Language Support**: Learn multiple languages with dedicated decks
+- **Thematic Organization**: Group cards into islands (e.g., "Restaurant Conversations", "Travel Phrases")
+- **Secure Authentication**: Powered by Clerk for seamless user management
+- **Stripe Integration**: Secure token purchases with webhook support
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Database**: PostgreSQL with Drizzle ORM
+- **Authentication**: Clerk
+- **Payments**: Stripe
+- **AI**: OpenAI API
+- **UI**: Shadcn/ui components with Tailwind CSS
+- **Validation**: Zod schemas
+- **Testing**: Playwright (E2E)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Getting Started
 
-## Learn More
+### Prerequisites
 
-To learn more about Next.js, take a look at the following resources:
+- Node.js 18+ and npm
+- PostgreSQL database
+- Clerk account (for authentication)
+- Stripe account (for payments)
+- OpenAI API key
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Installation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Clone the repository:
 
-## Deploy on Vercel
+```bash
+git clone <repository-url>
+cd islands-of-language
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2. Install dependencies:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm install
+```
 
-# Choose translation language and target languages?
+3. Set up environment variables:
 
-Migration guide:
+   - Copy `.env.example` to `.env.local`
+   - Fill in required values (database, Clerk, Stripe, OpenAI)
 
-1. Generate migration
-2. Run migration
-3. Run seed
-4. What do i do if data has chagned for enum
-5. run in prod
+4. Set up the database:
 
-## How to create a user in db
+```bash
+npm run db:generate  # Generate migrations
+npm run db:migrate   # Apply migrations
+```
 
-- just migrate the prod db to dev db, bc the webhooks are pointing at prod
+5. Start the development server:
 
-How to test stripe webhooks
+```bash
+npm run dev
+```
 
-1. Run npm run stripe:webhook
-2. Add the webhook id to env file
-3. Run npm run stripe:webhook
-4. Run the app, then make a purchase using 424242 card
+6. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## Development Commands
+
+### Core Commands
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run lint` - Run ESLint
+- `npm run type-check` - Run TypeScript type checking
+- `npm run test` / `npm run test:e2e` - Run Playwright E2E tests
+
+### Database Commands
+
+- `npm run db:generate` - Generate Drizzle migrations
+- `npm run db:migrate` - Apply migrations to local database
+- `npm run db:migrate:prod` - Apply migrations to production
+- `npm run db:push` - Push schema changes directly (development only)
+- `npm run db:studio` - Open Drizzle Studio for local DB
+- `npm run db:studio:prod` - Open Drizzle Studio for production DB
+
+### Stripe Development
+
+- `npm run stripe:webhook` - Listen for Stripe webhooks locally
+
+## Project Structure
+
+```
+src/
+├── app/              # Next.js App Router pages and API routes
+├── components/       # Reusable UI components (Shadcn/ui)
+├── drizzle/         # Database schema and table definitions
+├── server/          # Server-side actions, database queries, API clients
+├── zod/             # Type-safe schemas
+│   ├── client/      # Client-specific schemas
+│   ├── contracts/   # API request/response schemas
+│   └── models/      # Database model schemas (1:1 with DB)
+├── data/            # Static configuration (languages, payment tiers)
+└── lib/             # Utility functions (spaced repetition, formatters)
+```
+
+## Database Schema
+
+- **Users**: Clerk integration with token balance and Stripe customer ID
+- **Decks**: Language-specific collections owned by users
+- **Islands**: Thematic groups within decks (e.g., "Restaurant Conversations")
+- **Cards**: Individual flashcards with spaced repetition metadata
+- **Purchases**: Token purchase transaction history
+
+## Testing Stripe Webhooks Locally
+
+1. Start the webhook listener:
+
+```bash
+npm run stripe:webhook
+```
+
+2. Copy the webhook signing secret to your `.env.local` file
+
+3. Restart the development server
+
+4. Make a test purchase using Stripe test card: `4242 4242 4242 4242`
+
+## Migration Guide
+
+1. Generate migration: `npm run db:generate`
+2. Review the generated SQL in `drizzle/` directory
+3. Apply migration: `npm run db:migrate` (local) or `npm run db:migrate:prod` (production)
+4. If enum values changed, manually update existing data as needed
+
+## Environment Variables
+
+This project uses `@t3-oss/env-nextjs` for type-safe environment configuration. Required variables include:
+
+- Database: `DATABASE_URL`
+- Clerk: `NEXT_PUBLIC_CLERK_*` keys
+- Stripe: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
+- OpenAI: `OPENAI_API_KEY`
+- reCAPTCHA: `RECAPTCHA_SECRET_KEY`
+
+See `.env.example` for the complete list.
+
+## Deployment
+
+The easiest way to deploy is using [Vercel](https://vercel.com):
+
+1. Push your code to GitHub
+2. Import the repository in Vercel
+3. Configure environment variables
+4. Run production migrations: `npm run db:migrate:prod`
+5. Deploy!
+
+Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Links
+
+- [Shadcn/ui Documentation](https://shadcdn.com/)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Drizzle ORM Documentation](https://orm.drizzle.team/)
+- [Clerk Documentation](https://clerk.com/docs)
