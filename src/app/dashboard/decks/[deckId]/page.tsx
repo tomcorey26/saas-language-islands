@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { DeckHero } from "@/app/dashboard/decks/[deckId]/_components/ui/DeckHero";
 import { EmptyState } from "@/app/dashboard/decks/[deckId]/_components/ui/EmptyState";
 import { CategoryTabs } from "@/app/dashboard/decks/[deckId]/_components/ui/CategoryTabs";
+import { ExportDeckDialog } from "@/app/dashboard/decks/[deckId]/_components/ui/ExportDeckDialog";
 import { getDeckWithCards } from "@/server/db/decks";
 import { DashboardPageLayout } from "@/app/dashboard/_components/DashboardPageLayout";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,7 @@ export default async function DeckPage({
               <span>Study</span>
             </Button>
           </Link>
+          <ExportDeckDialog deck={deck} />
           <Link href={`/dashboard/decks/${deck.id}?createIsland=true`}>
             <Button variant="default" className="flex items-center gap-2">
               <Sparkles className="h-5 w-5" />
