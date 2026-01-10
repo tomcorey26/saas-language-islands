@@ -15,7 +15,6 @@ import {
   MessageCircle,
   Loader2,
   ArrowLeft,
-  Plus,
   Clock,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -30,9 +29,16 @@ interface Conversation {
   createdAt: string;
 }
 
-export function ConversationPracticeMode() {
+interface ConversationPracticeModeProps {
+  view: "list" | "new";
+  onViewChange: (view: "list" | "new") => void;
+}
+
+export function ConversationPracticeMode({
+  view,
+  onViewChange,
+}: ConversationPracticeModeProps) {
   const router = useRouter();
-  const [view, setView] = useState<"list" | "new">("list");
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [targetLanguage, setTargetLanguage] = useState<string>("");
@@ -119,25 +125,6 @@ export function ConversationPracticeMode() {
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
       >
-        {/* Action Button */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="flex justify-end mb-6"
-        >
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button
-              onClick={() => setView("new")}
-              className="bg-purple-600 hover:bg-purple-700 text-white"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Chat
-            </Button>
-          </motion.div>
-        </motion.div>
-
-        {/* Conversations Grid */}
         <AnimatePresence mode="wait">
           {isLoading ? (
             <motion.div
@@ -190,7 +177,7 @@ export function ConversationPracticeMode() {
                 whileTap={{ scale: 0.98 }}
               >
                 <Button
-                  onClick={() => setView("new")}
+                  onClick={() => onViewChange("new")}
                   className="bg-purple-600 hover:bg-purple-700 text-white"
                 >
                   Start Your First Chat
@@ -265,7 +252,7 @@ export function ConversationPracticeMode() {
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3 }}
-          onClick={() => setView("list")}
+          onClick={() => onViewChange("list")}
           className="flex items-center gap-2 text-gray-500 hover:text-gray-900 mb-6 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />

@@ -1,7 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { DashboardPageLayout } from "../_components/DashboardPageLayout";
-import { ConversationPracticeMode } from "./_components/ConversationPracticeMode";
+import { PracticePageWrapper } from "./_components/PracticePageWrapper";
 
 export default async function PracticePage() {
   const { userId } = await auth();
@@ -10,12 +9,5 @@ export default async function PracticePage() {
     redirect("/sign-in");
   }
 
-  return (
-    <DashboardPageLayout
-      pageTitle="Conversation Practice"
-      backButtonHref="/dashboard"
-    >
-      <ConversationPracticeMode />
-    </DashboardPageLayout>
-  );
+  return <PracticePageWrapper />;
 }
