@@ -58,13 +58,21 @@ export function ConversationPracticeMode({
       const res = await fetch(`/api/conversation/list?offset=${offset}`);
       if (res.ok) {
         const data = await res.json();
+        console.log("Fetch response:", { offset, data });
         if (offset === 0) {
           setConversations(data.conversations);
+          console.log("Set conversations (initial):", data.conversations.length);
         } else {
-          setConversations((prev) => [...prev, ...data.conversations]);
+          setConversations((prev) => {
+            const updated = [...prev, ...data.conversations];
+            console.log("Appended conversations:", prev.length, "+", data.conversations.length, "=", updated.length);
+            return updated;
+          });
         }
         setHasMore(data.hasMore);
         setNextOffset(data.nextOffset);
+      } else {
+        console.error("Fetch failed with status:", res.status);
       }
     } catch (error) {
       console.error("Failed to fetch conversations:", error);
@@ -75,7 +83,8 @@ export function ConversationPracticeMode({
   }
 
   async function loadMore() {
-    if (!nextOffset || isLoadingMore) return;
+    console.log("loadMore called, nextOffset:", nextOffset, "isLoadingMore:", isLoadingMore);
+    if (nextOffset === null || isLoadingMore) return;
     setIsLoadingMore(true);
     await fetchConversations(nextOffset);
   }
@@ -109,27 +118,6 @@ export function ConversationPracticeMode({
   function openConversation(conversationId: string) {
     router.push(`/dashboard/practice/${conversationId}`);
   }
-
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.08,
-        delayChildren: 0.1,
-      },
-    },
-  } as const;
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { type: "spring" as const, stiffness: 300, damping: 24 },
-    },
-  };
 
   // ============================================
   // LIST VIEW
@@ -203,49 +191,60 @@ export function ConversationPracticeMode({
             </motion.div>
           ) : (
             <motion.div key="grid">
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-              >
-                {conversations.map((conv) => (
-                  <motion.button
-                    key={conv.id}
-                    variants={itemVariants}
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => openConversation(conv.id)}
-                    className="text-left p-5 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-purple-300 transition-colors"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <span
-                        className={cn(
-                          "px-2 py-1 text-xs font-medium rounded-full",
-                          conv.status === "active"
-                            ? "bg-green-100 text-green-700"
-                            : conv.status === "completed"
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-gray-100 text-gray-600"
-                        )}
-                      >
-                        {conv.status.charAt(0).toUpperCase() + conv.status.slice(1)}
-                      </span>
-                      <div className="flex items-center gap-1 text-sm text-gray-400">
-                        <Clock className="h-3.5 w-3.5" />
-                        {new Date(conv.createdAt).toLocaleDateString()}
+              {/* Conversation count */}
+              <p className="text-sm text-gray-500 mb-4">
+                Showing {conversations.length} conversation{conversations.length !== 1 ? "s" : ""}
+              </p>
+
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <AnimatePresence mode="popLayout">
+                  {conversations.map((conv, index) => (
+                    <motion.button
+                      key={conv.id}
+                      layout
+                      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{
+                        type: "spring" as const,
+                        stiffness: 300,
+                        damping: 24,
+                        delay: index < 9 ? index * 0.05 : 0, // Only stagger initial load
+                      }}
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => openConversation(conv.id)}
+                      className="text-left p-5 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-purple-300 transition-colors"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <span
+                          className={cn(
+                            "px-2 py-1 text-xs font-medium rounded-full",
+                            conv.status === "active"
+                              ? "bg-green-100 text-green-700"
+                              : conv.status === "completed"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-gray-100 text-gray-600"
+                          )}
+                        >
+                          {conv.status.charAt(0).toUpperCase() + conv.status.slice(1)}
+                        </span>
+                        <div className="flex items-center gap-1 text-sm text-gray-400">
+                          <Clock className="h-3.5 w-3.5" />
+                          {new Date(conv.createdAt).toLocaleDateString()}
+                        </div>
                       </div>
-                    </div>
-                    <p className="font-medium text-gray-900 line-clamp-2 mb-3">
-                      {conv.customPrompt}
-                    </p>
-                    <div className="flex items-center gap-1 text-sm text-gray-500">
-                      <MessageCircle className="h-4 w-4" />
-                      {conv.totalMessages} messages
-                    </div>
-                  </motion.button>
-                ))}
-              </motion.div>
+                      <p className="font-medium text-gray-900 line-clamp-2 mb-3">
+                        {conv.customPrompt}
+                      </p>
+                      <div className="flex items-center gap-1 text-sm text-gray-500">
+                        <MessageCircle className="h-4 w-4" />
+                        {conv.totalMessages} messages
+                      </div>
+                    </motion.button>
+                  ))}
+                </AnimatePresence>
+              </div>
 
               {/* Load More Button */}
               {hasMore && (
