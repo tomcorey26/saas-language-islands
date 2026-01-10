@@ -16,6 +16,7 @@ import {
   Loader2,
   ArrowLeft,
   Clock,
+  ChevronDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -41,6 +42,9 @@ export function ConversationPracticeMode({
   const router = useRouter();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [nextOffset, setNextOffset] = useState<number | null>(null);
   const [targetLanguage, setTargetLanguage] = useState<string>("");
   const [customPrompt, setCustomPrompt] = useState<string>("");
   const [isStarting, setIsStarting] = useState(false);
@@ -49,18 +53,31 @@ export function ConversationPracticeMode({
     fetchConversations();
   }, []);
 
-  async function fetchConversations() {
+  async function fetchConversations(offset = 0) {
     try {
-      const res = await fetch("/api/conversation/list");
+      const res = await fetch(`/api/conversation/list?offset=${offset}`);
       if (res.ok) {
         const data = await res.json();
-        setConversations(data.conversations);
+        if (offset === 0) {
+          setConversations(data.conversations);
+        } else {
+          setConversations((prev) => [...prev, ...data.conversations]);
+        }
+        setHasMore(data.hasMore);
+        setNextOffset(data.nextOffset);
       }
     } catch (error) {
       console.error("Failed to fetch conversations:", error);
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
     }
+  }
+
+  async function loadMore() {
+    if (!nextOffset || isLoadingMore) return;
+    setIsLoadingMore(true);
+    await fetchConversations(nextOffset);
   }
 
   async function startConversation() {
@@ -185,49 +202,78 @@ export function ConversationPracticeMode({
               </motion.div>
             </motion.div>
           ) : (
-            <motion.div
-              key="grid"
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-            >
-              {conversations.map((conv) => (
-                <motion.button
-                  key={conv.id}
-                  variants={itemVariants}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => openConversation(conv.id)}
-                  className="text-left p-5 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-purple-300 transition-colors"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <span
-                      className={cn(
-                        "px-2 py-1 text-xs font-medium rounded-full",
-                        conv.status === "active"
-                          ? "bg-green-100 text-green-700"
-                          : conv.status === "completed"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-gray-100 text-gray-600"
-                      )}
-                    >
-                      {conv.status.charAt(0).toUpperCase() + conv.status.slice(1)}
-                    </span>
-                    <div className="flex items-center gap-1 text-sm text-gray-400">
-                      <Clock className="h-3.5 w-3.5" />
-                      {new Date(conv.createdAt).toLocaleDateString()}
+            <motion.div key="grid">
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+              >
+                {conversations.map((conv) => (
+                  <motion.button
+                    key={conv.id}
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => openConversation(conv.id)}
+                    className="text-left p-5 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-purple-300 transition-colors"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <span
+                        className={cn(
+                          "px-2 py-1 text-xs font-medium rounded-full",
+                          conv.status === "active"
+                            ? "bg-green-100 text-green-700"
+                            : conv.status === "completed"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-gray-100 text-gray-600"
+                        )}
+                      >
+                        {conv.status.charAt(0).toUpperCase() + conv.status.slice(1)}
+                      </span>
+                      <div className="flex items-center gap-1 text-sm text-gray-400">
+                        <Clock className="h-3.5 w-3.5" />
+                        {new Date(conv.createdAt).toLocaleDateString()}
+                      </div>
                     </div>
-                  </div>
-                  <p className="font-medium text-gray-900 line-clamp-2 mb-3">
-                    {conv.customPrompt}
-                  </p>
-                  <div className="flex items-center gap-1 text-sm text-gray-500">
-                    <MessageCircle className="h-4 w-4" />
-                    {conv.totalMessages} messages
-                  </div>
-                </motion.button>
-              ))}
+                    <p className="font-medium text-gray-900 line-clamp-2 mb-3">
+                      {conv.customPrompt}
+                    </p>
+                    <div className="flex items-center gap-1 text-sm text-gray-500">
+                      <MessageCircle className="h-4 w-4" />
+                      {conv.totalMessages} messages
+                    </div>
+                  </motion.button>
+                ))}
+              </motion.div>
+
+              {/* Load More Button */}
+              {hasMore && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex justify-center mt-8"
+                >
+                  <Button
+                    variant="outline"
+                    onClick={loadMore}
+                    disabled={isLoadingMore}
+                    className="px-6"
+                  >
+                    {isLoadingMore ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="h-4 w-4 mr-2" />
+                        Load more
+                      </>
+                    )}
+                  </Button>
+                </motion.div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
