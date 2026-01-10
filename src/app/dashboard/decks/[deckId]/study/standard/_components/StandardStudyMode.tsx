@@ -14,24 +14,24 @@ import { CardDifficulty } from "@/data/cardDifficulties";
 import { SupportedLanguageCode } from "@/data/supportedLanguages";
 import { ArrowLeft, ArrowRight, Volume2 } from "lucide-react";
 import { FlashCard } from "@/zod/models/flashcard.model";
-import { updateCardAction } from "../../actions";
+import { updateCardAction } from "../../../actions";
 import { cn } from "@/lib/utils";
 import { speak } from "@/lib/textToSpeech";
 import { motion, AnimatePresence } from "framer-motion";
 
-interface StudyModeProps {
+interface StandardStudyModeProps {
   cards: FlashCard[];
   deckId: string;
   deckName: string;
   deckLanguage: SupportedLanguageCode;
 }
 
-export function StudyMode({
+export function StandardStudyMode({
   cards,
   deckId,
   deckName,
   deckLanguage,
-}: StudyModeProps) {
+}: StandardStudyModeProps) {
   const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
