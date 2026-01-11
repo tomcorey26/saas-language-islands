@@ -40,7 +40,12 @@ async function detectAndSaveErrors(
         hasError: z.boolean(),
         errors: z.array(
           z.object({
-            errorType: z.enum(["grammar", "vocabulary", "pronunciation", "context"]),
+            errorType: z.enum([
+              "grammar",
+              "vocabulary",
+              "pronunciation",
+              "context",
+            ]),
             errorText: z.string(),
             correction: z.string(),
             explanation: z.string(),
@@ -85,7 +90,7 @@ If there are no errors, return hasError: false with empty errors array.`,
  * Build conversation context with Hybrid Summary Buffer
  * Recent messages stay verbatim, older messages get summarized
  */
-async function buildConversationContext(conversationId: string) {
+async function buildConversationContext(conversationId: string, userId: string) {
   const messages = await getConversationMessages(conversationId);
 
   // If we have few messages, return all as-is
@@ -101,10 +106,7 @@ async function buildConversationContext(conversationId: string) {
   const olderMessages = messages.slice(0, -RAW_MESSAGE_WINDOW);
 
   // Get conversation for existing summary
-  const conversation = await getConversation(
-    conversationId,
-    messages[0].conversationId
-  );
+  const conversation = await getConversation(conversationId, userId);
   if (!conversation) {
     throw new Error("Conversation not found");
   }
@@ -122,13 +124,23 @@ async function buildConversationContext(conversationId: string) {
 
     // Generate new summary including old summary + older messages
     const summaryPrompt = conversation.conversationSummary
-      ? `Previous summary: ${conversation.conversationSummary}\n\nAdditional messages to summarize:\n${olderMessages.map((m) => `${m.role}: ${m.content}`).join("\n")}`
-      : `Summarize the following conversation:\n${olderMessages.map((m) => `${m.role}: ${m.content}`).join("\n")}`;
+      ? `Previous summary: ${
+          conversation.conversationSummary
+        }\n\nAdditional messages to summarize:\n${olderMessages
+          .map((m) => `${m.role}: ${m.content}`)
+          .join("\n")}`
+      : `Summarize the following conversation:\n${olderMessages
+          .map((m) => `${m.role}: ${m.content}`)
+          .join("\n")}`;
 
     const { object: summaryResponse } = await generateObject({
       model: openai("gpt-4o-mini"),
       schema: z.object({
-        summary: z.string().describe("Concise summary of the conversation so far, preserving key context and errors made"),
+        summary: z
+          .string()
+          .describe(
+            "Concise summary of the conversation so far, preserving key context and errors made"
+          ),
       }),
       prompt: `${summaryPrompt}\n\nProvide a concise summary that captures the key points, topics discussed, and any errors the user made. Keep it under 500 tokens.`,
     });
@@ -148,7 +160,10 @@ async function buildConversationContext(conversationId: string) {
 
     // Return summary + recent messages
     return [
-      { role: "system" as const, content: `Conversation summary: ${newSummary}` },
+      {
+        role: "system" as const,
+        content: `Conversation summary: ${newSummary}`,
+      },
       ...recentMessages.map((m) => ({
         role: m.role as "user" | "assistant" | "system",
         content: m.content,
@@ -190,9 +205,7 @@ export async function POST(req: Request) {
     const { conversationId, messages } = chatMessageRequestSchema.parse(body);
 
     // Extract the last user message
-    const lastUserMessage = messages
-      .filter((m) => m.role === "user")
-      .pop();
+    const lastUserMessage = messages.filter((m) => m.role === "user").pop();
 
     if (!lastUserMessage) {
       return new Response("No user message found", { status: 400 });
@@ -217,7 +230,7 @@ export async function POST(req: Request) {
     }
 
     // Build conversation context with Hybrid Summary Buffer
-    const context = await buildConversationContext(conversationId);
+    const context = await buildConversationContext(conversationId, userId);
 
     // Stream AI response
     const result = streamText({
@@ -259,8 +272,11 @@ IMPORTANT RULES:
           });
 
           // Detect errors in user's message (async, non-blocking)
-          detectAndSaveErrors(conversationId, userMessageRecord.id, userMessageText)
-            .catch((err) => console.error("Error detection failed:", err));
+          detectAndSaveErrors(
+            conversationId,
+            userMessageRecord.id,
+            userMessageText
+          ).catch((err) => console.error("Error detection failed:", err));
 
           // Update conversation stats
           await incrementConversationStats(conversationId, {
