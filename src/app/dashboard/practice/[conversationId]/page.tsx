@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getConversation } from "@/server/db/conversations";
 import { getConversationMessages } from "@/server/db/messages";
 import { DashboardPageLayout } from "../../_components/DashboardPageLayout";
-import { ChatView } from "../_components/ChatView";
+import { ChatViewWithErrorBoundary } from "../_components/ChatViewWithErrorBoundary";
 
 interface Props {
   params: Promise<{ conversationId: string }>;
@@ -39,7 +39,7 @@ export default async function ConversationPage({ params }: Props) {
       pageTitle={truncatedPrompt}
       backButtonHref="/dashboard/practice"
     >
-      <ChatView
+      <ChatViewWithErrorBoundary
         conversationId={conversationId}
         customPrompt={conversation.customPrompt}
         initialMessages={messages.map((m) => ({

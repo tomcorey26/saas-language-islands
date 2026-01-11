@@ -5,7 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Send, Loader2 } from "lucide-react";
+import { MessageCircle, Send, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -41,7 +41,7 @@ export function ChatView({
       createdAt: new Date(m.createdAt),
     }));
 
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, error, regenerate } = useChat({
     id: conversationId,
     messages: initialUIMessages,
     transport: new DefaultChatTransport({
@@ -49,6 +49,44 @@ export function ChatView({
       body: { conversationId },
     }),
   });
+
+  const renderStreamingError = () => {
+    if (!error) return null;
+
+    const isNetworkError =
+      error.message.includes("fetch") ||
+      error.message.includes("network") ||
+      error.message.includes("Failed to fetch");
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3"
+      >
+        <AlertCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-red-800">
+            {isNetworkError ? "Connection lost" : "Failed to send message"}
+          </p>
+          <p className="text-sm text-red-600 mt-0.5">
+            {isNetworkError
+              ? "Please check your internet connection and try again."
+              : "Something went wrong. Your message wasn't sent."}
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => regenerate()}
+          className="shrink-0 gap-1.5 border-red-200 text-red-700 hover:bg-red-100"
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+          Retry
+        </Button>
+      </motion.div>
+    );
+  };
 
   const isStreaming = status === "streaming";
 
@@ -93,6 +131,7 @@ export function ChatView({
       {/* Messages */}
       <div className="flex-1 min-h-0 overflow-y-auto bg-gray-50/50 rounded-xl border border-gray-200">
         <div className="px-4 py-6 space-y-4 max-w-3xl mx-auto">
+          {renderStreamingError()}
           <AnimatePresence mode="sync">
             {messages.length === 0 && (
               <motion.div
