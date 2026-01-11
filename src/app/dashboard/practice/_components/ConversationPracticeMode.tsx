@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { promptSuggestions } from "@/data/conversationPromptSuggestions";
+import { TOKEN_COSTS } from "@/data/tokenCosts";
 import {
   MessageCircle,
   Loader2,
@@ -410,7 +411,7 @@ export function ConversationPracticeMode({
                   Starting...
                 </>
               ) : (
-                "Start Conversation (5 tokens)"
+                `Start Conversation (${TOKEN_COSTS.CONVERSATION} tokens)`
               )}
             </Button>
           </motion.div>

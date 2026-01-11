@@ -6,8 +6,9 @@ import { UserTable } from "@/drizzle/user";
 import { ConversationTable } from "@/drizzle/conversation";
 import { MessageTable } from "@/drizzle/message";
 import { eq, sql, and, gte } from "drizzle-orm";
+import { TOKEN_COSTS } from "@/data/tokenCosts";
 
-const CONVERSATION_COST = 5;
+const CONVERSATION_COST = TOKEN_COSTS.CONVERSATION;
 
 export async function POST(req: Request) {
   try {
