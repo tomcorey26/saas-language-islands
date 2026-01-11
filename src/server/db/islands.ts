@@ -16,5 +16,5 @@ export async function deleteIsland(id: string) {
     .delete(IslandTable)
     .where(eq(IslandTable.id, id));
 
-  return rowCount > 0;
+  return (rowCount ?? 0) > 0;
 }

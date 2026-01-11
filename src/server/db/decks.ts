@@ -34,7 +34,7 @@ export async function updateDeck(
     .set(data)
     .where(and(eq(DeckTable.id, id), eq(DeckTable.clerkUserId, clerkUserId)));
 
-  return rowCount > 0;
+  return (rowCount ?? 0) > 0;
 }
 
 export async function getDeck(data: { id: string; clerkUserId: string }) {
@@ -70,5 +70,5 @@ export async function deleteDeck(data: { id: string; clerkUserId: string }) {
       )
     );
 
-  return rowCount > 0;
+  return (rowCount ?? 0) > 0;
 }
