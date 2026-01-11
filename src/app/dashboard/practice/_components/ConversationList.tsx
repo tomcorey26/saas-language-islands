@@ -3,14 +3,16 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Loader2, Clock, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { supportedLanguagesArray } from "@/data/supportedLanguages";
 
 interface Conversation {
   id: string;
   customPrompt: string;
-  status: string;
+  targetLanguage: string | null;
+  status: "active" | "completed" | "abandoned";
   totalMessages: number;
   errorCount: number;
   createdAt: string;
@@ -157,18 +159,18 @@ export function ConversationList({ onStartNew }: ConversationListProps) {
               className="text-left p-5 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-purple-300 transition-colors"
             >
               <div className="flex items-start justify-between mb-3">
-                <span
-                  className={cn(
-                    "px-2 py-1 text-xs font-medium rounded-full",
-                    conv.status === "active"
-                      ? "bg-green-100 text-green-700"
-                      : conv.status === "completed"
-                        ? "bg-blue-100 text-blue-700"
-                        : "bg-gray-100 text-gray-600"
+                <div className="flex items-center gap-2">
+                  <Badge variant={conv.status}>
+                    {conv.status.charAt(0).toUpperCase() + conv.status.slice(1)}
+                  </Badge>
+                  {conv.targetLanguage && (
+                    <Badge variant="language">
+                      {supportedLanguagesArray.find(
+                        (l) => l.name === conv.targetLanguage
+                      )?.formatName() ?? conv.targetLanguage}
+                    </Badge>
                   )}
-                >
-                  {conv.status.charAt(0).toUpperCase() + conv.status.slice(1)}
-                </span>
+                </div>
                 <div className="flex items-center gap-1 text-sm text-gray-400">
                   <Clock className="h-3.5 w-3.5" />
                   {new Date(conv.createdAt).toLocaleDateString()}

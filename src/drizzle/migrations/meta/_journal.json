@@ -8,6 +8,13 @@
       "when": 1768010854737,
       "tag": "0000_public_timeslip",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1768150020538,
+      "tag": "0001_fluffy_the_hood",
+      "breakpoints": true
     }
   ]
 }

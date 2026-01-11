@@ -69,6 +69,7 @@ IMPORTANT RULES:
         id: conversationId,
         clerkUserId: userId,
         customPrompt,
+        targetLanguage,
         tokensCharged: CONVERSATION_COST,
       });
 

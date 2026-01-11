@@ -25,6 +25,7 @@ export const ConversationTable = pgTable(
       .notNull()
       .references(() => UserTable.clerkUserId, { onDelete: "cascade" }),
     customPrompt: text("custom_prompt").notNull(),
+    targetLanguage: text("target_language"),
     status: ConversationStatusEnum("status").notNull().default("active"),
     tokensCharged: integer("tokens_charged").notNull().default(5),
     totalMessages: integer("total_messages").notNull().default(0),
