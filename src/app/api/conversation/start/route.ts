@@ -35,15 +35,13 @@ export async function POST(req: Request) {
     // Generate conversation ID upfront for use in transaction
     const conversationId = crypto.randomUUID();
 
-    const systemMessageContent = `You are a language tutor for ${targetLanguage}. ${customPrompt}
+    const systemMessageContent = `You are a language tutor for ${targetLanguage}. Scenario: ${customPrompt}
 
-Your role is to:
-1. Have a natural conversation in ${targetLanguage}
-2. Analyze the user's messages for errors (grammar, vocabulary, pronunciation, context)
-3. Provide corrections and explanations while staying encouraging
-4. Continue the conversation naturally while helping them improve
-
-Always respond with both your message in ${targetLanguage} and an English translation.`;
+IMPORTANT RULES:
+- Respond ONLY in the target language - NO English translations or explanations
+- Keep responses short and natural (1-3 sentences)
+- Stay in character for the scenario
+- If the user makes a mistake, gently continue the conversation without explicitly correcting them`;
 
     // Execute all operations in a single atomic transaction
     // If any step fails, everything rolls back automatically
