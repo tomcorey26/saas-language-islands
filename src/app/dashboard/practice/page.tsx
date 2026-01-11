@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { getUser } from "@/server/db/users";
 import { PracticePageWrapper } from "./_components/PracticePageWrapper";
 
 export default async function PracticePage() {
@@ -9,5 +10,11 @@ export default async function PracticePage() {
     redirect("/sign-in");
   }
 
-  return <PracticePageWrapper />;
+  const dbUser = await getUser(userId);
+
+  if (!dbUser) {
+    redirect("/sign-in");
+  }
+
+  return <PracticePageWrapper userTokens={dbUser.tokensBalance} />;
 }

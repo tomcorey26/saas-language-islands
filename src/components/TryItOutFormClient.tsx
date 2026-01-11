@@ -18,7 +18,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { supportedLanguagesArray } from "@/data/supportedLanguages";
+import { supportedLanguagesArraySorted } from "@/data/supportedLanguages";
 import { generateDemoFlashcards } from "@/server/actions/demo";
 import { DemoRequestSchema } from "@/zod/contracts/demo.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -81,7 +81,7 @@ export function TryItOutFormClient() {
   const watchedLanguage = form.watch("language");
   const watchedPrompt = form.watch("prompt");
 
-  const selectedLangData = supportedLanguagesArray.find(
+  const selectedLangData = supportedLanguagesArraySorted.find(
     (lang) => lang.languageCode === watchedLanguage
   );
 
@@ -118,7 +118,7 @@ export function TryItOutFormClient() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {supportedLanguagesArray.map((lang) => (
+                        {supportedLanguagesArraySorted.map((lang) => (
                           <SelectItem
                             key={lang.languageCode}
                             value={lang.languageCode}

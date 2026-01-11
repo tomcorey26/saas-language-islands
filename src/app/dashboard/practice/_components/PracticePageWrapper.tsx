@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { DashboardPageLayout } from "../../_components/DashboardPageLayout";
 import { ConversationPracticeMode } from "./ConversationPracticeMode";
 
-export function PracticePageWrapper() {
-  const router = useRouter();
+interface PracticePageWrapperProps {
+  userTokens: number;
+}
+
+export function PracticePageWrapper({ userTokens }: PracticePageWrapperProps) {
   const [view, setView] = useState<"list" | "new">("list");
 
   return (
@@ -32,6 +34,7 @@ export function PracticePageWrapper() {
       <ConversationPracticeMode
         view={view}
         onViewChange={setView}
+        userTokens={userTokens}
       />
     </DashboardPageLayout>
   );
