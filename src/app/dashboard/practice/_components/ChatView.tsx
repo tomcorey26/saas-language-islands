@@ -93,7 +93,7 @@ export function ChatView({
       {/* Messages */}
       <div className="flex-1 min-h-0 overflow-y-auto bg-gray-50/50 rounded-xl border border-gray-200">
         <div className="px-4 py-6 space-y-4 max-w-3xl mx-auto">
-          <AnimatePresence mode="popLayout">
+          <AnimatePresence mode="sync">
             {messages.length === 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
