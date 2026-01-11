@@ -81,6 +81,7 @@ export async function POST(request: NextRequest) {
       if (result.success && !result.alreadyFulfilled) {
         revalidatePath("/dashboard");
         revalidatePath("/dashboard/account");
+        revalidatePath("/dashboard/decks");
       }
 
       console.log(

@@ -4,6 +4,7 @@ import { streamObject } from "ai";
 import { getDeck } from "@/server/db/decks";
 import { deductTokensFromUser, getUser } from "@/server/db/users";
 import { flashcardSchema, useIslandRequestSchema } from "@/zod/contracts/islandStream.schema";
+import { revalidatePath } from "next/cache";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -64,6 +65,10 @@ export async function POST(req: Request) {
         if (!tokensDeducted && object && !error) {
           await deductTokensFromUser(userId, tokensRequired);
           tokensDeducted = true;
+
+          // Revalidate paths to update token balance in UI
+          revalidatePath("/dashboard");
+          revalidatePath(`/dashboard/decks/${deckId}`);
         }
       },
       onError: ({ error }) => {
