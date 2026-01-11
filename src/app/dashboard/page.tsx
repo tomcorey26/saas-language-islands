@@ -80,6 +80,37 @@ export default async function Dashboard() {
         {/* Placeholder for future pages */}
         <div className="p-6 h-48 rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition flex flex-col justify-between opacity-70">
           <div className="flex justify-between items-start">
+            <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 text-orange-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                />
+              </svg>
+            </div>
+            <span className="text-sm text-gray-500 font-medium">
+              Coming Soon
+            </span>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold mb-1">Statistics</h3>
+            <p className="text-gray-600">
+              View your learning progress and stats
+            </p>
+          </div>
+        </div>
+
+        {/* Placeholder for future pages */}
+        <div className="p-6 h-48 rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition flex flex-col justify-between opacity-70">
+          <div className="flex justify-between items-start">
             <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
