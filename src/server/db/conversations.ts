@@ -89,3 +89,20 @@ export async function incrementConversationStats(
       .where(eq(ConversationTable.id, conversationId));
   }
 }
+
+// Update the last analyzed message ID for a conversation
+export async function updateLastAnalyzedMessageId(
+  conversationId: string,
+  clerkUserId: string,
+  messageId: string
+) {
+  await db
+    .update(ConversationTable)
+    .set({ lastAnalyzedMessageId: messageId })
+    .where(
+      and(
+        eq(ConversationTable.id, conversationId),
+        eq(ConversationTable.clerkUserId, clerkUserId)
+      )
+    );
+}

@@ -42,6 +42,7 @@ export default async function ConversationPage({ params }: Props) {
       <ChatViewWithErrorBoundary
         conversationId={conversationId}
         customPrompt={conversation.customPrompt}
+        lastAnalyzedMessageId={conversation.lastAnalyzedMessageId ?? null}
         initialMessages={messages.map((m) => ({
           id: m.id,
           role: m.role as "user" | "assistant" | "system",

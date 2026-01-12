@@ -1,11 +1,19 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect, useMemo, useCallback } from "react";
+import { useForm } from "react-hook-form";
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Send, Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import {
+  MessageCircle,
+  Send,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
+  Sparkles,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -19,17 +27,34 @@ interface StoredMessage {
 interface ChatViewProps {
   conversationId: string;
   customPrompt: string;
+  lastAnalyzedMessageId: string | null;
   initialMessages: StoredMessage[];
+}
+
+interface ChatFormData {
+  message: string;
 }
 
 export function ChatView({
   conversationId,
   customPrompt,
+  lastAnalyzedMessageId: initialLastAnalyzedMessageId,
   initialMessages,
 }: ChatViewProps) {
-  const [input, setInput] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { isSubmitting },
+  } = useForm<ChatFormData>({
+    defaultValues: { message: "" },
+  });
+
+  const messageValue = watch("message");
 
   // Convert stored messages to UIMessage format for initial state
   const initialUIMessages: UIMessage[] = initialMessages
@@ -107,18 +132,106 @@ export function ChatView({
   }, [messages]);
 
   useEffect(() => {
-    inputRef.current?.focus();
+    textareaRef.current?.focus();
   }, []);
 
-  const handleSubmit = (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (input.trim() && !isStreaming) {
+  const onSubmit = (data: ChatFormData) => {
+    if (data.message.trim() && !isStreaming) {
       sendMessage({
         role: "user",
-        parts: [{ type: "text", text: input }],
+        parts: [{ type: "text", text: data.message }],
       });
-      setInput("");
+      reset();
     }
+  };
+
+  const isAnalysisRequest = useCallback((message: UIMessage): boolean => {
+    const text = getMessageText(message);
+    return message.role === "user" && text.startsWith("[ANALYSIS_REQUEST]");
+  }, []);
+
+  // Filter out analysis request messages for display and analysis tracking
+  const displayableMessages = useMemo(
+    () => messages.filter((m) => m.role !== "system" && !isAnalysisRequest(m)),
+    [messages, isAnalysisRequest]
+  );
+
+  // Find messages to analyze: those after the last analyzed message
+  const messagesToAnalyze = useMemo(() => {
+    if (!initialLastAnalyzedMessageId) {
+      // No previous analysis, all displayable messages are candidates
+      return displayableMessages;
+    }
+
+    // Find the index of the last analyzed message
+    const lastAnalyzedIndex = displayableMessages.findIndex(
+      (m) => m.id === initialLastAnalyzedMessageId
+    );
+
+    if (lastAnalyzedIndex === -1) {
+      // Last analyzed message not found (could be deleted), analyze all
+      return displayableMessages;
+    }
+
+    // Return messages after the last analyzed one
+    return displayableMessages.slice(lastAnalyzedIndex + 1);
+  }, [displayableMessages, initialLastAnalyzedMessageId]);
+
+  const hasNewMessagesToAnalyze = messagesToAnalyze.length > 0;
+
+  const handleAnalyze = async () => {
+    if (isStreaming || !hasNewMessagesToAnalyze) return;
+
+    const conversationForAnalysis = messagesToAnalyze
+      .map(
+        (m) =>
+          `${m.role === "user" ? "User" : "AI Tutor"}: ${getMessageText(m)}`
+      )
+      .join("\n\n");
+
+    // Get the last message ID to update the server after analysis
+    const lastMessageId =
+      displayableMessages[displayableMessages.length - 1]?.id;
+
+    // Send analysis request (will be hidden from display)
+    sendMessage({
+      role: "user",
+      parts: [
+        {
+          type: "text",
+          text: `[ANALYSIS_REQUEST]Please analyze my grammar, vocabulary, and language usage in the following conversation. Provide specific feedback on any mistakes I made, explain why they are incorrect, and suggest improvements. Please provide this response in English. Be encouraging but thorough:\n\n${conversationForAnalysis}`,
+        },
+      ],
+    });
+
+    // Update server with the last analyzed message ID
+    if (lastMessageId) {
+      try {
+        await fetch("/api/conversation/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            conversationId,
+            lastAnalyzedMessageId: lastMessageId,
+          }),
+        });
+      } catch (err) {
+        console.error("Failed to update analysis index:", err);
+      }
+    }
+  };
+
+  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(onSubmit)();
+    }
+  };
+
+  const handleTextareaInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
+    const target = e.target as HTMLTextAreaElement;
+    target.style.height = "52px";
+    target.style.height = `${Math.min(target.scrollHeight, 120)}px`;
   };
 
   return (
@@ -163,6 +276,8 @@ export function ChatView({
 
             {messages.map((message, i) => {
               if (message.role === "system") return null;
+              // Hide analysis request messages
+              if (isAnalysisRequest(message)) return null;
               const isUser = message.role === "user";
               const text = getMessageText(message);
 
@@ -176,7 +291,10 @@ export function ChatView({
                     stiffness: 400,
                     damping: 25,
                   }}
-                  className={cn("flex", isUser ? "justify-end" : "justify-start")}
+                  className={cn(
+                    "flex",
+                    isUser ? "justify-end" : "justify-start"
+                  )}
                 >
                   <div
                     className={cn(
@@ -186,7 +304,9 @@ export function ChatView({
                         : "bg-white border border-gray-200 text-gray-900"
                     )}
                   >
-                    <p className="whitespace-pre-wrap leading-relaxed">{text}</p>
+                    <p className="whitespace-pre-wrap leading-relaxed">
+                      {text}
+                    </p>
                   </div>
                 </motion.div>
               );
@@ -208,12 +328,20 @@ export function ChatView({
                     />
                     <motion.span
                       animate={{ y: [0, -4, 0] }}
-                      transition={{ duration: 0.6, repeat: Infinity, delay: 0.15 }}
+                      transition={{
+                        duration: 0.6,
+                        repeat: Infinity,
+                        delay: 0.15,
+                      }}
                       className="w-2 h-2 bg-gray-400 rounded-full"
                     />
                     <motion.span
                       animate={{ y: [0, -4, 0] }}
-                      transition={{ duration: 0.6, repeat: Infinity, delay: 0.3 }}
+                      transition={{
+                        duration: 0.6,
+                        repeat: Infinity,
+                        delay: 0.3,
+                      }}
                       className="w-2 h-2 bg-gray-400 rounded-full"
                     />
                   </div>
@@ -232,30 +360,42 @@ export function ChatView({
         transition={{ duration: 0.3, delay: 0.1 }}
         className="shrink-0 pt-4"
       >
-        <form onSubmit={handleSubmit} className="flex gap-3 max-w-3xl mx-auto">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex gap-3 max-w-3xl mx-auto"
+        >
           <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
+            {...register("message")}
+            ref={(e) => {
+              register("message").ref(e);
+              (textareaRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = e;
+            }}
             placeholder="Type your message..."
             className="flex-1 resize-none border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent min-h-[52px] max-h-[120px]"
             rows={1}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmit();
-              }
-            }}
-            onInput={(e) => {
-              const target = e.target as HTMLTextAreaElement;
-              target.style.height = "52px";
-              target.style.height = `${Math.min(target.scrollHeight, 120)}px`;
-            }}
+            onKeyDown={handleTextareaKeyDown}
+            onInput={handleTextareaInput}
           />
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
             <Button
+              type="button"
+              onClick={handleAnalyze}
+              disabled={isStreaming || !hasNewMessagesToAnalyze}
+              className="shrink-0 h-[52px] px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-xl disabled:opacity-50"
+              title={
+                hasNewMessagesToAnalyze
+                  ? "Analyze my conversation"
+                  : "No new messages to analyze"
+              }
+            >
+              Analyze
+              <Sparkles className="h-5 w-5" />
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
+            <Button
               type="submit"
-              disabled={isStreaming || !input.trim()}
+              disabled={isStreaming || !messageValue.trim() || isSubmitting}
               className="shrink-0 h-[52px] px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl"
             >
               {isStreaming ? (

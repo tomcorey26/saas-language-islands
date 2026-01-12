@@ -32,6 +32,7 @@ export const ConversationTable = pgTable(
     errorCount: integer("error_count").notNull().default(0),
     conversationSummary: text("conversation_summary"),
     summaryTokenCount: integer("summary_token_count").default(0),
+    lastAnalyzedMessageId: uuid("last_analyzed_message_id"),
     createdAt,
     updatedAt,
     completedAt: timestamp("completed_at"),

@@ -14,6 +14,7 @@ interface StoredMessage {
 interface ChatViewWithErrorBoundaryProps {
   conversationId: string;
   customPrompt: string;
+  lastAnalyzedMessageId: string | null;
   initialMessages: StoredMessage[];
 }
 
