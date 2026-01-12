@@ -77,6 +77,41 @@ export default async function Dashboard() {
           </div>
         </Link>
 
+        {/* Settings Card */}
+        <Link href="/dashboard/settings" className="group">
+          <div className="p-6 h-48 rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition flex flex-col justify-between group-hover:border-green-500">
+            <div className="flex justify-between items-start">
+              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6 text-green-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+                  />
+                </svg>
+              </div>
+              <span className="text-sm text-gray-500 font-medium">
+                Navigate
+              </span>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold mb-1 group-hover:text-green-600 transition">
+                Settings
+              </h3>
+              <p className="text-gray-600">
+                Customize your learning experience
+              </p>
+            </div>
+          </div>
+        </Link>
+
         {/* Placeholder for future pages */}
         <div className="p-6 h-48 rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition flex flex-col justify-between opacity-70">
           <div className="flex justify-between items-start">
@@ -105,35 +140,6 @@ export default async function Dashboard() {
             <p className="text-gray-600">
               View your learning progress and stats
             </p>
-          </div>
-        </div>
-
-        {/* Placeholder for future pages */}
-        <div className="p-6 h-48 rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition flex flex-col justify-between opacity-70">
-          <div className="flex justify-between items-start">
-            <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 text-green-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-                />
-              </svg>
-            </div>
-            <span className="text-sm text-gray-500 font-medium">
-              Coming Soon
-            </span>
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold mb-1">Settings</h3>
-            <p className="text-gray-600">Customize your learning experience</p>
           </div>
         </div>
       </div>

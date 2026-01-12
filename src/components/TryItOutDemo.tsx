@@ -10,7 +10,9 @@ export function TryItOutDemo() {
 
   // Generate random positions and delays for each language
   const bubbleData = supportedLanguagesArray.map((_, index) => ({
+    // eslint-disable-next-line react-hooks/purity
     topPosition: Math.random() * 90 + 5, // 5% to 95% from top
+    // eslint-disable-next-line react-hooks/purity
     animationDelay: Math.random() * -60, // Random delay between 0 and -60 seconds
     animationType: animationTypes[index % animationTypes.length],
   }));

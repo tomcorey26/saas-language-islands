@@ -40,6 +40,11 @@ export default async function Layout({
     }
   }
 
+  // If user hasn't completed onboarding (no base language set), redirect
+  if (!dbUser.baseLanguage) {
+    redirect("/onboarding");
+  }
+
   const userTokens = dbUser.tokensBalance;
 
   return (
