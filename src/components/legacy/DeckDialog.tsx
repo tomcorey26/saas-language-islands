@@ -21,7 +21,7 @@ import {
   CreateDeckRequest,
   CreateDeckRequestSchema,
 } from "@/zod/contracts/deck.schema";
-import { supportedLanguagesArray } from "@/data/supportedLanguages";
+import { supportedLanguagesArraySorted } from "@/data/supportedLanguages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import dynamic from "next/dynamic";
@@ -260,7 +260,7 @@ export default function DeckDialog({
                           <SelectValue placeholder="Add a language" />
                         </SelectTrigger>
                         <SelectContent>
-                          {supportedLanguagesArray.map((lang) => (
+                          {supportedLanguagesArraySorted.map((lang) => (
                             <SelectItem key={lang.name} value={lang.name}>
                               {lang.formatName()}
                             </SelectItem>

@@ -373,6 +373,10 @@ export const supportedLanguages = {
 
 export const supportedLanguagesArray = Object.values(supportedLanguages);
 
+export const supportedLanguagesArraySorted = [...supportedLanguagesArray].sort(
+  (a, b) => a.name.localeCompare(b.name)
+);
+
 export const supportedLanguageCodes = Object.values(supportedLanguages).map(
   (lang) => lang.languageCode
 ) as [SupportedLanguageCode];

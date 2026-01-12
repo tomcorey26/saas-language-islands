@@ -2,8 +2,11 @@ import { auth } from "@clerk/nextjs/server";
 import { openai } from "@ai-sdk/openai";
 import { streamObject } from "ai";
 import { getDeck } from "@/server/db/decks";
-import { deductTokensFromUser, getUser } from "@/server/db/users";
+import { addTokensToUser, getUser } from "@/server/db/users";
 import { flashcardSchema, useIslandRequestSchema } from "@/zod/contracts/islandStream.schema";
+import { db } from "@/drizzle/db";
+import { UserTable } from "@/drizzle/user";
+import { eq, sql, and, gte } from "drizzle-orm";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -17,6 +20,8 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const { deckId, prompt, count } = useIslandRequestSchema.parse(body);
+
+    const tokensRequired = count;
 
     // Verify deck ownership and get user data
     const [deck, user] = await Promise.all([
@@ -32,10 +37,8 @@ export async function POST(req: Request) {
       return new Response("User not found", { status: 404 });
     }
 
-    // Check if user has enough tokens
-    const tokensRequired = count;
+    // Pre-check for better UX error message
     const availableTokens = user.tokensBalance || 0;
-
     if (availableTokens < tokensRequired) {
       return new Response(
         `Insufficient tokens. You need ${tokensRequired} tokens but only have ${availableTokens}.`,
@@ -43,10 +46,28 @@ export async function POST(req: Request) {
       );
     }
 
-    // Track if tokens have been deducted to avoid double deduction
-    let tokensDeducted = false;
+    // Deduct tokens FIRST with balance guard (prevents race conditions)
+    const [deductionResult] = await db
+      .update(UserTable)
+      .set({
+        tokensBalance: sql`${UserTable.tokensBalance} - ${tokensRequired}`,
+      })
+      .where(
+        and(
+          eq(UserTable.clerkUserId, userId),
+          gte(UserTable.tokensBalance, tokensRequired)
+        )
+      )
+      .returning({ clerkUserId: UserTable.clerkUserId });
 
-    // Then stream the flashcards array
+    if (!deductionResult) {
+      return new Response(
+        `Insufficient tokens. You need ${tokensRequired} tokens to generate flashcards.`,
+        { status: 402 }
+      );
+    }
+
+    // Tokens secured - now stream the flashcards
     const result = streamObject({
       model: openai("gpt-4o-mini"),
       output: "array",
@@ -60,15 +81,15 @@ export async function POST(req: Request) {
       - Make them useful for conversation with a native speaker
       - Include a mix of questions and statements`,
       onFinish: async ({ object, error }) => {
-        // Only deduct tokens if generation completed successfully with valid object
-        if (!tokensDeducted && object && !error) {
-          await deductTokensFromUser(userId, tokensRequired);
-          tokensDeducted = true;
+        // If generation failed, refund the tokens
+        if (!object || error) {
+          console.error("AI generation failed, refunding tokens:", error);
+          await addTokensToUser(userId, tokensRequired);
         }
       },
-      onError: ({ error }) => {
-        console.error("AI generation error:", error);
-        // Don't deduct tokens if there's an error
+      onError: async ({ error }) => {
+        console.error("AI generation error, refunding tokens:", error);
+        await addTokensToUser(userId, tokensRequired);
       },
     });
 

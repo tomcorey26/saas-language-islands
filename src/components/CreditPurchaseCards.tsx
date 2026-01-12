@@ -98,11 +98,11 @@ export function CreditPurchaseCards() {
         if (data?.error) {
           console.error("Checkout session creation failed:", data);
           setErrorTier(tierKey);
-          
+
           // Show specific error messages based on the error type
           const errorTitle = getErrorTitle(data.message);
           const errorDescription = getErrorDescription(data.message);
-          
+
           toast({
             title: errorTitle,
             description: errorDescription,
@@ -123,7 +123,7 @@ export function CreditPurchaseCards() {
 
   const getErrorTitle = (message?: string): string => {
     if (!message) return "Checkout Error";
-    
+
     if (message.includes("sign in") || message.includes("signed in")) {
       return "Authentication Required";
     }
@@ -136,13 +136,13 @@ export function CreditPurchaseCards() {
     if (message.includes("payment tier")) {
       return "Configuration Error";
     }
-    
+
     return "Checkout Error";
   };
 
   const getErrorDescription = (message?: string): string => {
     if (!message) return "Unable to create checkout session. Please try again.";
-    
+
     // Return the actual message from the server, which is already user-friendly
     return message;
   };
@@ -153,7 +153,7 @@ export function CreditPurchaseCards() {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto p-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-5xl mx-auto p-6">
       {purchasableTiers.map(([tierKey, tier], index) => {
         const features = getTierSpecialFeatures(tierKey);
 

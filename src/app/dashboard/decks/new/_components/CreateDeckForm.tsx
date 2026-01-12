@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Smile } from "lucide-react";
 import { CreateDeckRequestSchema } from "@/zod/contracts/deck.schema";
-import { supportedLanguagesArray } from "@/data/supportedLanguages";
+import { supportedLanguagesArraySorted } from "@/data/supportedLanguages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
@@ -235,7 +235,7 @@ export function CreateDeckForm({
                         <SelectValue placeholder="Add a language" />
                       </SelectTrigger>
                       <SelectContent>
-                        {supportedLanguagesArray.map((lang) => (
+                        {supportedLanguagesArraySorted.map((lang) => (
                           <SelectItem
                             key={lang.languageCode}
                             value={lang.languageCode}

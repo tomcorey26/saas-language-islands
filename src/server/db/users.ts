@@ -52,9 +52,9 @@ export function deductTokensFromUser(
     .where(eq(UserTable.clerkUserId, clerkUserId));
 }
 
-export function deleteUser(clerkUserId: string) {
-  return db.batch([
-    db.delete(UserTable).where(eq(UserTable.clerkUserId, clerkUserId)),
-    db.delete(DeckTable).where(eq(DeckTable.clerkUserId, clerkUserId)),
-  ]);
+export async function deleteUser(clerkUserId: string) {
+  await db.transaction(async (tx) => {
+    await tx.delete(DeckTable).where(eq(DeckTable.clerkUserId, clerkUserId));
+    await tx.delete(UserTable).where(eq(UserTable.clerkUserId, clerkUserId));
+  });
 }
