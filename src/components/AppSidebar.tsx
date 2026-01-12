@@ -48,10 +48,9 @@ const items = [
   // },
   {
     title: "Settings",
-    url: "#",
+    url: "/dashboard/settings",
     icon: Settings,
-    disabled: true,
-    comingSoon: true,
+    disabled: false,
   },
 ];
 

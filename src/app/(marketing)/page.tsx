@@ -8,8 +8,16 @@ import { PricingCard } from "@/components/marketing/PricingCard";
 import { SimpleFAQ } from "@/components/marketing/FAQSection";
 import { CTASection } from "@/components/marketing/CTASection";
 import { FAQ_DATA, UI_TEXT } from "@/data/marketing";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export default async function Home() {
+  const { userId } = await auth();
+
+  if (userId) {
+    redirect("/dashboard");
+  }
+
   return (
     <>
       <DemoErrorBoundary>

@@ -9,53 +9,32 @@ import {
 import { CreateIslandRequest } from "@/zod/contracts/island.schema";
 import { z } from "zod";
 import { SupportedLanguageCode } from "@/data/supportedLanguages";
-
-// Learn AI SDK
+import {
+  generateWorldPrompt,
+  generateIslandFlashcardsPrompt,
+  DEFAULT_BASE_LANGUAGE,
+} from "@/data/prompts";
 
 const openAiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const generateIslandsPrompt = (request: CreateWorldRequest) => {
-  return `
-  The user has selected filled out a form related to with their name, occupation, and interests, and you need to generate flashcards of useful sentences 
-  that the user can study to become conversant in ${
-    request.language
-  }. The sentence field is english, and the translation field is ${
-    request.language
-  }.
-
-
-  Here is the user's form data:
-  ${JSON.stringify(request)} 
-
-  List of things you must do:
-  - DO NOT Generate flashcards for fields that the user has not selected, just return an empty array for that category
-  - Generate 5 flashcards using the user's name: ${
-    request.name
-  } for the introduction category
-  - Generate 5 flashcards using the user's occupation: ${
-    request.occupation
-  } for the occupation category
-  - Generate 5 flashcards using the user's location: ${
-    request.location
-  } for the location category
-  - Generate 5 flashcards for each interest that the user has selected: ${request.interests.join(
-    ", "
-  )}
-  -  Generate 5 flashcards for each scenario that the user has selected: ${request.commonScenarios.join(
-    ", "
-  )}
-  - Make sure the flashcards are relevant to the user's form data and that they don't all begin with I
-  - Make sure that the sentences generated are practical and useful for having a conversation with someone in ${
-    request.language
-  }.
-  - Make sure that at least 1 flashcard is a question that the user can ask, and at least 1 flashcard is a statement that the user can make.
-  `;
+type CreateWorldRequestWithBaseLanguage = CreateWorldRequest & {
+  baseLanguage?: SupportedLanguageCode;
 };
 
-export async function generateWorld(request: CreateWorldRequest) {
+export async function generateWorld(request: CreateWorldRequestWithBaseLanguage) {
+  const prompt = generateWorldPrompt({
+    targetLanguage: request.language as SupportedLanguageCode,
+    baseLanguage: request.baseLanguage ?? DEFAULT_BASE_LANGUAGE,
+    name: request.name,
+    occupation: request.occupation,
+    location: request.location,
+    interests: request.interests,
+    commonScenarios: request.commonScenarios,
+  });
+
   const completion = await openAiClient.chat.completions.parse({
     model: "gpt-4o-mini",
-    messages: [{ role: "user", content: generateIslandsPrompt(request) }],
+    messages: [{ role: "user", content: prompt }],
     response_format: zodResponseFormat(
       CreateWorldResponseSchema,
       "world_response"
@@ -73,22 +52,8 @@ export async function generateWorld(request: CreateWorldRequest) {
 
 type CreateIslandRequestWithLanguage = CreateIslandRequest & {
   language: SupportedLanguageCode;
+  baseLanguage?: SupportedLanguageCode;
 };
-
-function generateFlashcardsIslandPrompt(
-  request: CreateIslandRequestWithLanguage
-) {
-  const translationLanguage = request.language;
-
-  return `You are a helpful assistant that generates flashcards that are useful for a conversation with a native speaker. 
-  You will generate a sentence in english, for the phrase field, and the translation field will be the translation of the sentence in ${translationLanguage}.
-  The flashcards should be relevant to the user's prompt: ${request.prompt}.
-  The flashcards should be ${request.count} flashcards.
-  Please make sure that the flashcards are relevant to the user's prompt and that they are useful for a conversation with a native speaker of ${translationLanguage}.
-  
-  Additionally, please generate a short, descriptive name (2-4 words) for this collection of flashcards based on the prompt and content. This name should be concise and capture the essence of what these flashcards cover.
-  `;
-}
 
 const FlashcardIslandSchema = z.object({
   island: z.array(
@@ -103,10 +68,17 @@ const FlashcardIslandSchema = z.object({
 export async function generateFlashcardsIsland(
   request: CreateIslandRequestWithLanguage
 ) {
+  const prompt = generateIslandFlashcardsPrompt({
+    targetLanguage: request.language,
+    baseLanguage: request.baseLanguage ?? DEFAULT_BASE_LANGUAGE,
+    prompt: request.prompt,
+    count: request.count,
+  });
+
   const result = await generateObject({
     model: openai("gpt-4o-mini"),
     schema: FlashcardIslandSchema,
-    prompt: generateFlashcardsIslandPrompt(request),
+    prompt,
   });
 
   return result.object;
@@ -115,10 +87,17 @@ export async function generateFlashcardsIsland(
 export function streamFlashcardsIsland(
   request: CreateIslandRequestWithLanguage
 ) {
+  const prompt = generateIslandFlashcardsPrompt({
+    targetLanguage: request.language,
+    baseLanguage: request.baseLanguage ?? DEFAULT_BASE_LANGUAGE,
+    prompt: request.prompt,
+    count: request.count,
+  });
+
   const result = streamObject({
     model: openai("gpt-4o-mini"),
     schema: FlashcardIslandSchema,
-    prompt: generateFlashcardsIslandPrompt(request),
+    prompt,
   });
 
   return result;

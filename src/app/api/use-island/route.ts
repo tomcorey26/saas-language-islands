@@ -7,6 +7,8 @@ import { flashcardSchema, useIslandRequestSchema } from "@/zod/contracts/islandS
 import { db } from "@/drizzle/db";
 import { UserTable } from "@/drizzle/user";
 import { eq, sql, and, gte } from "drizzle-orm";
+import { generateStreamIslandPrompt, DEFAULT_BASE_LANGUAGE } from "@/data/prompts";
+import { SupportedLanguageCode } from "@/data/supportedLanguages";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -67,19 +69,23 @@ export async function POST(req: Request) {
       );
     }
 
+    // Get user's base language for prompt generation
+    const baseLanguage = (user.baseLanguage as SupportedLanguageCode) ?? DEFAULT_BASE_LANGUAGE;
+
+    // Generate prompt using centralized prompts file
+    const promptContent = generateStreamIslandPrompt({
+      targetLanguage: deck.language as SupportedLanguageCode,
+      baseLanguage,
+      prompt,
+      count,
+    });
+
     // Tokens secured - now stream the flashcards
     const result = streamObject({
       model: openai("gpt-4o-mini"),
       output: "array",
       schema: flashcardSchema,
-      prompt: `Generate exactly ${count} flashcards for learning ${deck.language}. The flashcards should be based on this prompt: ${prompt}
-
-      Requirements:
-      - The phrase field should be in English
-      - The translation field should be in ${deck.language}
-      - Make the flashcards relevant to the prompt
-      - Make them useful for conversation with a native speaker
-      - Include a mix of questions and statements`,
+      prompt: promptContent,
       onFinish: async ({ object, error }) => {
         // If generation failed, refund the tokens
         if (!object || error) {

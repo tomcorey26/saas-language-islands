@@ -28,9 +28,9 @@ This is a language learning SaaS application built with Next.js 15, featuring sp
 ### Database Commands
 
 - `npm run db:generate` - Generate Drizzle migrations
-- `npm run db:migrate` - Apply migrations to local database
-- `npm run db:migrate:prod` - Apply migrations to production
-- `npm run db:push` - Push schema changes directly (dev)
+- `npm run db:migrate` - Apply migrations to local database. Ask the user to do this for you
+- `npm run db:migrate:prod` - Apply migrations to production. Ask the user to do this for you
+- `npm run db:push` - Push schema changes directly (dev). Ask the user to do this for you
 - `npm run db:studio` - Open Drizzle Studio for local DB
 - `npm run db:studio:prod` - Open Drizzle Studio for production DB
 
@@ -41,6 +41,7 @@ This is a language learning SaaS application built with Next.js 15, featuring sp
 ## Architecture Overview
 
 ### Database Schema (Drizzle)
+
 - **Users**: Clerk integration with token balance and Stripe customer ID
 - **Decks**: Language-specific collections owned by users
 - **Islands**: Thematic groups within decks (e.g., "Restaurant Conversations")

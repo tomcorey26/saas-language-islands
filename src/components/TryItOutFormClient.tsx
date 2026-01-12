@@ -125,7 +125,6 @@ export function TryItOutFormClient() {
                           >
                             <span className="flex items-center gap-2">
                               {lang.flag}
-                              <span className="text-xl"></span>
                               <span>{lang.name}</span>
                             </span>
                           </SelectItem>

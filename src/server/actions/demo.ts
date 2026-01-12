@@ -11,10 +11,8 @@ import {
   DemoResponse,
   DemoResponseSchema,
 } from "@/zod/contracts/demo.schema";
-import {
-  SupportedLanguageCode,
-  supportedLanguages,
-} from "@/data/supportedLanguages";
+import { SupportedLanguageCode } from "@/data/supportedLanguages";
+import { generateDemoFlashcardsPrompt } from "@/data/prompts";
 
 const openAiClient = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -79,34 +77,6 @@ function checkRateLimit(identifier: string): {
   return { allowed: true };
 }
 
-function generateDemoPrompt(
-  userPrompt: string,
-  language: SupportedLanguageCode
-): string {
-  const targetLanguage = supportedLanguages[language].name;
-
-  if (!targetLanguage) {
-    throw new Error(`Language ${language} not supported`);
-  }
-
-  return `You are creating sample flashcards for a language learning demo. 
-  Generate exactly 5 flashcards based on this scenario: "${userPrompt}" for learning ${targetLanguage}.
-  
-  Rules:
-  - Each flashcard should have a "phrase" in English and "translation" in ${targetLanguage} The 
-  phrase field should always be in English, not ${targetLanguage}. And the translation field should always be in ${targetLanguage}.
-  - Make the flashcards practical and useful for the scenario
-  - Include a mix of statements, questions, and common expressions
-  - Keep phrases conversational and realistic
-  - Ensure variety in the types of phrases (greetings, questions, responses, etc.)
-  
-  Example scenario: "Ordering coffee in Spanish"
-  Should produce flashcards like:
-  - "Can I have a coffee, please?" → "¿Puedo tomar un café, por favor?"
-  - "How much does it cost?" → "¿Cuánto cuesta?"
-  - etc.`;
-}
-
 export async function generateDemoFlashcards(
   prompt: string,
   language: SupportedLanguageCode
@@ -118,7 +88,10 @@ export async function generateDemoFlashcards(
 
   try {
     // Validate input
-    const validation = DemoRequestSchema.safeParse({ prompt, language });
+    const validation = DemoRequestSchema.safeParse({
+      prompt,
+      language,
+    });
     if (!validation.success) {
       return {
         success: false,
@@ -159,6 +132,11 @@ export async function generateDemoFlashcards(
     }
 
     // Generate flashcards using OpenAI
+    const promptContent = generateDemoFlashcardsPrompt({
+      targetLanguage: validation.data.language,
+      userPrompt: validation.data.prompt,
+    });
+
     const completion = await openAiClient.chat.completions.parse({
       model: "gpt-4o-mini",
       messages: [
@@ -169,10 +147,7 @@ export async function generateDemoFlashcards(
         },
         {
           role: "user",
-          content: generateDemoPrompt(
-            validation.data.prompt,
-            validation.data.language
-          ),
+          content: promptContent,
         },
       ],
       response_format: zodResponseFormat(DemoResponseSchema, "demo_response"),
