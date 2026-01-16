@@ -25,14 +25,14 @@ export function CreditPurchaseCards() {
 
   // Filter out the free tier for purchase display
   const purchasableTiers = Object.entries(paymentTiers).filter(
-    ([, tier]) => tier.priceInCents > 0
+    ([, tier]) => tier.priceInCents > 0,
   );
 
   const formatPrice = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 
   const calculatePerGenerationCost = (
     priceInCents: number,
-    generationCount: number
+    generationCount: number,
   ) => {
     const costPer = priceInCents / 100 / generationCount;
     if (costPer >= 0.01) {
@@ -40,7 +40,7 @@ export function CreditPurchaseCards() {
     } else {
       // For very small amounts, show as "X generations per dollar"
       const generationsPerDollar = Math.floor(
-        generationCount / (priceInCents / 100)
+        generationCount / ((priceInCents + 1) / 100),
       );
       return `${generationsPerDollar} flashcard generations per $1`;
     }
@@ -209,7 +209,7 @@ export function CreditPurchaseCards() {
                 <p className="text-muted-foreground mb-8 text-sm">
                   {calculatePerGenerationCost(
                     tier.priceInCents,
-                    tier.generationCount
+                    tier.generationCount,
                   )}
                 </p>
 

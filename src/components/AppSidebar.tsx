@@ -34,13 +34,13 @@ const items = [
     icon: User,
     disabled: false,
   },
-  {
-    title: "Stats",
-    url: "#",
-    icon: BarChart,
-    disabled: true,
-    comingSoon: true,
-  },
+  // {
+  //   title: "Stats",
+  //   url: "#",
+  //   icon: BarChart,
+  //   disabled: true,
+  //   comingSoon: true,
+  // },
   // {
   //   title: "Search",
   //   url: "#",
@@ -80,11 +80,6 @@ export function AppSidebar({ userTokens }: AppSidebarProps) {
                     >
                       <item.icon />
                       <span>{item.title}</span>
-                      {item.comingSoon && (
-                        <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-md">
-                          Coming Soon
-                        </span>
-                      )}
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

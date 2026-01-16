@@ -40,7 +40,7 @@ export default async function DeckPage({
       backButtonHref="/dashboard/decks"
       actions={
         <>
-          <Link href={`/dashboard/decks/${deck.id}/study`}>
+          <Link href={`/dashboard/decks/${deck.id}/study/standard`}>
             <Button
               variant="outline"
               className="flex items-center gap-2 rounded-lg text-base"

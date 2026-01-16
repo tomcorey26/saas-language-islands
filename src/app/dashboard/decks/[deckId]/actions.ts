@@ -16,9 +16,13 @@ import {
   deleteIsland as deleteIslandDb,
 } from "@/server/db/islands";
 import {
+  ReviewCardRequest,
+  ReviewCardRequestSchema,
   UpdateCardRequest,
   UpdateCardRequestSchema,
 } from "@/zod/contracts/card.schema";
+import { calculateNextReview } from "@/lib/spaced-repetition";
+import { updateCardReview } from "@/server/db/cards";
 import {
   CreateIslandRequest,
   CreateIslandRequestSchema,
@@ -256,4 +260,42 @@ export async function updateCardAction(
     error: false,
     message: "Card updated successfully",
   };
+}
+
+export async function reviewCardAction(
+  unsafeData: ReviewCardRequest
+): Promise<{ error: boolean; message: string }> {
+  const { userId } = await auth();
+  if (!userId) {
+    return { error: true, message: "Not authenticated" };
+  }
+
+  const { success, data } = ReviewCardRequestSchema.safeParse(unsafeData);
+  if (!success) {
+    return { error: true, message: "Invalid request data" };
+  }
+
+  const { cardId, quality } = data;
+
+  // Get card and verify ownership
+  const card = await getCardWithDeckDb(cardId);
+  if (!card) {
+    return { error: true, message: "Card not found" };
+  }
+
+  if (card.deck.clerkUserId !== userId) {
+    return { error: true, message: "Unauthorized" };
+  }
+
+  // Calculate next review using SM-2
+  const srData = calculateNextReview(quality, {
+    interval: card.interval,
+    easeFactor: card.easeFactor,
+    reviewCount: card.reviewCount,
+  });
+
+  // Update the card
+  await updateCardReview(cardId, srData);
+
+  return { error: false, message: "Review recorded" };
 }

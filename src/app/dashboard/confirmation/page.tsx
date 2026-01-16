@@ -4,13 +4,13 @@ import { fulfillCheckoutSession } from "@/server/actions/stripe";
 import { Button } from "@/components/ui/button";
 import {
   AlertTriangle,
-  CheckCircle,
   RefreshCw,
   MessageCircle,
   Home,
   ShoppingCart,
 } from "lucide-react";
 import { getRecoveryAction } from "@/lib/stripe";
+import { SuccessContent } from "./SuccessContent";
 
 interface ConfirmationPageProps {
   searchParams: Promise<{
@@ -42,32 +42,35 @@ export default async function ConfirmationPage({
     const recovery = getRecoveryAction(fulfillmentResult.error);
 
     return (
-      <div className="container mx-auto py-8">
-        <div className="max-w-md mx-auto text-center">
-          <div className="mb-6">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <AlertTriangle className="w-8 h-8 text-red-600" />
+      <div className="min-h-[80vh] flex items-center justify-center px-4">
+        <div className="max-w-sm w-full">
+          <div className="flex justify-center mb-6">
+            <div className="w-20 h-20 bg-gradient-to-br from-red-400 to-rose-500 rounded-full flex items-center justify-center shadow-lg shadow-red-500/30">
+              <AlertTriangle className="w-10 h-10 text-white" strokeWidth={2.5} />
             </div>
+          </div>
+
+          <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
               {fulfillmentResult.error || "Payment Processing Error"}
             </h1>
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-500 text-sm">
               {fulfillmentResult.details ||
                 "There was an issue processing your payment."}
             </p>
           </div>
 
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-800 text-sm">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+            <p className="text-amber-800 text-sm text-center">
               Don&apos;t worry - if your payment went through, you won&apos;t be
-              charged again. We&apos;ll help you resolve this issue.
+              charged again.
             </p>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             {recovery.primaryAction === "retry" && (
               <a href={`/dashboard/purchase?session_id=${sessionId}`}>
-                <Button className="w-full" variant="default">
+                <Button className="w-full h-11" variant="default">
                   <RefreshCw className="w-4 h-4 mr-2" />
                   {recovery.primaryLabel}
                 </Button>
@@ -76,7 +79,7 @@ export default async function ConfirmationPage({
 
             {recovery.primaryAction === "new_purchase" && (
               <a href="/dashboard/buy">
-                <Button className="w-full" variant="default">
+                <Button className="w-full h-11" variant="default">
                   <ShoppingCart className="w-4 h-4 mr-2" />
                   {recovery.primaryLabel}
                 </Button>
@@ -84,7 +87,7 @@ export default async function ConfirmationPage({
             )}
 
             {recovery.primaryAction === "contact_support" && (
-              <Button className="w-full" variant="default">
+              <Button className="w-full h-11" variant="default">
                 <MessageCircle className="w-4 h-4 mr-2" />
                 {recovery.primaryLabel}
               </Button>
@@ -92,7 +95,7 @@ export default async function ConfirmationPage({
 
             {recovery.primaryAction === "wait" && (
               <a href={`/dashboard/purchase?session_id=${sessionId}`}>
-                <Button className="w-full" variant="default">
+                <Button className="w-full h-11" variant="default">
                   <RefreshCw className="w-4 h-4 mr-2" />
                   {recovery.primaryLabel}
                 </Button>
@@ -102,7 +105,7 @@ export default async function ConfirmationPage({
             {recovery.secondaryAction && (
               <>
                 {recovery.secondaryAction === "contact_support" && (
-                  <Button className="w-full" variant="outline">
+                  <Button className="w-full h-11" variant="outline">
                     <MessageCircle className="w-4 h-4 mr-2" />
                     {recovery.secondaryLabel}
                   </Button>
@@ -110,7 +113,7 @@ export default async function ConfirmationPage({
 
                 {recovery.secondaryAction === "account" && (
                   <a href="/dashboard/account">
-                    <Button className="w-full" variant="outline">
+                    <Button className="w-full h-11" variant="outline">
                       {recovery.secondaryLabel}
                     </Button>
                   </a>
@@ -118,7 +121,7 @@ export default async function ConfirmationPage({
 
                 {recovery.secondaryAction === "dashboard" && (
                   <a href="/dashboard">
-                    <Button className="w-full" variant="outline">
+                    <Button className="w-full h-11" variant="outline">
                       <Home className="w-4 h-4 mr-2" />
                       {recovery.secondaryLabel}
                     </Button>
@@ -132,48 +135,5 @@ export default async function ConfirmationPage({
     );
   }
 
-  return (
-    <div className="container mx-auto py-8">
-      <div className="max-w-md mx-auto text-center">
-        <div className="mb-6">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="w-8 h-8 text-green-600" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Payment Successful!
-          </h1>
-          <p className="text-gray-600">
-            Your tokens have been added to your account.
-          </p>
-        </div>
-
-        {fulfillmentResult.tokensAdded && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p className="text-blue-800 font-medium">
-              🎉 {fulfillmentResult.tokensAdded.toLocaleString()} tokens added
-              to your account!
-            </p>
-          </div>
-        )}
-
-        <div className="space-y-3">
-          <a href="/dashboard">
-            <Button className="w-full" size="lg">
-              Go to Dashboard
-            </Button>
-          </a>
-          <a href="/create">
-            <Button className="w-full" variant="outline" size="lg">
-              Start Creating Islands
-            </Button>
-          </a>
-          <a href="/dashboard/buy">
-            <Button className="w-full" variant="ghost">
-              Buy More Tokens
-            </Button>
-          </a>
-        </div>
-      </div>
-    </div>
-  );
+  return <SuccessContent tokensAdded={fulfillmentResult.tokensAdded} />;
 }

@@ -41,7 +41,7 @@ export default async function Dashboard() {
                 </svg>
               </div>
               <span className="text-sm text-gray-500 font-medium">
-                Navigate
+                {/* Navigate */}
               </span>
             </div>
             <div>
@@ -63,7 +63,7 @@ export default async function Dashboard() {
                 <MessageCircle className="h-6 w-6 text-purple-600" />
               </div>
               <span className="text-sm text-gray-500 font-medium">
-                Practice
+                {/* Navigate */}
               </span>
             </div>
             <div>
@@ -98,7 +98,7 @@ export default async function Dashboard() {
                 </svg>
               </div>
               <span className="text-sm text-gray-500 font-medium">
-                Navigate
+                {/* Navigate */}
               </span>
             </div>
             <div>
@@ -113,7 +113,7 @@ export default async function Dashboard() {
         </Link>
 
         {/* Placeholder for future pages */}
-        <div className="p-6 h-48 rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition flex flex-col justify-between opacity-70">
+        {/* <div className="p-6 h-48 rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition flex flex-col justify-between opacity-70">
           <div className="flex justify-between items-start">
             <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
               <svg
@@ -141,7 +141,7 @@ export default async function Dashboard() {
               View your learning progress and stats
             </p>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Quick Stats */}

@@ -9,6 +9,7 @@ import {
   integer,
   pgEnum,
   pgTable,
+  timestamp,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -32,10 +33,18 @@ export const CardTable = pgTable(
     translation: varchar("translation", { length: 500 }).notNull(),
     difficulty: DifficultyEnum("difficulty").notNull().default("again"),
     position: integer("position").notNull(),
+    // Spaced repetition fields
+    nextReviewDate: timestamp("next_review_date", { withTimezone: true }), // null = new card
+    interval: integer("interval").notNull().default(0), // days
+    reviewCount: integer("review_count").notNull().default(0),
+    easeFactor: integer("ease_factor").notNull().default(250), // SM-2 factor × 100
     createdAt,
     updatedAt,
   },
-  (t) => [index("cards.deck_id_index").on(t.deckId)]
+  (t) => [
+    index("cards.deck_id_index").on(t.deckId),
+    index("cards.deck_id_next_review_index").on(t.deckId, t.nextReviewDate),
+  ]
 );
 
 export const cardRelations = relations(CardTable, ({ one }) => ({
