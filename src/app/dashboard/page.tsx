@@ -41,7 +41,7 @@ export default async function Dashboard() {
                 </svg>
               </div>
               <span className="text-sm text-gray-500 font-medium">
-                Navigate
+                {/* Navigate */}
               </span>
             </div>
             <div>
@@ -63,7 +63,7 @@ export default async function Dashboard() {
                 <MessageCircle className="h-6 w-6 text-purple-600" />
               </div>
               <span className="text-sm text-gray-500 font-medium">
-                Practice
+                {/* Navigate */}
               </span>
             </div>
             <div>
@@ -98,7 +98,7 @@ export default async function Dashboard() {
                 </svg>
               </div>
               <span className="text-sm text-gray-500 font-medium">
-                Navigate
+                {/* Navigate */}
               </span>
             </div>
             <div>
