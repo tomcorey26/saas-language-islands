@@ -18,13 +18,6 @@ export function StudyModeSelector({
       colorClass: "from-blue-500 to-blue-600",
     },
     {
-      href: `/dashboard/decks/${deckId}/study/conversation`,
-      iconName: "MessageCircle" as const,
-      title: "Conversational Study",
-      description: "Practice with AI-powered conversations in context",
-      colorClass: "from-purple-500 to-purple-600",
-    },
-    {
       href: `/dashboard/decks/${deckId}/study/listening`,
       iconName: "Headphones" as const,
       title: "Listening Practice",

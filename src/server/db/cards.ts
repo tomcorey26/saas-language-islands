@@ -45,3 +45,23 @@ export async function deleteCardById(deckId: string, cardId: string) {
     .delete(CardTable)
     .where(and(eq(CardTable.id, cardId), eq(CardTable.deckId, deckId)));
 }
+
+export async function updateCardReview(
+  cardId: string,
+  srData: {
+    nextReviewDate: Date;
+    interval: number;
+    easeFactor: number;
+    reviewCount: number;
+  }
+) {
+  return await db
+    .update(CardTable)
+    .set({
+      nextReviewDate: srData.nextReviewDate,
+      interval: srData.interval,
+      easeFactor: srData.easeFactor,
+      reviewCount: srData.reviewCount,
+    })
+    .where(eq(CardTable.id, cardId));
+}
