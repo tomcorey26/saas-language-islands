@@ -45,7 +45,7 @@ export function CTASection({
         )}>
           {description}
         </p>
-        <SignUpButton asChild>
+        <SignUpButton>
           <Button
             size="lg"
             className={cn(
