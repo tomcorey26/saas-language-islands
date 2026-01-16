@@ -90,7 +90,7 @@ export function PricingCard({
       </CardHeader>
 
       <CardContent>
-        <SignUpButton>
+        <SignUpButton asChild>
           <Button
             className={cn(
               "w-full",

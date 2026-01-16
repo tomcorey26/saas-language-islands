@@ -34,7 +34,7 @@ export function FlashcardDisplay({
     >
       <div className="grid gap-3">
         {flashcards.map((card, index) => (
-          <SignUpButton key={index}>
+          <SignUpButton key={index} asChild>
             <div
               className="flashcard p-4 border-2 rounded-xl bg-gradient-to-r from-accent/5 to-accent/10 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] hover:border-primary/30 cursor-pointer group animate-slide-in-left"
               style={{
@@ -66,7 +66,7 @@ export function FlashcardDisplay({
           Like what you see? Get personalized flashcards for your
           learning goals!
         </p>
-        <SignUpButton>
+        <SignUpButton asChild>
           <Button
             variant="cta"
             className="text-base md:text-lg px-6 py-3 rounded-full transition-all duration-200 hover:scale-105"
