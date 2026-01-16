@@ -113,7 +113,7 @@ export default async function Dashboard() {
         </Link>
 
         {/* Placeholder for future pages */}
-        <div className="p-6 h-48 rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition flex flex-col justify-between opacity-70">
+        {/* <div className="p-6 h-48 rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition flex flex-col justify-between opacity-70">
           <div className="flex justify-between items-start">
             <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
               <svg
@@ -141,7 +141,7 @@ export default async function Dashboard() {
               View your learning progress and stats
             </p>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Quick Stats */}

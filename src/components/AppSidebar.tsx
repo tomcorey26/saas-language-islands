@@ -34,13 +34,13 @@ const items = [
     icon: User,
     disabled: false,
   },
-  {
-    title: "Stats",
-    url: "#",
-    icon: BarChart,
-    disabled: true,
-    comingSoon: true,
-  },
+  // {
+  //   title: "Stats",
+  //   url: "#",
+  //   icon: BarChart,
+  //   disabled: true,
+  //   comingSoon: true,
+  // },
   // {
   //   title: "Search",
   //   url: "#",
