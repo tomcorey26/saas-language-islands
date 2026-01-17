@@ -28,7 +28,7 @@ export const CONTACT = {
 
 // Business Policies
 export const POLICIES = {
-  freeTokens: 100,
+  freeTokens: 10000,
   supportResponseHours: 24,
   reviewTimeHours: 48,
   languageCount: supportedLanguagesArray.length,
@@ -56,7 +56,6 @@ export const FEATURES = {
 
 // FAQ Data
 export const FAQ_DATA = {
-  refundPolicy: `Due to the high costs involved in powering the advanced AI models for our flashcard generation, we unfortunately cannot offer refunds once tokens have been used. We realize this may not be the ideal scenario for everyone, but this policy helps us to maintain a fair and sustainable service for all of our valued users.`,
   general: [
     {
       question: "What is Speech Islands?",
@@ -65,7 +64,7 @@ export const FAQ_DATA = {
     {
       question: "How does the token system work?",
       answer:
-        "Tokens are used to generate AI-powered flashcards. Each flashcard creation uses one token. You can purchase token packages (no subscription required) and use them whenever you want to create new content. Tokens never expire.",
+        "Tokens are used to generate AI-powered flashcards. Each flashcard creation uses one token. All new users receive 10,000 free tokens to start learning immediately.",
     },
     {
       question: "Which languages does Speech Islands support?",
@@ -76,8 +75,8 @@ export const FAQ_DATA = {
       answer: `Unlike traditional apps that focus on isolated vocabulary, ${COMPANY.name} teaches contextual phrases grouped into thematic 'islands' (like 'Restaurant Conversations' or 'Travel Essentials'). This approach, combined with spaced repetition science, helps you learn practical language skills faster.`,
     },
     {
-      question: "Do I need a subscription?",
-      answer: `No! ${COMPANY.name} uses a simple token-based system with no recurring subscriptions. Purchase tokens once and use them whenever you're ready to learn. You can buy additional tokens at any time.`,
+      question: "Is Speech Islands really free?",
+      answer: `Yes! ${COMPANY.name} is completely free. All new users receive 10,000 tokens to generate AI-powered flashcards. No credit card required, no hidden fees.`,
     },
   ],
   technical: [
@@ -102,35 +101,10 @@ export const FAQ_DATA = {
         "Your dashboard shows detailed statistics including cards studied, retention rates, and learning streaks. Each card tracks your performance history to optimize future review timing.",
     },
     {
-      question: "Can I export my flashcards?",
+      question: "What happens when I run out of tokens?",
       answer:
-        "Yes! Premium users can export their flashcards to formats like Anki, CSV, or PDF for use in other applications or offline study.",
+        "You can still access and study all your existing flashcards forever. You just won't be able to generate new ones until you have more tokens.",
     },
-  ],
-  billing: [
-    {
-      question: "How much do tokens cost?",
-      answer: `We offer several token packages: 500 tokens for $1.99, 2,000 tokens for $5.99, and 5,000 tokens for $12.99. All users start with ${POLICIES.freeTokens} free tokens to try the platform.`,
-    },
-    {
-      question: "Do tokens expire?",
-      answer:
-        "No, tokens never expire. Once you purchase them, they remain in your account until you use them to generate flashcards.",
-    },
-    {
-      question: "What payment methods do you accept?",
-      answer:
-        "We accept all major credit cards (Visa, MasterCard, American Express, Discover) and PayPal through our secure payment processor, Stripe.",
-    },
-    {
-      question: "Can I get a refund?",
-      answer: `Due to the high costs involved in powering the advanced AI models for our flashcard generation, we unfortunately cannot offer refunds once tokens have been used. We realize this may not be the ideal scenario for everyone, but this policy helps us to maintain a fair and sustainable service for all of our valued users.`,
-    },
-    // {
-    //   question: "Do you offer student discounts?",
-    //   answer:
-    //     "Yes! We provide special pricing for students, teachers, and educational institutions. Contact us with your .edu email address for more information about our educational discounts.",
-    // },
   ],
 } as const;
 
@@ -168,7 +142,7 @@ export const META_DESCRIPTIONS = {
   home: COMPANY.fullDescription,
   about: `Learn about ${COMPANY.name} and our mission to revolutionize language learning through AI-powered flashcards and spaced repetition.`,
   pricing:
-    "Choose the perfect plan for your language learning journey. Affordable token packages with no subscription required.",
+    "Speech Islands is completely free! Get 10,000 tokens to generate AI-powered flashcards. No credit card required.",
   contact: `Get in touch with the ${COMPANY.name} team. We're here to help with questions about our language learning platform.`,
   faq: `Frequently asked questions about ${COMPANY.name}, our language learning platform, token system, and features.`,
   privacy: `${COMPANY.name} privacy policy. Learn how we collect, use, and protect your personal information.`,

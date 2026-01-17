@@ -10,7 +10,6 @@ import { ConditionalStatusMessage } from "@/components/marketing/StatusMessage";
 import {
   COMPANY,
   CONTACT,
-  FAQ_DATA,
   META_DESCRIPTIONS,
   POLICIES,
   FEATURES,
@@ -110,29 +109,24 @@ export default async function ContactPage({
               <div className="space-y-6">
                 <div>
                   <h3 className="font-semibold text-lg mb-2">
-                    How quickly do tokens get added to my account?
+                    How many free tokens do I get?
                   </h3>
                   <p className="text-gray-600">
-                    Tokens are added to your account immediately after
-                    successful payment processing, usually within seconds.
+                    All new users receive {POLICIES.freeTokens.toLocaleString()}{" "}
+                    free tokens to generate AI-powered flashcards. No credit
+                    card required.
                   </p>
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-2">
-                    Can I get a refund if I&apos;m not satisfied?
-                  </h3>
-                  <p className="text-gray-600">{FAQ_DATA.refundPolicy}</p>
-                </div>
-                {/* <div>
-                  <h3 className="font-semibold text-lg mb-2">
-                    Do you offer educational discounts?
+                    Is Speech Islands really free?
                   </h3>
                   <p className="text-gray-600">
-                    Yes! We provide special pricing for students, teachers, and
-                    educational institutions. Contact us with your .edu email
-                    for more information.
+                    Yes! Speech Islands is completely free. You get{" "}
+                    {POLICIES.freeTokens.toLocaleString()} tokens to start
+                    learning immediately.
                   </p>
-                </div> */}
+                </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-2">
                     Which languages do you support?

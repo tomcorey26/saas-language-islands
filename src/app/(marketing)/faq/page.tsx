@@ -42,12 +42,6 @@ export default function FAQPage() {
               icon="⚙️"
               faqs={FAQ_DATA.technical}
             />
-
-            <FAQSection
-              title="Billing & Pricing"
-              icon="💳"
-              faqs={FAQ_DATA.billing}
-            />
           </div>
 
           <div className="mt-16 p-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border">
