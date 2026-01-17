@@ -48,7 +48,6 @@ export async function POST(req: Request) {
       // User Deleted
       if (event.data.id != null) {
         await deleteUser(event.data.id);
-        // TODO: Delete stripe customer
       }
       break;
     }

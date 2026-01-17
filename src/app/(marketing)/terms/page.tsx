@@ -2,7 +2,6 @@ import { Metadata } from "next";
 import {
   COMPANY,
   CONTACT,
-  FAQ_DATA,
   META_DESCRIPTIONS,
   POLICIES,
 } from "@/data/marketing";
@@ -72,25 +71,26 @@ export default function TermsPage() {
               have parental consent.
             </p>
 
-            <h2 className="text-2xl font-bold text-gray-900 border-b border-gray-200 pb-2">4. Token System and Payments</h2>
+            <h2 className="text-2xl font-bold text-gray-900 border-b border-gray-200 pb-2">4. Token System</h2>
 
-            <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">Token Purchase</h3>
+            <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">Free Tokens</h3>
             <p className="text-gray-700 leading-relaxed">
               Tokens are virtual credits used to generate AI-powered flashcards.
-              By purchasing tokens, you agree that:
+              All new users receive {POLICIES.freeTokens.toLocaleString()} free
+              tokens. By using tokens, you agree that:
             </p>
             <ul className="space-y-2 ml-6">
-              <li className="text-gray-700 list-disc">Tokens have no monetary value outside the Service</li>
               <li className="text-gray-700 list-disc">
-                Tokens are non-transferable and non-refundable except as stated
-                in our refund policy
+                Tokens have no monetary value outside the Service
+              </li>
+              <li className="text-gray-700 list-disc">
+                Tokens are non-transferable
               </li>
               <li className="text-gray-700 list-disc">Tokens do not expire</li>
-              <li className="text-gray-700 list-disc">We may modify token pricing with 30 days notice</li>
+              <li className="text-gray-700 list-disc">
+                We may modify token allocations with reasonable notice
+              </li>
             </ul>
-
-            <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">Refund Policy</h3>
-            <p className="text-gray-700 leading-relaxed">{FAQ_DATA.refundPolicy}</p>
 
             <h2 className="text-2xl font-bold text-gray-900 border-b border-gray-200 pb-2">5. Acceptable Use</h2>
 
@@ -158,7 +158,7 @@ export default function TermsPage() {
             <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">Termination by You</h3>
             <p className="text-gray-700 leading-relaxed">
               You may terminate your account at any time by contacting support.
-              Unused tokens may be eligible for refund within our refund policy.
+              Any unused tokens will be forfeited upon account deletion.
             </p>
 
             <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">Termination by Us</h3>

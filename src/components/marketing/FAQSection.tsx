@@ -5,15 +5,16 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FAQ_DATA } from "@/data/marketing";
+
+interface FAQItem {
+  question: string;
+  answer: string;
+}
 
 interface FAQSectionProps {
   title: string;
   icon?: string;
-  faqs:
-    | typeof FAQ_DATA.general
-    | typeof FAQ_DATA.technical
-    | typeof FAQ_DATA.billing;
+  faqs: readonly FAQItem[];
   className?: string;
 }
 
@@ -42,11 +43,6 @@ export function FAQSection({ title, icon, faqs, className }: FAQSectionProps) {
       </CardContent>
     </Card>
   );
-}
-
-interface FAQItem {
-  question: string;
-  answer: string;
 }
 
 interface SimpleFAQProps {

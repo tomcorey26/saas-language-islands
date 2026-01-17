@@ -3,8 +3,8 @@ import { SignUpButton } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 
 interface CTASectionProps {
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   buttonText: string;
   className?: string;
   variant?: "gradient" | "solid" | "outline";
@@ -29,29 +29,44 @@ export function CTASection({
     outline: "bg-blue-600 text-white hover:bg-blue-700",
   };
 
-  return (
-    <section className={cn(
-      "py-16 px-8",
-      variantClasses[variant],
-      className
-    )}>
-      <div className="container max-w-4xl mx-auto text-center">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          {title}
-        </h2>
-        <p className={cn(
-          "text-xl mb-8",
-          variant === "outline" ? "text-gray-600" : "opacity-90"
-        )}>
-          {description}
-        </p>
+  // If no title/description, just render button
+  if (!title && !description) {
+    return (
+      <div className={cn("text-center", className)}>
         <SignUpButton>
           <Button
             size="lg"
+            className={cn("font-semibold px-8 py-3", buttonClasses[variant])}
+          >
+            {buttonText}
+          </Button>
+        </SignUpButton>
+      </div>
+    );
+  }
+
+  return (
+    <section
+      className={cn("py-16 px-8", variantClasses[variant], className)}
+    >
+      <div className="container max-w-4xl mx-auto text-center">
+        {title && (
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{title}</h2>
+        )}
+        {description && (
+          <p
             className={cn(
-              "font-semibold px-8 py-3",
-              buttonClasses[variant]
+              "text-xl mb-8",
+              variant === "outline" ? "text-gray-600" : "opacity-90"
             )}
+          >
+            {description}
+          </p>
+        )}
+        <SignUpButton>
+          <Button
+            size="lg"
+            className={cn("font-semibold px-8 py-3", buttonClasses[variant])}
           >
             {buttonText}
           </Button>

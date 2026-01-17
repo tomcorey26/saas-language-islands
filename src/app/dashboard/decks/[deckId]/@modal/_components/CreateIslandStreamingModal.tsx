@@ -27,7 +27,6 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Sparkles,
-  CreditCard,
   AlertTriangle,
   Loader2,
   CheckCircle,
@@ -40,7 +39,6 @@ import {
   Flashcard,
   flashcardSchema,
 } from "@/zod/contracts/islandStream.schema";
-import Link from "next/link";
 import z from "zod";
 import { toast } from "@/hooks/use-toast";
 import { createIslandAction } from "../../actions";
@@ -543,7 +541,7 @@ export function CreateIslandStreamingModal({
 
 function TokensBalance({ userTokens }: { userTokens: number }) {
   return (
-    <div className="flex items-center justify-between bg-blue-50 p-3 rounded-lg border">
+    <div className="flex items-center bg-blue-50 p-3 rounded-lg border">
       <div className="flex items-center gap-2">
         <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
           <Sparkles className="h-3 w-3 text-white" />
@@ -553,12 +551,6 @@ function TokensBalance({ userTokens }: { userTokens: number }) {
           <span className="font-bold">{userTokens.toLocaleString()}</span>
         </span>
       </div>
-      <Link href="/dashboard/buy">
-        <Button variant="outline" size="sm" className="text-xs">
-          <CreditCard className="h-3 w-3 mr-1" />
-          Buy More
-        </Button>
-      </Link>
     </div>
   );
 }
@@ -568,18 +560,9 @@ function NoTokensMessage() {
     <div className="text-center py-8">
       <AlertTriangle className="h-16 w-16 text-amber-500 mx-auto mb-4" />
       <h3 className="text-lg font-semibold mb-2">No Tokens Available</h3>
-      <p className="text-muted-foreground mb-4">
-        You need tokens to generate flashcards. Purchase tokens to continue
-        creating islands.
+      <p className="text-muted-foreground">
+        You have used all your tokens. Each flashcard generation costs 1 token.
       </p>
-      <div className="flex justify-center">
-        <Link href="/dashboard/buy">
-          <Button>
-            <CreditCard className="h-4 w-4" />
-            Buy Tokens
-          </Button>
-        </Link>
-      </div>
     </div>
   );
 }

@@ -7,14 +7,10 @@ export const UserTable = pgTable(
   {
     id,
     clerkUserId: text("clerk_user_id").notNull().unique(),
-    stripeCustomerId: text("stripe_customer_id"),
-    tokensBalance: integer("tokens_balance").notNull().default(100),
+    tokensBalance: integer("tokens_balance").notNull().default(10000),
     baseLanguage: LanguageEnum("base_language"), // null = needs onboarding
     createdAt,
     updatedAt,
   },
-  (table) => [
-    index("users.clerk_user_id_index").on(table.clerkUserId),
-    index("users.stripe_customer_id_index").on(table.stripeCustomerId),
-  ]
+  (table) => [index("users.clerk_user_id_index").on(table.clerkUserId)]
 );
