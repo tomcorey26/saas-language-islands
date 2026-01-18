@@ -619,7 +619,7 @@ function CardSelectionView({
         </DialogDescription>
       </DialogHeader>
 
-      <div className="space-y-4 py-4">
+      <div className="flex flex-col flex-1 min-h-0 space-y-4 py-4">
         {/* Generation Progress */}
         {isLoading && !isViewingPrevious && (
           <div className="border border-blue-200 bg-blue-50 p-4 rounded-lg">
@@ -706,7 +706,7 @@ function CardSelectionView({
         )}
 
         {/* Card List */}
-        <div className="space-y-2 max-h-[400px] sm:max-h-[500px] overflow-y-auto">
+        <div className="flex-1 min-h-0 space-y-2 overflow-y-auto">
           {allCards.map((card, index) => {
             const isCompleted =
               isViewingPrevious || !!(card?.phrase && card?.translation);
@@ -778,8 +778,8 @@ function CardSelectionView({
           })}
         </div>
 
-        {/* Action Buttons - Sticky at bottom of modal */}
-        <div className="sticky bottom-0 bg-white/95 backdrop-blur-sm border-t mt-4 pt-4 space-y-3">
+        {/* Action Buttons - Fixed at bottom of modal */}
+        <div className="mt-auto flex-shrink-0 bg-white/95 backdrop-blur-sm border-t pt-4 space-y-3">
           {/* Mobile: Stack all buttons */}
           <div className="flex flex-col sm:hidden gap-2">
             <Button
