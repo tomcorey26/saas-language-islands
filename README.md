@@ -50,7 +50,6 @@ npm install
 ```
 
 3. Set up environment variables:
-
    - Copy `.env.example` to `.env.local`
    - Fill in required values (database, Clerk, Stripe, OpenAI)
 
@@ -167,3 +166,5 @@ Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Drizzle ORM Documentation](https://orm.drizzle.team/)
 - [Clerk Documentation](https://clerk.com/docs)
+
+The setup for google oauth is at the google api developer console
