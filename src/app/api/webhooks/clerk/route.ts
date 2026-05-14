@@ -51,6 +51,11 @@ export async function POST(req: Request) {
       }
       break;
     }
+    case "user.updated": {
+      // Handle user updates if necessary
+      // TODO: Implement user update logic
+      break;
+    }
   }
 
   return new Response("", { status: 200 });
